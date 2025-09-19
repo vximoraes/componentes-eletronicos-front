@@ -1,3 +1,5 @@
+
+
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Sidebar } from "@/components/ui/sidebar"
 import { SidebarContent } from "@/components/ui/sidebar"
@@ -6,11 +8,15 @@ import { SidebarGroup } from "@/components/ui/sidebar"
 import { SidebarMenu } from "@/components/ui/sidebar"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { SidebarMenuItem } from "@/components/ui/sidebar"
+import { useState } from "react"
+import toggleSVG from "."
 
 export default function CustomSidebar() {
+  const  [testNome, setTesteNome] = useState<string>("")
+  // const componentesSVG = "componentes-svg"
   return (
     <div>
-      <SidebarProvider >
+      <SidebarProvider data-test='sidebar' >
         <Sidebar>
           <SidebarContent className="bg-[#111827] w-[350px]">
             <SidebarGroup>
@@ -18,7 +24,14 @@ export default function CustomSidebar() {
             </SidebarGroup>
             <SidebarMenu className="mt-[78px]">
               <SidebarMenuItem className="text-[#B4BAC5] justify-items-center">
-                <SidebarMenuButton className="text-[21px] justify-center h-[60px] w-[310px]"><img src="componentes.svg" alt="" /><span>Componentes</span></SidebarMenuButton>
+                <SidebarMenuButton className="text-[21px] pl-[25px] h-[60px] w-[310px] componentes"
+                  onMouseEnter={() => toggleSVG(componentesSVG)}
+                  onMouseLeave={() => toggleSVG(componentesSVG)}
+                >
+                  {/* <img src="componentes-hover.svg" className={isHidden} alt="" /> */}
+                  <img src={"componentes"+ testNome}  alt="" />
+                  <span>Componentes</span>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>

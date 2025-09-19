@@ -1,3 +1,5 @@
+"use client"
+
 import CustomSidebar from "@/components/sidebar";
 
 export default function TelaComponentes(){
