@@ -20,7 +20,7 @@ export default function Sidebar() {
       <button
         // Ao clicar, inverte o estado de isExpanded
         onClick={() => setIsExpanded(!isExpanded)}
-        className="absolute top-1/2 -right-4 transform -translate-y-1/2 p-1.5 rounded-full bg-blue-500 text-white shadow-lg z-50 focus:outline-none transition-transform duration-300"
+        className="absolute top-1/2 -right-4 transform -translate-y-1/2 p-1.5 rounded-full bg-blue-800 text-white shadow-lg z-50 focus:outline-none transition-transform duration-300"
       >
         <ChevronRight
           className={`w-4 h-4 transition-transform duration-300 ${
