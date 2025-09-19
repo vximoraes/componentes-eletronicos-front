@@ -37,7 +37,7 @@ export default function CustomSidebar() {
                 <SidebarButtonMenu
                   src="orcamentos.svg"
                   srcHover="orcamentos-hover.svg"
-                  name="Orçamentos.svg"
+                  name="Orçamentos"
                 />
                 <hr className="w-[310px] border-[#D9D9D9]" />
                 <SidebarButtonMenu

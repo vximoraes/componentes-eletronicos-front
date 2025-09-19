@@ -11,12 +11,12 @@ export default function SidebarButtonMenu({src, srcHover, name}: sidebarMenuButt
     const [isHover, setIsHover] = useState<string>(src)
     return(
         <>
-        <SidebarMenuButton className="text-[21px] pl-[25px] h-[60px] w-[310px] componentes cursor-pointer"
+        <SidebarMenuButton className="text-[21px] pl-[25px] h-[60px] w-[310px] componentes cursor-pointer flex gap-[15px]"
         onMouseEnter={() =>setIsHover(srcHover)}
         onMouseLeave={() => setIsHover(src)}
         >
             <img src={isHover} alt="" />
-            <span>{name}</span>
+            <span className="font-medium">{name}</span>
         </SidebarMenuButton>
         </>
     )
