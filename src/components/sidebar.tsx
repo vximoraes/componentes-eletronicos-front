@@ -9,10 +9,10 @@ import { SidebarMenu } from "@/components/ui/sidebar"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { SidebarMenuItem } from "@/components/ui/sidebar"
 import { useState } from "react"
-import toggleSVG from "."
+import SidebarButtonMenu from "./sidebarButton"
 
 export default function CustomSidebar() {
-  const  [testNome, setTesteNome] = useState<string>("")
+  const [testNome, setTesteNome] = useState<string>("")
   // const componentesSVG = "componentes-svg"
   return (
     <div>
@@ -23,15 +23,28 @@ export default function CustomSidebar() {
               <SidebarGroupLabel className="mt-[70px] justify-center"><img src="logo-componentes.svg" alt="" /></SidebarGroupLabel>
             </SidebarGroup>
             <SidebarMenu className="mt-[78px]">
-              <SidebarMenuItem className="text-[#B4BAC5] justify-items-center">
-                <SidebarMenuButton className="text-[21px] pl-[25px] h-[60px] w-[310px] componentes"
-                  onMouseEnter={() => toggleSVG(componentesSVG)}
-                  onMouseLeave={() => toggleSVG(componentesSVG)}
-                >
-                  {/* <img src="componentes-hover.svg" className={isHidden} alt="" /> */}
-                  <img src={"componentes"+ testNome}  alt="" />
-                  <span>Componentes</span>
-                </SidebarMenuButton>
+              <SidebarMenuItem className="text-[#B4BAC5] items-center gap-[27px] flex flex-col">
+                <SidebarButtonMenu
+                  src="componentes.svg"
+                  srcHover="componentes-hover.svg"
+                  name="Componentes"
+                />
+                <SidebarButtonMenu
+                  src="relatorios.svg"
+                  srcHover="relatorios-hover.svg"
+                  name="Relatórios"
+                />
+                <SidebarButtonMenu
+                  src="orcamentos.svg"
+                  srcHover="orcamentos-hover.svg"
+                  name="Orçamentos.svg"
+                />
+                <hr className="w-[310px] border-[#D9D9D9]" />
+                <SidebarButtonMenu
+                src="sair.svg"
+                srcHover="sair-hover.svg"
+                name="Sair"
+                />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
