@@ -15,35 +15,41 @@ export default function CustomSidebar() {
   const [testNome, setTesteNome] = useState<string>("")
   // const componentesSVG = "componentes-svg"
   return (
-    <div>
-      <SidebarProvider data-test='sidebar' >
-        <Sidebar>
-          <SidebarContent className="bg-[#111827] w-[350px]">
-            <SidebarGroup>
-              <SidebarGroupLabel className="mt-[70px] justify-center"><img src="logo-componentes.svg" alt="" /></SidebarGroupLabel>
+    <div data-test="sidebar-container">
+      <SidebarProvider data-test='sidebar-provider' className="m-0 p-0" >
+        <Sidebar data-test="sidebar-main">
+          <SidebarContent className="bg-[#111827] w-[350px]" data-test="sidebar-content">
+            <SidebarGroup data-test="sidebar-logo-group" className="">
+              <SidebarGroupLabel className="mt-[70px] justify-center flex items-center justify-center flex justify-center items-center h-8 rounded-md text-xs font-medium transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2" data-test="sidebar-logo-label">
+                <img src="logo-componentes.svg" className="" alt="" data-test="sidebar-logo-image" />
+                </SidebarGroupLabel>
             </SidebarGroup>
-            <SidebarMenu className="mt-[78px]">
-              <SidebarMenuItem className="text-[#B4BAC5] items-center gap-[27px] flex flex-col">
+            <SidebarMenu className="mt-[70px]" data-test="sidebar-menu">
+              <SidebarMenuItem className="text-[#B4BAC5] items-center gap-[25px] flex flex-col" data-test="sidebar-menu-item">
                 <SidebarButtonMenu
                   src="componentes.svg"
                   srcHover="componentes-hover.svg"
                   name="Componentes"
+                  data-test="sidebar-btn-componentes"
                 />
                 <SidebarButtonMenu
                   src="relatorios.svg"
                   srcHover="relatorios-hover.svg"
                   name="Relatórios"
+                  data-test="sidebar-btn-relatorios"
                 />
                 <SidebarButtonMenu
                   src="orcamentos.svg"
                   srcHover="orcamentos-hover.svg"
                   name="Orçamentos"
+                  data-test="sidebar-btn-orcamentos"
                 />
-                <hr className="w-[310px] border-[#D9D9D9]" />
+                <hr className="w-[310px] border-[#D9D9D9]" data-test="sidebar-divider" />
                 <SidebarButtonMenu
                 src="sair.svg"
                 srcHover="sair-hover.svg"
                 name="Sair"
+                data-test="sidebar-btn-sair"
                 />
               </SidebarMenuItem>
             </SidebarMenu>
