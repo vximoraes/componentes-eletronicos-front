@@ -15,14 +15,14 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <h2 className="mb-10 text-center text-3xl font-bold">Bem-vindo!</h2>
           <div>
-            <Label className="pb-2" htmlFor="email">Email</Label>
-            <Input className="p-5 w-full" type="email" id="email" placeholder="Email" />
+            <Label className="pb-2" htmlFor="email">E-mail</Label>
+            <Input className="p-5 w-full" type="email" id="email" placeholder="Insira seu endereço de e-mail" />
           </div>
           <div className="pt-4">
             <Label className="pb-2" htmlFor="senha">Senha</Label>
             <div className="relative">
-              <Input className="p-5 w-full pr-12" type={showPassword ? "text" : "password"} id="senha" placeholder="Senha"/>
-              <button type="button" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600">
+              <Input className="p-5 w-full pr-12" type={showPassword ? "text" : "password"} id="senha" placeholder="Insira sua senha"/>
+              <button type="button" aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer">
                 {showPassword ? (
                   <img src="eye.png" alt="" className="w-5 h-5 opacity-60" />
                 ) : (
@@ -33,7 +33,7 @@ export default function LoginPage() {
           </div>
           <p className="mt-3 text-zinc-600 text-base underline">Esqueci minha senha</p>
           <div className="mt-6">
-            <Button type="submit" className="p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500">Entrar</Button>
+            <Button type="submit" className="p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer">Entrar</Button>
           </div>
           <p className="mt-6 text-center">Não tem uma conta?{" "} <span className="text-[#306FCC] hover:text-[#2557a7] underline cursor-pointer" onClick={() => window.location.href = "/cadastro"}>Cadastrar-se</span>
           </p>
