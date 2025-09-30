@@ -16,7 +16,7 @@ export default function CustomSidebar() {
   // const componentesSVG = "componentes-svg"
   return (
     <div data-test="sidebar-container">
-      <SidebarProvider data-test='sidebar-provider' className="m-0 p-0 bg-black" >
+      <SidebarProvider data-test='sidebar-provider' className="m-0 p-0" >
         <Sidebar data-test="sidebar-main">
           <SidebarContent className="bg-[#111827] w-[350px]" data-test="sidebar-content">
             <SidebarGroup data-test="sidebar-logo-group" className="">
