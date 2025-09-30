@@ -16,11 +16,11 @@ export default function CustomSidebar() {
   // const componentesSVG = "componentes-svg"
   return (
     <div data-test="sidebar-container">
-      <SidebarProvider data-test='sidebar-provider' className="m-0 p-0" >
+      <SidebarProvider data-test='sidebar-provider' className="m-0 p-0 bg-black" >
         <Sidebar data-test="sidebar-main">
           <SidebarContent className="bg-[#111827] w-[350px]" data-test="sidebar-content">
             <SidebarGroup data-test="sidebar-logo-group" className="">
-              <SidebarGroupLabel className="mt-[70px] justify-center flex items-center justify-center flex justify-center items-center h-8 rounded-md text-xs font-medium transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2" data-test="sidebar-logo-label">
+              <SidebarGroupLabel className="mt-[70px] flex justify-center items-center h-8 rounded-md text-xs font-medium transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2" data-test="sidebar-logo-label">
                 <img src="logo-componentes.svg" className="" alt="" data-test="sidebar-logo-image" />
                 </SidebarGroupLabel>
             </SidebarGroup>
