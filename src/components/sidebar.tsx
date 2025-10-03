@@ -12,6 +12,9 @@ import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { SidebarMenuItem } from "@/components/ui/sidebar"
 import { Component, useState } from "react"
 import SidebarButtonMenu from "./sidebarButton"
+import { useRouter } from "next/navigation"
+import { getURL } from "next/dist/shared/lib/utils"
+import Link from "next/link"
 
 interface CustomSidebarProps {
   children?: React.ReactNode;
@@ -19,6 +22,7 @@ interface CustomSidebarProps {
 
 export default function CustomSidebar({ children }: CustomSidebarProps) {
   const [testNome, setTesteNome] = useState<string>("")
+  const router = useRouter()
   // const componentesSVG = "componentes-svg"
   return (
     <div data-test="sidebar-container" className="flex">
@@ -33,24 +37,33 @@ export default function CustomSidebar({ children }: CustomSidebarProps) {
               </SidebarGroup>
               <SidebarMenu className="mt-[70px]" data-test="sidebar-menu">
                 <SidebarMenuItem className="text-[#B4BAC5] items-center gap-[25px] flex flex-col" data-test="sidebar-menu-item">
-                  <SidebarButtonMenu
-                    src="componentes.svg"
-                    srcHover="componentes-hover.svg"
-                    name="Componentes"
-                    data-test="sidebar-btn-componentes"
-                  />
-                  <SidebarButtonMenu
-                    src="relatorios.svg"
-                    srcHover="relatorios-hover.svg"
-                    name="Relatórios"
-                    data-test="sidebar-btn-relatorios"
-                  />
-                  <SidebarButtonMenu
-                    src="orcamentos.svg"
-                    srcHover="orcamentos-hover.svg"
-                    name="Orçamentos"
-                    data-test="sidebar-btn-orcamentos"
-                  />
+                  <Link href={"/componentes"}>
+                    <SidebarButtonMenu
+                      rota="/componentes"
+                      src="componentes.svg"
+                      srcHover="componentes-hover.svg"
+                      name="Componentes"
+                      data-test="sidebar-btn-componentes"
+                    />
+                  </Link>
+                  <Link href={"/relatorios"}>
+                    <SidebarButtonMenu
+                      rota="relatorios"
+                      src="relatorios.svg"
+                      srcHover="relatorios-hover.svg"
+                      name="Relatórios"
+                      data-test="sidebar-btn-relatorios"
+                    />
+                  </Link>
+                  <Link href={"/orcamentos"}>
+                    <SidebarButtonMenu
+                      rota="orcamentos"
+                      src="orcamentos.svg"
+                      srcHover="orcamentos-hover.svg"
+                      name="Orçamentos"
+                      data-test="sidebar-btn-orcamentos"
+                    />
+                  </Link>
                   <hr className="w-[310px] border-[#D9D9D9]" data-test="sidebar-divider" />
                   <SidebarButtonMenu
                     src="sair.svg"

@@ -1,7 +1,9 @@
+import CustomSidebar from "@/components/sidebar";
+import Cabecalho from "@/components/cabecalho";
 export default function OrcamentosPage() {
   return (
-    <div>
-      <h1>Orçamentos</h1>
-    </div>
+    <CustomSidebar>
+      <Cabecalho acao={"Adicionar"} pagina="Componentes" fotoPerfil="foto-default.svg"/>
+    </CustomSidebar>
   )
 }
