@@ -8,12 +8,9 @@ import { SidebarContent } from "@/components/ui/sidebar"
 import { SidebarGroupLabel } from "@/components/ui/sidebar"
 import { SidebarGroup } from "@/components/ui/sidebar"
 import { SidebarMenu } from "@/components/ui/sidebar"
-import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { SidebarMenuItem } from "@/components/ui/sidebar"
-import { Component, useState } from "react"
+import { useState } from "react"
 import SidebarButtonMenu from "./sidebarButton"
-import { useRouter } from "next/navigation"
-import { getURL } from "next/dist/shared/lib/utils"
 import Link from "next/link"
 
 interface CustomSidebarProps {
@@ -22,7 +19,6 @@ interface CustomSidebarProps {
 
 export default function CustomSidebar({ children }: CustomSidebarProps) {
   const [testNome, setTesteNome] = useState<string>("")
-  const router = useRouter()
   // const componentesSVG = "componentes-svg"
   return (
     <div data-test="sidebar-container" className="flex">
@@ -48,7 +44,7 @@ export default function CustomSidebar({ children }: CustomSidebarProps) {
                   </Link>
                   <Link href={"/relatorios"}>
                     <SidebarButtonMenu
-                      rota="relatorios"
+                      rota="/relatorios"
                       src="relatorios.svg"
                       srcHover="relatorios-hover.svg"
                       name="Relatórios"
@@ -57,7 +53,7 @@ export default function CustomSidebar({ children }: CustomSidebarProps) {
                   </Link>
                   <Link href={"/orcamentos"}>
                     <SidebarButtonMenu
-                      rota="orcamentos"
+                      rota="/orcamentos"
                       src="orcamentos.svg"
                       srcHover="orcamentos-hover.svg"
                       name="Orçamentos"
