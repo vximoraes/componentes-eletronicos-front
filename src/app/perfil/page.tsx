@@ -1,10 +1,14 @@
+"use client"; // necessário se estiver usando Next.js 13+ com App Router
+
+import { useState } from "react";
 import Image from "next/image";
 import { Bell, Calendar, Clock, Key, Mail, Pencil, User as UserIcon } from "lucide-react";
 
 export default function HomePage() {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
-
       <main className="flex-1 p-8">
         <header className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-2">
@@ -12,7 +16,7 @@ export default function HomePage() {
             <span className="text-sm text-gray-500">Informações do usuário</span>
           </div>
 
-          {/*notificação (adicionar depois para estar implementando as notificações */}
+          {/* Notificação */}
           <div className="relative">
             <Bell className="w-6 h-6 text-gray-500 cursor-pointer" />
             <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 w-4 bg-red-500 text-white rounded-full text-xs">
@@ -22,10 +26,9 @@ export default function HomePage() {
         </header>
 
         <div className="flex gap-8">
-          {/* Informações do usuário*/}
-          <div className="w-80 p-6 bg-white rounded-lg shadow-sm">
+          {/* Informações do usuário */}
+          <div className="w-full max-w-xs p-6 bg-white rounded-lg shadow-sm">
             <div className="flex flex-col items-center space-y-4">
-              
               <div className="w-24 h-24 rounded-full overflow-hidden">
                 <Image src="/avatar.png" alt="avatar" width={96} height={96} />
               </div>
@@ -53,12 +56,13 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Informações pessoais*/}
+          {/* Informações pessoais */}
           <div className="flex-1 space-y-8">
-         
             <div className="p-6 bg-white rounded-lg shadow-sm">
               <h3 className="text-xl font-semibold mb-4">Informações pessoais</h3>
+              <div className="w-full border-t border-gray-200 my-4"></div>
               <div className="space-y-4">
+                {/* Nome */}
                 <div className="flex items-center space-x-4">
                   <UserIcon className="w-5 h-5 text-gray-500" />
                   <div>
@@ -66,15 +70,17 @@ export default function HomePage() {
                     <div className="font-medium">Nome do Usuário</div>
                   </div>
                 </div>
-                
+
+                {/* Descrição personalizada com ícone da pasta public */}
                 <div className="flex items-center space-x-4">
-                  <Mail className="w-5 h-5 text-gray-500" />
+                  <Image src="/descricao.png" alt="Descrição" width={20} height={20} />
                   <div>
                     <div className="text-sm text-gray-500">Descrição personalizada</div>
-                    <div className="font-medium">Texto da descrição</div> {/* ← Aqui estava faltando */}
+                    <div className="font-medium">Texto da descrição</div>
                   </div>
-               </div>
+                </div>
 
+                {/* E-mail */}
                 <div className="flex items-center space-x-4">
                   <Mail className="w-5 h-5 text-gray-500" />
                   <div>
@@ -82,12 +88,21 @@ export default function HomePage() {
                     <div className="font-medium">usuario@email.com</div>
                   </div>
                 </div>
+
+                {/* Senha com toggle */}
                 <div className="flex items-center space-x-4">
-                  <Key className="w-5 h-5 text-gray-500" />
+                  <Image src="/senha.png" alt="Descrição" width={20} height={20} />
                   <div>
                     <div className="text-sm text-gray-500">Senha</div>
-                    <div className="font-medium">*********</div>
-                    {/* Implementar funcionalidade de mostras senha*/}
+                    <div className="font-medium">
+                      {showPassword ? "minhaSenha123" : "*********"}
+                    </div>
+                    <button
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-xs text-blue-600 hover:underline mt-1"
+                    >
+                      {showPassword ? "Ocultar" : "Mostrar"}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -95,19 +110,22 @@ export default function HomePage() {
 
             {/* Seção de estatísticas */}
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-              <h3 className="text-xl font-semibold">Estatísticas de uso</h3>
-              <span className="text-sm text-gray-500">Semanal</span>
+              <div className="flex items-center space-x-2">
+                <h3 className="text-xl font-semibold">Estatísticas de uso</h3>
+                <span className="text-sm text-gray-500">Semanal</span>
+              </div>
+              <div className="w-full border-t border-gray-200 my-4"></div>
               <div className="flex justify-between mt-4">
-                <div className="text-center w-1/3 p-4 bg-gray-100 rounded-lg shadow-sm border border-blue-500">
+                <div className="text-center w-1/3 p-4 bg-gray-100 rounded-lg shadow-sm">
                   <div className="text-4xl font-bold text-blue-600">42</div>
                   <div className="text-sm text-gray-600 mt-2">Componentes registrados</div>
                 </div>
                 <div className="text-center w-1/3 p-4 bg-gray-100 rounded-lg shadow-sm">
-                  <div className="text-4xl font-bold text-gray-600">8</div>
+                  <div className="text-4xl font-bold text-blue-600">8</div>
                   <div className="text-sm text-gray-600 mt-2">Componentes removidos</div>
                 </div>
                 <div className="text-center w-1/3 p-4 bg-gray-100 rounded-lg shadow-sm">
-                  <div className="text-4xl font-bold text-gray-600">3</div>
+                  <div className="text-4xl font-bold text-blue-600">3</div>
                   <div className="text-sm text-gray-600 mt-2">Orçamentos criados</div>
                 </div>
               </div>
@@ -118,5 +136,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-{/* Verificar a questão das notificações, blocos de estatisticas, questão da senha e a descrição personalizada nas informações */}
