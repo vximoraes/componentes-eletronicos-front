@@ -1,5 +1,3 @@
-
-
 "use client"
 
 import { SidebarProvider } from "@/components/ui/sidebar"
@@ -17,13 +15,13 @@ interface CustomSidebarProps {
   children?: React.ReactNode;
 }
 
-export default function CustomSidebar({ children }: CustomSidebarProps) {
+export default function CustomSidebar() {
   const [testNome, setTesteNome] = useState<string>("")
   // const componentesSVG = "componentes-svg"
   return (
     <div data-test="sidebar-container" className="flex">
       <div>
-        <SidebarProvider data-test='sidebar-provider' className="m-0 p-0 w-[350px] bg-black" >
+        <SidebarProvider data-test='sidebar-provider' className="m-0 p-0 w-max-[350px] bg-[#000]" >
           <Sidebar data-test="sidebar-main" className="flex-row">
             <SidebarContent className="bg-[#111827] w-[350px]" data-test="sidebar-content">
               <SidebarGroup data-test="sidebar-logo-group" className="">
@@ -72,9 +70,6 @@ export default function CustomSidebar({ children }: CustomSidebarProps) {
             </SidebarContent>
           </Sidebar>
         </SidebarProvider>
-      </div>
-      <div className="w-[100%]">
-        {children}
       </div>
     </div>
   )

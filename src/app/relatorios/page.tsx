@@ -1,9 +1,9 @@
-import CustomSidebar from "@/components/sidebar"
-import Cabecalho from "@/components/cabecalho"
-export default function RelatoriosPage() {
+"use client"
+export default function RelarotiosPage() {
   return (
-    <CustomSidebar>
-      <Cabecalho acao={"Adicionar"} pagina="Componentes" fotoPerfil="foto-default.svg"/>
-    </CustomSidebar>
+    <div>
+      <h1>Página de Relatórios</h1>
+      <p>Conteúdo da página de ralatórios aqui...</p>
+    </div>
   )
 }
