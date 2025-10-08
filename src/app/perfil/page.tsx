@@ -1,11 +1,9 @@
-import Sidebar from "@/components/ui/sidebar";
 import Image from "next/image";
 import { Bell, Calendar, Clock, Key, Mail, Pencil, User as UserIcon } from "lucide-react";
 
 export default function HomePage() {
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
-      <Sidebar />
 
       <main className="flex-1 p-8">
         <header className="flex justify-between items-center mb-6">
@@ -68,18 +66,29 @@ export default function HomePage() {
                     <div className="font-medium">Nome do Usuário</div>
                   </div>
                 </div>
+                
                 <div className="flex items-center space-x-4">
-                  <Key className="w-5 h-5 text-gray-500" />
+                  <Mail className="w-5 h-5 text-gray-500" />
                   <div>
-                    <div className="text-sm text-gray-500">Senha</div>
-                    <div className="font-medium">*********</div>
+                    <div className="text-sm text-gray-500">Descrição personalizada</div>
+                    <div className="font-medium">Texto da descrição</div> {/* ← Aqui estava faltando */}
                   </div>
-                </div>
+               </div>
+
+
                 <div className="flex items-center space-x-4">
                   <Mail className="w-5 h-5 text-gray-500" />
                   <div>
                     <div className="text-sm text-gray-500">E-mail</div>
                     <div className="font-medium">usuario@email.com</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Key className="w-5 h-5 text-gray-500" />
+                  <div>
+                    <div className="text-sm text-gray-500">Senha</div>
+                    <div className="font-medium">*********</div>
+                    {/* Implementar funcionalidade de mostras senha*/}
                   </div>
                 </div>
               </div>
