@@ -25,13 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <QueryProvider>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <QueryProvider>
           {children}
-        </body>
-      </QueryProvider>
+        </QueryProvider>
+      </body>
     </html>
   );
 }
