@@ -6,8 +6,7 @@ interface ComponenteEletronicoProps {
   nome: string;
   categoria: string;
   quantidade: number;
-  localizacao: string;
-  emEstoque: boolean;
+  status: string;
   imagem?: string;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -18,8 +17,7 @@ export default function ComponenteEletronico({
   nome,
   categoria,
   quantidade,
-  localizacao,
-  emEstoque,
+  status,
   imagem,
   onEdit,
   onDelete
@@ -102,12 +100,14 @@ export default function ComponenteEletronico({
         <div className="flex justify-center">
           <span
             className={`inline-flex items-center justify-center px-4 py-2 rounded-[5px] text-sm font-medium min-w-[110px] text-center ${
-            emEstoque
+            status === 'Em Estoque'
               ? 'bg-green-100 text-green-800'
+              : status === 'Baixo Estoque'
+              ? 'bg-yellow-100 text-yellow-800'
               : 'bg-red-100 text-red-800'
             }`}
           >
-            {emEstoque ? 'Em estoque' : 'Fora de estoque'}
+            {status}
           </span>
         </div>
 
