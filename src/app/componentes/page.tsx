@@ -112,9 +112,13 @@ export default function ComponentesPage() {
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          <span className="ml-2">Carregando componentes...</span>
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="relative w-12 h-12">
+            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+          </div>
+          <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
+          <p className="mt-1 text-sm text-gray-400">Aguarde um momento</p>
         </div>
       ) : componentes.length > 0 ? (
         <div className="grid gap-4 w-full" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))' }}>
