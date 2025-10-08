@@ -75,7 +75,6 @@ export default function HomePage() {
                   </div>
                </div>
 
-
                 <div className="flex items-center space-x-4">
                   <Mail className="w-5 h-5 text-gray-500" />
                   <div>
