@@ -35,7 +35,7 @@ export default function ComponenteEletronico({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 w-[380px] h-[200px] flex flex-col">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 w-full max-w-[380px] min-w-[280px] h-[200px] flex flex-col">
       {/* Header com imagem e ações */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center space-x-3">
