@@ -1,5 +1,4 @@
-"use client"; // necessário se estiver usando Next.js 13+ com App Router
-
+"use client"; 
 import { useState } from "react";
 import Image from "next/image";
 import { Bell, Calendar, Clock, Key, Mail, Pencil, User as UserIcon } from "lucide-react";
@@ -9,7 +8,7 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-6 ">
         <header className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-2">
             <h1 className="text-2xl font-bold">Perfil</h1>
@@ -25,9 +24,9 @@ export default function HomePage() {
           </div>
         </header>
 
-        <div className="flex gap-8">
+        <div className="flex gap-3 p-6 ">
           {/* Informações do usuário */}
-          <div className="w-full max-w-xs p-6 bg-white rounded-lg shadow-sm">
+          <div className="w-full max-w-xs [300px] p-8 bg-white rounded-lg shadow-sm">
             <div className="flex flex-col items-center space-y-4">
               <div className="w-24 h-24 rounded-full overflow-hidden">
                 <Image src="/avatar.png" alt="avatar" width={96} height={96} />
@@ -57,7 +56,7 @@ export default function HomePage() {
           </div>
 
           {/* Informações pessoais */}
-          <div className="flex-1 space-y-8">
+          <div className=" w-full max-w-[900px] p-6  flex-1 space-y-8">
             <div className="p-6 bg-white rounded-lg shadow-sm">
               <h3 className="text-xl font-semibold mb-4">Informações pessoais</h3>
               <div className="w-full border-t border-gray-200 my-4"></div>
@@ -109,22 +108,22 @@ export default function HomePage() {
             </div>
 
             {/* Seção de estatísticas */}
-            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className=" w-full max-w-[900px] p-6 bg-white rounded-lg shadow-sm border border-gray-200">
               <div className="flex items-center space-x-2">
                 <h3 className="text-xl font-semibold">Estatísticas de uso</h3>
                 <span className="text-sm text-gray-500">Semanal</span>
               </div>
               <div className="w-full border-t border-gray-200 my-4"></div>
               <div className="flex justify-between mt-4">
-                <div className="text-center w-1/3 p-4 bg-gray-100 rounded-lg shadow-sm">
+                <div className="text-center w-1/4 p-4 bg-gray-100 rounded-lg shadow-sm">
                   <div className="text-4xl font-bold text-blue-600">42</div>
                   <div className="text-sm text-gray-600 mt-2">Componentes registrados</div>
                 </div>
-                <div className="text-center w-1/3 p-4 bg-gray-100 rounded-lg shadow-sm">
+                <div className="text-center w-1/4 p-4 bg-gray-100 rounded-lg shadow-sm">
                   <div className="text-4xl font-bold text-blue-600">8</div>
                   <div className="text-sm text-gray-600 mt-2">Componentes removidos</div>
                 </div>
-                <div className="text-center w-1/3 p-4 bg-gray-100 rounded-lg shadow-sm">
+                <div className="text-center w-1/4 p-4 bg-gray-100 rounded-lg shadow-sm">
                   <div className="text-4xl font-bold text-blue-600">3</div>
                   <div className="text-sm text-gray-600 mt-2">Orçamentos criados</div>
                 </div>
