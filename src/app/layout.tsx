@@ -10,6 +10,7 @@ import Header from "@/components/header/header";
 // });
 
 import { QueryProvider } from "@/providers/queryProvider";
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 
 // const geistMono = Geist_Mono({
@@ -47,9 +48,11 @@ export default function RootLayout({
       >
         <Header />
         <main className="w-[100%]">
+        <NuqsAdapter>
           <QueryProvider>
             {children}
           </QueryProvider>
+        </NuqsAdapter>
         </main>
       </body>
     </html>

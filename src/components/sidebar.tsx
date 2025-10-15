@@ -34,7 +34,7 @@ export default function CustomSidebar({path}:PathRouter) {
                 </SidebarGroupLabel>
             </SidebarGroup>
             <SidebarMenu className="mt-[70px]" data-test="sidebar-menu">
-              <SidebarMenuItem className="text-[#B4BAC5] items-center gap-[25px] flex flex-col" data-test="sidebar-menu-item">
+              <SidebarMenuItem className="text-[#B4BAC5] items-center gap-[10px] flex flex-col" data-test="sidebar-menu-item">
                 <SidebarButtonMenu
                   src="/componentes.svg"
                   srcHover="/componentes-hover.svg"
