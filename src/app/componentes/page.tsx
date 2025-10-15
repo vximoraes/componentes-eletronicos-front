@@ -4,25 +4,38 @@ import ComponenteEletronico from "@/components/componente-eletronico";
 import StatCard from "@/components/stat-card";
 import CustomSidebar from "@/components/sidebar";
 import ModalLocalizacoes from "@/components/modal-localizacoes";
+import ModalFiltros from "@/components/modal-filtros";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
 import { authenticatedRequest } from '@/utils/auth';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
 import { useState } from 'react';
+import { useQueryState } from 'nuqs';
 
 export default function ComponentesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+
+  const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
+  const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
   
   const { data, isLoading, error, refetch } = useQuery<ApiResponse>({
-    queryKey: ['componentes', searchTerm],
-    queryFn: () => authenticatedRequest<ApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/componentes${searchTerm ? `?nome=${encodeURIComponent(searchTerm)}` : ''}`,
-      { method: 'GET' }
-    ),
+    queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('nome', searchTerm);
+      if (categoriaFilter) params.append('categoria', categoriaFilter);
+      if (statusFilter) params.append('status', statusFilter);
+      
+      const queryString = params.toString();
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/componentes${queryString ? `?${queryString}` : ''}`;
+      
+      return authenticatedRequest<ApiResponse>(url, { method: 'GET' });
+    },
     staleTime: 1000 * 60 * 5, 
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -49,6 +62,22 @@ export default function ComponentesPage() {
     },
   });
 
+  // Query para buscar categorias para mostrar o nome nos filtros
+  const { data: categoriasData } = useQuery({
+    queryKey: ['categorias'],
+    queryFn: () => authenticatedRequest(
+      `${process.env.NEXT_PUBLIC_API_URL}/categorias`,
+      { method: 'GET' }
+    ),
+    staleTime: 1000 * 60 * 10, 
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
   const handleEdit = (id: string) => {
     console.log("Edit clicked for component:", id);
   };
@@ -65,6 +94,19 @@ export default function ComponentesPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedComponenteId(null);
+  };
+
+  const handleOpenFiltrosModal = () => {
+    setIsFiltrosModalOpen(true);
+  };
+
+  const handleCloseFiltrosModal = () => {
+    setIsFiltrosModalOpen(false);
+  };
+
+  const handleFiltersChange = (categoria: string, status: string) => {
+    setCategoriaFilter(categoria);
+    setStatusFilter(status);
   };
 
   const componentes = data?.data?.docs || [];
@@ -134,8 +176,9 @@ export default function ComponentesPage() {
         </div>
         <Button 
           variant="outline" 
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 cursor-pointer"
           data-test="filtros-button"
+          onClick={handleOpenFiltrosModal}
         >
           <Filter className="w-4 h-4" />
           Filtros
@@ -149,6 +192,40 @@ export default function ComponentesPage() {
           Adicionar
         </Button>
       </div>
+
+      {/* Filtros aplicados */}
+      {(categoriaFilter || statusFilter) && (
+        <div className="mb-4" data-test="applied-filters">
+          <div className="flex flex-wrap items-center gap-2">
+            {categoriaFilter && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <span className="font-medium">Categoria:</span>
+                <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
+                <button
+                  onClick={() => setCategoriaFilter('')}
+                  className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                  title="Remover filtro de categoria"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+            {statusFilter && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <span className="font-medium">Status:</span>
+                <span>{statusFilter}</span>
+                <button
+                  onClick={() => setStatusFilter('')}
+                  className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                  title="Remover filtro de status"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {error && (
         <div 
@@ -173,7 +250,6 @@ export default function ComponentesPage() {
           className="grid gap-4 w-full" 
           style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))' }}
           data-test="componentes-grid"
-          title={`Mostrando ${componentes.length} componente${componentes.length !== 1 ? 's' : ''}`}
         >
           {componentes.map((componente, index) => (
             <ComponenteEletronico
@@ -218,6 +294,15 @@ export default function ComponentesPage() {
           }
         />
       )}
+
+      {/* Modal de Filtros */}
+      <ModalFiltros
+        isOpen={isFiltrosModalOpen}
+        onClose={handleCloseFiltrosModal}
+        categoriaFilter={categoriaFilter}
+        statusFilter={statusFilter}
+        onFiltersChange={handleFiltersChange}
+      />
     </div>
   );
 }
