@@ -1,50 +1,60 @@
 "use client"
 
 import { SidebarMenuButton } from "@/components/ui/sidebar"
-import { usePathname } from "next/navigation"
-import { useState, useMemo } from "react"
+import { useState} from "react"
+import { useRouter } from "next/navigation"
+import { useEffect} from "react"
 
 type sidebarMenuButton = {
-    rota?: string
-    src: string,
+    src:string,
     srcHover: string,
     name: string,
-    "data-test"?: string
+    "data-test"?: string,
+    route: string,
+    path?: string
 }
+export default function SidebarButtonMenu({ src, srcHover, name, "data-test": dataTest, route, path }: sidebarMenuButton) {
+    const [isHover, setIsHover] = useState<string>(src)
+    const [isRouter, setIsRouter] = useState<string>()
+    const [isBlack, setIsBlack] = useState<string>()
+    const router = useRouter()
 
-export default function SidebarButtonMenu({rota, src, srcHover, name, "data-test": dataTest}: sidebarMenuButton) {
-    const [isHover, setIsHover] = useState<boolean>(false)
-    const currentPath = usePathname()
-    
-    // Usa useMemo para otimizar a comparação e torná-la reativa
-    const isActiveRoute = useMemo(() => {
-        return rota ? currentPath === rota : false
-    }, [currentPath, rota])
-    return(
+    // Toda vez que a url trocar ele vê faz uma comparação para ver qual botão é compativel com a url, assim trocando de cor
+    useEffect(() => {
+
+        if (path?.startsWith("/" + name?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))) {
+            setIsHover(srcHover)
+            setIsRouter("bg-white")
+            setIsBlack("text-[#000]")
+        }
+        else if (isHover && isBlack) {
+            setIsRouter("")
+            setIsHover(src)
+            setIsBlack("")
+        }
+    }, [path])
+    function trocarPagina() {
+        router.push(route)
+    }
+    function hoverButton(svg: string) {
+        // condição pra assegurar a cor do botão se a url atual for igual
+        if (!isRouter) {
+            setIsHover(svg)
+        }
+    }
+    return (
         <>
-        <SidebarMenuButton 
-        className={`text-[21px] pl-[25px] h-[60px] w-[310px] componentes cursor-pointer flex gap-[15px] transition-all duration-200 ${
-            isActiveRoute || isHover ? 'bg-white rounded-lg' : 'hover:bg-gray-700'
-        }`}
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
-        data-test={dataTest || "sidebar-menu-button"}
-        >
-            <img 
-                src={isActiveRoute || isHover ? srcHover : src} 
-                alt="" 
-                data-test={`${dataTest}-icon` || "sidebar-button-icon"} 
-                className="w-6 h-6"
-            />
-            <span 
-                className={`font-medium transition-colors duration-200 ${
-                    isActiveRoute || isHover ? 'text-black' : 'text-[#B4BAC5]'
-                }`} 
-                data-test={`${dataTest}-text` || "sidebar-button-text"}
+            <SidebarMenuButton
+                className={"text-[21px] pl-[25px] h-[60px] w-[310px] componentes cursor-pointer flex gap-[15px] " + isRouter}
+                onMouseEnter={() => hoverButton(srcHover)}
+                onMouseLeave={() => hoverButton(src)}
+                onClick={() => trocarPagina()}
+                data-test={dataTest || "sidebar-menu-button"}
             >
-                {name}
-            </span>
-        </SidebarMenuButton>
+                <img src={isHover} alt="" data-test={`${dataTest}-icon` || "sidebar-button-icon"} />
+                <span className={"font-medium " + isBlack} data-test={`${dataTest}-text` || "sidebar-button-text"}>{name}</span>
+
+            </SidebarMenuButton>
         </>
     )
 }
