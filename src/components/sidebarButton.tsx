@@ -51,7 +51,7 @@ export default function SidebarButtonMenu({ src, srcHover, name, "data-test": da
                 onClick={() => trocarPagina()}
                 data-test={dataTest || "sidebar-menu-button"}
             >
-                <img src={isHover} alt="" data-test={`${dataTest}-icon` || "sidebar-button-icon"} />
+                <img src={isHover} alt="" data-test={`${dataTest}-icon` || "sidebar-button-icon"}  className="w-[28px] h-[28px]"/>
                 <span className={"font-medium " + isBlack} data-test={`${dataTest}-text` || "sidebar-button-text"}>{name}</span>
 
             </SidebarMenuButton>

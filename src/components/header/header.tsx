@@ -1,7 +1,6 @@
 "use client"
 import { usePathname } from "next/navigation";
 import CustomSidebar from "../sidebar";
-import { useEffect } from "react";
 
 interface ComponenteReact {
     children?: React.ReactNode
@@ -9,13 +8,10 @@ interface ComponenteReact {
 
 export default function Header ({children}:ComponenteReact){
     const pathName = usePathname()
-    // useEffect
-    if(pathName !=="/perfil" && pathName !== "/"){
+    const rotasIgnoradas = ["/", "/login", "/perfil"]
+    if(!rotasIgnoradas.includes(pathName)){
         return(
         <CustomSidebar path={pathName}/>
     )
     }
-    return(
-        <div>Nada</div>
-    )
 }
