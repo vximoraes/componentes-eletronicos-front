@@ -5,6 +5,7 @@ import StatCard from "@/components/stat-card";
 import CustomSidebar from "@/components/sidebar";
 import ModalLocalizacoes from "@/components/modal-localizacoes";
 import ModalFiltros from "@/components/modal-filtros";
+import ModalEntradaComponente from "@/components/modal-entrada-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
@@ -19,6 +20,8 @@ export default function ComponentesPage() {
   const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
+  const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
@@ -107,6 +110,25 @@ export default function ComponentesPage() {
   const handleFiltersChange = (categoria: string, status: string) => {
     setCategoriaFilter(categoria);
     setStatusFilter(status);
+  };
+
+  const handleEntrada = (id: string) => {
+    setEntradaComponenteId(id);
+    setIsEntradaModalOpen(true);
+  };
+
+  const handleSaida = (id: string) => {
+    console.log("Saída clicked for component:", id);
+    // TODO modal de saídA
+  };
+
+  const handleCloseEntradaModal = () => {
+    setIsEntradaModalOpen(false);
+    setEntradaComponenteId(null);
+  };
+
+  const handleEntradaSuccess = () => {
+    refetch();
   };
 
   const componentes = data?.data?.docs || [];
@@ -263,6 +285,8 @@ export default function ComponentesPage() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onClick={handleComponenteClick}
+              onEntrada={handleEntrada}
+              onSaida={handleSaida}
               data-test={`componente-card-${index}`}
             />
           ))}
@@ -303,6 +327,17 @@ export default function ComponentesPage() {
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
       />
+
+      {/* Modal de Entrada de Componente */}
+      {entradaComponenteId && (
+        <ModalEntradaComponente
+          isOpen={isEntradaModalOpen}
+          onClose={handleCloseEntradaModal}
+          componenteId={entradaComponenteId}
+          componenteNome={componentes.find(c => c._id === entradaComponenteId)?.nome || ''}
+          onSuccess={handleEntradaSuccess}
+        />
+      )}
     </div>
   );
 }

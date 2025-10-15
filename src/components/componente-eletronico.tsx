@@ -11,6 +11,8 @@ interface ComponenteEletronicoProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onClick?: (id: string) => void;
+  onEntrada?: (id: string) => void;
+  onSaida?: (id: string) => void;
   'data-test'?: string;
 }
 
@@ -24,6 +26,8 @@ export default function ComponenteEletronico({
   onEdit,
   onDelete,
   onClick,
+  onEntrada,
+  onSaida,
   'data-test': dataTest
 }: ComponenteEletronicoProps) {
   const handleEdit = (e: React.MouseEvent) => {
@@ -37,6 +41,20 @@ export default function ComponenteEletronico({
     e.stopPropagation();
     if (onDelete && id) {
       onDelete(id);
+    }
+  };
+
+  const handleEntrada = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEntrada && id) {
+      onEntrada(id);
+    }
+  };
+
+  const handleSaida = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSaida && id) {
+      onSaida(id);
     }
   };
 
@@ -161,7 +179,7 @@ export default function ComponenteEletronico({
             className="p-2 rounded-md flex-shrink-0 hover:bg-green-50 transition-colors duration-200 cursor-pointer" 
             title={`Registrar entrada de ${nome}`}
             data-test="entrada-icon"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleEntrada}
           >
             <ArrowDownCircle size={20} className="text-green-600 hover:text-green-700" />
           </button>
@@ -169,7 +187,7 @@ export default function ComponenteEletronico({
             className="p-2 rounded-md flex-shrink-0 hover:bg-red-50 transition-colors duration-200 cursor-pointer" 
             title={`Registrar saída de ${nome}`}
             data-test="saida-icon"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleSaida}
           >
             <ArrowUpCircle size={20} className="text-red-600 hover:text-red-700" />
           </button>
