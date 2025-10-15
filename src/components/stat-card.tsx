@@ -8,6 +8,8 @@ interface StatCardProps {
   icon: LucideIcon;
   iconColor: string;
   iconBgColor: string;
+  'data-test'?: string;
+  hoverTitle?: string;
 }
 
 export default function StatCard({ 
@@ -16,10 +18,18 @@ export default function StatCard({
   value, 
   icon: Icon, 
   iconColor, 
-  iconBgColor 
+  iconBgColor,
+  'data-test': dataTest,
+  hoverTitle
 }: StatCardProps) {
+  const cardTitle = hoverTitle || `${title}${subtitle ? ` ${subtitle}` : ''}: ${value}`;
+  
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center">
+    <div 
+      className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
+      data-test={dataTest}
+      title={cardTitle}
+    >
       <div className="flex items-center w-full">
         <div className={`p-2 ${iconBgColor} rounded-lg flex-shrink-0`}>
           <Icon className={`w-6 h-6 ${iconColor}`} />
