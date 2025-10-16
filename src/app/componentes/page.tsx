@@ -6,6 +6,7 @@ import CustomSidebar from "@/components/sidebar";
 import ModalLocalizacoes from "@/components/modal-localizacoes";
 import ModalFiltros from "@/components/modal-filtros";
 import ModalEntradaComponente from "@/components/modal-entrada-componente";
+import ModalSaidaComponente from "@/components/modal-saida-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
@@ -22,6 +23,8 @@ export default function ComponentesPage() {
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
+  const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
+  const [saidaComponenteId, setSaidaComponenteId] = useState<string | null>(null);
   const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
@@ -119,8 +122,8 @@ export default function ComponentesPage() {
   };
 
   const handleSaida = (id: string) => {
-    console.log("Saída clicked for component:", id);
-    // TODO modal de saídA
+    setSaidaComponenteId(id);
+    setIsSaidaModalOpen(true);
   };
 
   const handleCloseEntradaModal = () => {
@@ -131,6 +134,18 @@ export default function ComponentesPage() {
   const handleEntradaSuccess = () => {
     if (entradaComponenteId) {
       setUpdatingComponenteId(entradaComponenteId);
+    }
+    refetch();
+  };
+
+  const handleCloseSaidaModal = () => {
+    setIsSaidaModalOpen(false);
+    setSaidaComponenteId(null);
+  };
+
+  const handleSaidaSuccess = () => {
+    if (saidaComponenteId) {
+      setUpdatingComponenteId(saidaComponenteId);
     }
     refetch();
   };
@@ -347,6 +362,17 @@ export default function ComponentesPage() {
           componenteId={entradaComponenteId}
           componenteNome={componentes.find(c => c._id === entradaComponenteId)?.nome || ''}
           onSuccess={handleEntradaSuccess}
+        />
+      )}
+
+      {/* Modal de Saída de Componente */}
+      {saidaComponenteId && (
+        <ModalSaidaComponente
+          isOpen={isSaidaModalOpen}
+          onClose={handleCloseSaidaModal}
+          componenteId={saidaComponenteId}
+          componenteNome={componentes.find(c => c._id === saidaComponenteId)?.nome || ''}
+          onSuccess={handleSaidaSuccess}
         />
       )}
     </div>

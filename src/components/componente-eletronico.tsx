@@ -198,12 +198,17 @@ export default function ComponenteEletronico({
             <ArrowDownCircle size={20} className="text-green-600 hover:text-green-700" />
           </button>
           <button 
-            className="p-2 rounded-md flex-shrink-0 hover:bg-red-50 transition-colors duration-200 cursor-pointer" 
-            title={`Registrar saída de ${nome}`}
+            className={`p-2 rounded-md flex-shrink-0 transition-colors duration-200 ${
+              quantidade === 0 
+                ? 'opacity-40 cursor-not-allowed' 
+                : 'hover:bg-red-50 cursor-pointer'
+            }`}
+            title={quantidade === 0 ? `${nome} sem estoque disponível` : `Registrar saída de ${nome}`}
             data-test="saida-icon"
-            onClick={handleSaida}
+            onClick={quantidade === 0 ? undefined : handleSaida}
+            disabled={quantidade === 0}
           >
-            <ArrowUpCircle size={20} className="text-red-600 hover:text-red-700" />
+            <ArrowUpCircle size={20} className={quantidade === 0 ? 'text-gray-400' : 'text-red-600 hover:text-red-700'} />
           </button>
         </div>
       </div>

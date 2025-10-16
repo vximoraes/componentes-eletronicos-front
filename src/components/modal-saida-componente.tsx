@@ -32,14 +32,33 @@ interface LocalizacoesApiResponse {
   errors: any[];
 }
 
+interface EstoqueData {
+  _id: string;
+  localizacao: {
+    _id: string;
+    nome: string;
+  };
+  componente: string;
+  quantidade: number;
+}
+
+interface EstoqueApiResponse {
+  error: boolean;
+  code: number;
+  message: string;
+  data: {
+    docs: EstoqueData[];
+  };
+}
+
 interface MovimentacaoRequest {
-  tipo: 'entrada';
+  tipo: 'saida';
   quantidade: string;
   componente: string;
   localizacao: string;
 }
 
-interface ModalEntradaComponenteProps {
+interface ModalSaidaComponenteProps {
   isOpen: boolean;
   onClose: () => void;
   componenteId: string;
@@ -47,13 +66,13 @@ interface ModalEntradaComponenteProps {
   onSuccess?: () => void;
 }
 
-export default function ModalEntradaComponente({
+export default function ModalSaidaComponente({
   isOpen,
   onClose,
   componenteId,
   componenteNome,
   onSuccess
-}: ModalEntradaComponenteProps) {
+}: ModalSaidaComponenteProps) {
   const queryClient = useQueryClient();
   const [quantidade, setQuantidade] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
@@ -79,8 +98,25 @@ export default function ModalEntradaComponente({
     },
   });
 
-  const entradaMutation = useMutation({
-    mutationFn: (data: MovimentacaoRequest) => 
+  // Query para buscar estoques do componente
+  const { data: estoquesData } = useQuery<EstoqueApiResponse>({
+    queryKey: ['estoques', componenteId],
+    queryFn: () => authenticatedRequest<EstoqueApiResponse>(
+      `${process.env.NEXT_PUBLIC_API_URL}/estoques/componente/${componenteId}`,
+      { method: 'GET' }
+    ),
+    enabled: isOpen && !!componenteId,
+    staleTime: 1000 * 60 * 5,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
+  const saidaMutation = useMutation({
+    mutationFn: (data: MovimentacaoRequest) =>
       authenticatedRequest(
         `${process.env.NEXT_PUBLIC_API_URL}/movimentacoes`,
         {
@@ -107,7 +143,7 @@ export default function ModalEntradaComponente({
       onClose();
     },
     onError: (error: any) => {
-      console.error('Erro ao registrar entrada:', error);
+      console.error('Erro ao registrar saída:', error);
       if (error?.response?.data) {
         console.error('Resposta da API:', error.response.data);
       }
@@ -171,7 +207,14 @@ export default function ModalEntradaComponente({
   if (!isOpen) return null;
 
   const localizacoes = localizacoesData?.data?.docs || [];
+  const estoques = estoquesData?.data?.docs || [];
   const localizacaoSelecionadaObj = localizacoes.find(loc => loc._id === localizacaoSelecionada);
+  
+  // Função para obter a quantidade disponível em uma localização
+  const getQuantidadeDisponivel = (localizacaoId: string): number => {
+    const estoque = estoques.find(e => e.localizacao._id === localizacaoId);
+    return estoque?.quantidade || 0;
+  };
 
 
 
@@ -236,25 +279,25 @@ export default function ModalEntradaComponente({
     }
 
     const movimentacaoData: MovimentacaoRequest = {
-      tipo: 'entrada',
+      tipo: 'saida',
       quantidade: quantidade.trim(),
       componente: componenteId.trim(),
       localizacao: localizacaoSelecionada.trim(),
     };
 
-    entradaMutation.mutate(movimentacaoData);
+    saidaMutation.mutate(movimentacaoData);
   };
 
   const modalContent = (
-    <div 
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4" 
-      style={{ 
+    <div
+      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
+      style={{
         zIndex: 99999,
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
     >
-      <div 
+      <div
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
@@ -273,7 +316,7 @@ export default function ModalEntradaComponente({
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              Registrar entrada de {componenteNome}
+              Registrar saída de {componenteNome}
             </h2>
           </div>
 
@@ -288,10 +331,9 @@ export default function ModalEntradaComponente({
               placeholder="Digite a quantidade"
               value={quantidade}
               onChange={handleQuantidadeChange}
-              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                errors.quantidade ? 'border-red-500' : 'border-gray-300'
-              }`}
-              disabled={entradaMutation.isPending}
+              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.quantidade ? 'border-red-500' : 'border-gray-300'
+                }`}
+              disabled={saidaMutation.isPending}
             />
             {errors.quantidade && (
               <p className="text-red-500 text-sm mt-1">{errors.quantidade}</p>
@@ -307,38 +349,61 @@ export default function ModalEntradaComponente({
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                  errors.localizacao ? 'border-red-500' : 'border-gray-300'
-                }`}
-                disabled={isLoadingLocalizacoes || entradaMutation.isPending}
+                className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${errors.localizacao ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                disabled={isLoadingLocalizacoes || saidaMutation.isPending}
               >
-                <span className={localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}>
-                  {isLoadingLocalizacoes 
-                    ? 'Carregando...' 
-                    : localizacaoSelecionadaObj?.nome || 'Selecione uma localização'
-                  }
-                </span>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${
-                  isDropdownOpen ? 'rotate-180' : ''
-                }`} />
+                <div className="flex items-center gap-2 flex-1">
+                  <span className={localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}>
+                    {isLoadingLocalizacoes
+                      ? 'Carregando...'
+                      : localizacaoSelecionadaObj?.nome || 'Selecione uma localização'
+                    }
+                  </span>
+                  {localizacaoSelecionada && (
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      getQuantidadeDisponivel(localizacaoSelecionada) > 0 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {getQuantidadeDisponivel(localizacaoSelecionada)} disponível
+                    </span>
+                  )}
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''
+                  }`} />
               </button>
 
               {/* Dropdown */}
               {isDropdownOpen && !isLoadingLocalizacoes && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
                   {localizacoes.length > 0 ? (
-                    localizacoes.map((localizacao) => (
-                      <button
-                        key={localizacao._id}
-                        type="button"
-                        onClick={() => handleLocalizacaoSelect(localizacao)}
-                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
-                          localizacaoSelecionada === localizacao._id ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
-                        }`}
-                      >
-                        {localizacao.nome}
-                      </button>
-                    ))
+                    localizacoes.map((localizacao) => {
+                      const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
+                      return (
+                        <button
+                          key={localizacao._id}
+                          type="button"
+                          onClick={() => handleLocalizacaoSelect(localizacao)}
+                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
+                            localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className={localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'}>
+                              {localizacao.nome}
+                            </span>
+                            <span className={`text-sm px-2 py-0.5 rounded ${
+                              qtdDisponivel > 0 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-gray-100 text-gray-500'
+                            }`}>
+                              {qtdDisponivel} disponível
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })
                   ) : (
                     <div className="px-4 py-8 text-center text-gray-500 text-sm">
                       Nenhuma localização encontrada
@@ -353,12 +418,12 @@ export default function ModalEntradaComponente({
           </div>
 
           {/* Mensagem de erro da API */}
-          {entradaMutation.error && (
+          {saidaMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível registrar a entrada</div>
+              <div className="font-medium mb-1">Não foi possível registrar a saída</div>
               <div className="text-red-500">
-                {(entradaMutation.error as any)?.response?.data?.message || 
-                  (entradaMutation.error as any)?.message || 
+                {(saidaMutation.error as any)?.response?.data?.message || 
+                  (saidaMutation.error as any)?.message || 
                   'Erro desconhecido'}
               </div>
             </div>
@@ -371,18 +436,18 @@ export default function ModalEntradaComponente({
             <Button
               variant="outline"
               onClick={onClose}
-              disabled={entradaMutation.isPending}
+              disabled={saidaMutation.isPending}
               className="flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={entradaMutation.isPending}
+              disabled={saidaMutation.isPending}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
-              {entradaMutation.isPending ? 'Registrando...' : 'Registrar'}
+              {saidaMutation.isPending ? 'Registrando...' : 'Registrar'}
             </Button>
           </div>
         </div>
@@ -390,7 +455,7 @@ export default function ModalEntradaComponente({
     </div>
   );
 
-  return typeof window !== 'undefined' 
+  return typeof window !== 'undefined'
     ? createPortal(modalContent, document.body)
     : null;
 }
