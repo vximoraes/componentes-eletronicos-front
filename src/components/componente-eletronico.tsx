@@ -6,11 +6,15 @@ interface ComponenteEletronicoProps {
   nome: string;
   categoria: string;
   quantidade: number;
+  estoqueMinimo?: number;
   status: string;
   imagem?: string;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
   onClick?: (id: string) => void;
+  onEntrada?: (id: string) => void;
+  onSaida?: (id: string) => void;
+  isLoading?: boolean;
   'data-test'?: string;
 }
 
@@ -19,11 +23,15 @@ export default function ComponenteEletronico({
   nome,
   categoria,
   quantidade,
+  estoqueMinimo,
   status,
   imagem,
   onEdit,
   onDelete,
   onClick,
+  onEntrada,
+  onSaida,
+  isLoading = false,
   'data-test': dataTest
 }: ComponenteEletronicoProps) {
   const handleEdit = (e: React.MouseEvent) => {
@@ -40,6 +48,20 @@ export default function ComponenteEletronico({
     }
   };
 
+  const handleEntrada = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEntrada && id) {
+      onEntrada(id);
+    }
+  };
+
+  const handleSaida = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSaida && id) {
+      onSaida(id);
+    }
+  };
+
   const handleClick = () => {
     if (onClick && id) {
       onClick(id);
@@ -50,11 +72,23 @@ export default function ComponenteEletronico({
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] flex flex-col cursor-pointer"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] flex flex-col cursor-pointer relative"
       data-test={dataTest || `componente-${id}`}
       title={componentTitle}
       onClick={handleClick}
     >
+      {/* Overlay de loading */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+          <div className="flex flex-col items-center">
+            <div className="relative w-8 h-8">
+              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+            </div>
+            <p className="mt-2 text-sm text-gray-600">Atualizando...</p>
+          </div>
+        </div>
+      )}
       {/* Header com imagem e ações */}
       <div className="flex items-start justify-between mb-2 gap-2" data-test="header">
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0" data-test="component-info">
@@ -132,10 +166,15 @@ export default function ComponenteEletronico({
       {/* Informações de quantidade e localização */}
       <div className="flex items-center justify-between gap-2" data-test="footer">
         {/* Quantidade à esquerda */}
-        <div className="flex items-center text-xs md:text-sm text-gray-600 flex-shrink-0" data-test="quantity">
+        <div className="flex flex-col text-xs md:text-sm text-gray-600 flex-shrink-0" data-test="quantity">
           <span title={`Quantidade em estoque: ${quantidade} unidades`}>
             <span className="font-semibold">Qtd:</span> {quantidade}
           </span>
+          {estoqueMinimo !== undefined && (
+            <span className="mt-0.5" title={`Estoque mínimo: ${estoqueMinimo} unidades`}>
+              <span className="font-semibold">Mín:</span> {estoqueMinimo}
+            </span>
+          )}
         </div>
 
         {/* Status ao meio */}
@@ -161,17 +200,22 @@ export default function ComponenteEletronico({
             className="p-2 rounded-md flex-shrink-0 hover:bg-green-50 transition-colors duration-200 cursor-pointer" 
             title={`Registrar entrada de ${nome}`}
             data-test="entrada-icon"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleEntrada}
           >
             <ArrowDownCircle size={20} className="text-green-600 hover:text-green-700" />
           </button>
           <button 
-            className="p-2 rounded-md flex-shrink-0 hover:bg-red-50 transition-colors duration-200 cursor-pointer" 
-            title={`Registrar saída de ${nome}`}
+            className={`p-2 rounded-md flex-shrink-0 transition-colors duration-200 ${
+              quantidade === 0 
+                ? 'opacity-40 cursor-not-allowed' 
+                : 'hover:bg-red-50 cursor-pointer'
+            }`}
+            title={quantidade === 0 ? `${nome} sem estoque disponível` : `Registrar saída de ${nome}`}
             data-test="saida-icon"
-            onClick={(e) => e.stopPropagation()}
+            onClick={quantidade === 0 ? undefined : handleSaida}
+            disabled={quantidade === 0}
           >
-            <ArrowUpCircle size={20} className="text-red-600 hover:text-red-700" />
+            <ArrowUpCircle size={20} className={quantidade === 0 ? 'text-gray-400' : 'text-red-600 hover:text-red-700'} />
           </button>
         </div>
       </div>
