@@ -92,8 +92,13 @@ export default function ModalEntradaComponente({
         }
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['componentes'] });
-      queryClient.invalidateQueries({ queryKey: ['estoques', componenteId] });
+      queryClient.invalidateQueries({ 
+        queryKey: ['componentes']
+      });
+      
+      queryClient.removeQueries({ 
+        queryKey: ['estoques', componenteId]
+      });
       
       setQuantidade('');
       setLocalizacaoSelecionada('');

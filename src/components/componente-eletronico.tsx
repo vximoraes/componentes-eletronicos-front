@@ -13,6 +13,7 @@ interface ComponenteEletronicoProps {
   onClick?: (id: string) => void;
   onEntrada?: (id: string) => void;
   onSaida?: (id: string) => void;
+  isLoading?: boolean;
   'data-test'?: string;
 }
 
@@ -28,6 +29,7 @@ export default function ComponenteEletronico({
   onClick,
   onEntrada,
   onSaida,
+  isLoading = false,
   'data-test': dataTest
 }: ComponenteEletronicoProps) {
   const handleEdit = (e: React.MouseEvent) => {
@@ -68,11 +70,23 @@ export default function ComponenteEletronico({
 
   return (
     <div 
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] flex flex-col cursor-pointer"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] flex flex-col cursor-pointer relative"
       data-test={dataTest || `componente-${id}`}
       title={componentTitle}
       onClick={handleClick}
     >
+      {/* Overlay de loading */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+          <div className="flex flex-col items-center">
+            <div className="relative w-8 h-8">
+              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+            </div>
+            <p className="mt-2 text-sm text-gray-600">Atualizando...</p>
+          </div>
+        </div>
+      )}
       {/* Header com imagem e ações */}
       <div className="flex items-start justify-between mb-2 gap-2" data-test="header">
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0" data-test="component-info">

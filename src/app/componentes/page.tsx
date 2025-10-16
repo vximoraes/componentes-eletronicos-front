@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { authenticatedRequest } from '@/utils/auth';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
 
 export default function ComponentesPage() {
@@ -22,11 +22,12 @@ export default function ComponentesPage() {
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
+  const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
   
-  const { data, isLoading, error, refetch } = useQuery<ApiResponse>({
+  const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>({
     queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -128,8 +129,17 @@ export default function ComponentesPage() {
   };
 
   const handleEntradaSuccess = () => {
+    if (entradaComponenteId) {
+      setUpdatingComponenteId(entradaComponenteId);
+    }
     refetch();
   };
+
+  useEffect(() => {
+    if (!isFetching && updatingComponenteId) {
+      setUpdatingComponenteId(null);
+    }
+  }, [isFetching, updatingComponenteId]);
 
   const componentes = data?.data?.docs || [];
   
@@ -287,6 +297,7 @@ export default function ComponentesPage() {
               onClick={handleComponenteClick}
               onEntrada={handleEntrada}
               onSaida={handleSaida}
+              isLoading={updatingComponenteId === componente._id && isFetching}
               data-test={`componente-card-${index}`}
             />
           ))}
