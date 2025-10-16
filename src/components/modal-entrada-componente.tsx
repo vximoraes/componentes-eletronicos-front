@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authenticatedRequest } from '@/utils/auth';
 import { Button } from '@/components/ui/button';
 
@@ -54,6 +54,7 @@ export default function ModalEntradaComponente({
   componenteNome,
   onSuccess
 }: ModalEntradaComponenteProps) {
+  const queryClient = useQueryClient();
   const [quantidade, setQuantidade] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -87,10 +88,13 @@ export default function ModalEntradaComponente({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data),
+          data: data,
         }
       ),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['componentes'] });
+      queryClient.invalidateQueries({ queryKey: ['estoques', componenteId] });
+      
       setQuantidade('');
       setLocalizacaoSelecionada('');
       setErrors({});
@@ -99,6 +103,9 @@ export default function ModalEntradaComponente({
     },
     onError: (error: any) => {
       console.error('Erro ao registrar entrada:', error);
+      if (error?.response?.data) {
+        console.error('Resposta da API:', error.response.data);
+      }
     },
   });
 
