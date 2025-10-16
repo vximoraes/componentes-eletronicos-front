@@ -305,6 +305,7 @@ export default function ComponentesPage() {
               nome={componente.nome}
               categoria={componente.categoria.nome}
               quantidade={componente.quantidade}
+              estoqueMinimo={componente.estoque_minimo}
               status={componente.status}
               imagem={componente.imagem}
               onEdit={handleEdit}

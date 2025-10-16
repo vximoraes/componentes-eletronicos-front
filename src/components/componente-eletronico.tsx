@@ -6,6 +6,7 @@ interface ComponenteEletronicoProps {
   nome: string;
   categoria: string;
   quantidade: number;
+  estoqueMinimo?: number;
   status: string;
   imagem?: string;
   onEdit?: (id: string) => void;
@@ -22,6 +23,7 @@ export default function ComponenteEletronico({
   nome,
   categoria,
   quantidade,
+  estoqueMinimo,
   status,
   imagem,
   onEdit,
@@ -164,10 +166,15 @@ export default function ComponenteEletronico({
       {/* Informações de quantidade e localização */}
       <div className="flex items-center justify-between gap-2" data-test="footer">
         {/* Quantidade à esquerda */}
-        <div className="flex items-center text-xs md:text-sm text-gray-600 flex-shrink-0" data-test="quantity">
+        <div className="flex flex-col text-xs md:text-sm text-gray-600 flex-shrink-0" data-test="quantity">
           <span title={`Quantidade em estoque: ${quantidade} unidades`}>
             <span className="font-semibold">Qtd:</span> {quantidade}
           </span>
+          {estoqueMinimo !== undefined && (
+            <span className="mt-0.5" title={`Estoque mínimo: ${estoqueMinimo} unidades`}>
+              <span className="font-semibold">Mín:</span> {estoqueMinimo}
+            </span>
+          )}
         </div>
 
         {/* Status ao meio */}
