@@ -43,14 +43,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       <LogoEi></LogoEi>
-      <div className="w-full md:w-1/2 flex items-center justify-center px-4">
+      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          <h2 className="mb-10 text-center text-3xl font-bold">Bem-vindo!</h2>
+          <h2 className="mb-6 md:mb-10 text-center text-2xl md:text-3xl font-bold">Bem-vindo!</h2>
           <form onSubmit={handleSubmit}>
             <div>
-              <Label className="pb-2" htmlFor="email">E-mail</Label>
+              <Label className="pb-2 text-sm md:text-base" htmlFor="email">E-mail</Label>
               <Input 
-                className="p-5 w-full" 
+                className="p-3 md:p-5 w-full text-sm md:text-base" 
                 type="email" 
                 id="email" 
                 placeholder="Insira seu endereço de e-mail"
@@ -60,11 +60,11 @@ export default function LoginPage() {
                 disabled={loading}
               />
             </div>
-            <div className="pt-4">
-              <Label className="pb-2" htmlFor="senha">Senha</Label>
+            <div className="pt-3 md:pt-4">
+              <Label className="pb-2 text-sm md:text-base" htmlFor="senha">Senha</Label>
               <div className="relative">
                 <Input 
-                  className="p-5 w-full pr-12" 
+                  className="p-3 md:p-5 w-full pr-12 text-sm md:text-base" 
                   type={showPassword ? "text" : "password"} 
                   id="senha" 
                   placeholder="Insira sua senha"
@@ -88,22 +88,22 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            <p className="mt-3 text-zinc-600 text-base underline cursor-pointer">Esqueci minha senha</p>
+            <p className="mt-2 md:mt-3 text-zinc-600 text-sm md:text-base underline cursor-pointer">Esqueci minha senha</p>
             {error && (
-              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              <div className="mt-3 md:mt-4 p-2 md:p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm md:text-base">
                 {error}
               </div>
             )}
-            <div className="mt-6">
+            <div className="mt-4 md:mt-6">
               <Button 
                 type="submit" 
-                className="p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer"
+                className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
                 disabled={loading}
               >
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
             </div>
-            <p className="mt-6 text-center">
+            <p className="mt-4 md:mt-6 text-center text-sm md:text-base">
               Não tem uma conta?{" "} 
               <span 
                 className="text-[#306FCC] hover:text-[#2557a7] underline cursor-pointer" 

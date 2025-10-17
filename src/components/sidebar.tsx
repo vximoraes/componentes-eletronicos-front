@@ -93,7 +93,7 @@ export default function CustomSidebar({ path }: PathRouter) {
       >
         <SidebarProvider data-test='sidebar-provider' className="m-0 p-0 w-[280px] h-full" >
           <Sidebar data-test="sidebar-main" className="h-full w-[280px]">
-            <SidebarContent className="bg-[#111827] w-[280px] h-auto relative overflow-y-auto" data-test="sidebar-content">
+            <SidebarContent className="bg-[#0f1419] w-[280px] h-auto relative overflow-y-auto" data-test="sidebar-content">
             <SidebarGroup data-test="sidebar-logo-group" className="">
               <SidebarGroupLabel className="mt-[50px] flex justify-center items-center h-8 rounded-md text-xs font-medium transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2" data-test="sidebar-logo-label">
                 <img src="/logo-componentes.svg" className="w-[140px]" alt="" data-test="sidebar-logo-image" />
@@ -162,7 +162,7 @@ export default function CustomSidebar({ path }: PathRouter) {
         }`}
         data-test="sidebar-container-mobile"
       >
-        <div className="bg-[#111827] h-full w-full overflow-y-auto">
+        <div className="bg-[#0f1419] h-full w-full overflow-y-auto">
           {/* Header com botão fechar */}
           <div className="relative p-5 pt-12 flex items-center justify-center">
             <button
