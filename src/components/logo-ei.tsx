@@ -1,0 +1,7 @@
+export default function LogoEi() {
+  return (
+    <div className="hidden md:flex md:w-1/2 bg-[#0f1419] items-center justify-center ">
+      <img className="w-60" src="ei.png" alt="Estoque Inteligente" />
+    </div>
+  )
+}

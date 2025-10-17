@@ -1,3 +1,6 @@
+"use client"
+import Cabecalho from "@/components/cabecalho"
+
 "use client"; 
 import { useState } from "react";
 import Image from "next/image";
