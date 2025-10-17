@@ -1,19 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import Header from "@/components/header/header";
 import { QueryProvider } from "@/providers/queryProvider";
 import { SessionProvider } from "@/providers/sessionProvider";
+import { SidebarProvider } from "@/contexts/SidebarContext";
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Estoque Inteligente",
@@ -33,14 +24,19 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className="flex justify-center"
       >
         <SessionProvider>
-          <NuqsAdapter>
-            <QueryProvider>
-              {children}
-            </QueryProvider>
-          </NuqsAdapter>
+          <SidebarProvider>
+            <Header />
+            <main className="w-[100%]">
+              <NuqsAdapter>
+                <QueryProvider>
+                  {children}
+                </QueryProvider>
+              </NuqsAdapter>
+            </main>
+          </SidebarProvider>
         </SessionProvider>
       </body>
     </html>
