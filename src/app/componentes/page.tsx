@@ -1,7 +1,7 @@
 "use client"
 import ComponenteEletronico from "@/components/componente-eletronico";
 import StatCard from "@/components/stat-card";
-// import CustomSidebar from "@/components/sidebar";
+import Cabecalho from "@/components/cabecalho";
 import ModalLocalizacoes from "@/components/modal-localizacoes";
 import ModalFiltros from "@/components/modal-filtros";
 import ModalEntradaComponente from "@/components/modal-entrada-componente";
@@ -164,8 +164,11 @@ export default function ComponentesPage() {
   const indisponiveis = componentes.filter(c => c.status === 'Indisponível').length;
   // console.log(totalComponentes)
   return (
-    <div className="p-6 w-[100%]" data-test="componentes-page">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
+    <div className="w-[100%]" data-test="componentes-page">
+      <Cabecalho pagina="Componentes" />
+      
+      <div className="p-6 pt-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
         <StatCard
           title="Total de"
           subtitle="componentes"
@@ -344,6 +347,7 @@ export default function ComponentesPage() {
           }
         />
       )}
+      </div>
 
       {/* Modal de Filtros */}
       <ModalFiltros

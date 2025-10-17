@@ -43,12 +43,12 @@ export default function SidebarButtonMenu({ src, srcHover, name, "data-test": da
   return (
     <>
       <SidebarMenuButton
-        className={"text-[21px] pl-[25px] h-[60px] w-[310px] componentes cursor-pointer flex gap-[15px] relative transition-all duration-300 ease-in-out group " + (isRouter ? (isRouter + " hover:bg-[rgba(255,255,255,1)]! shadow-md ") : "hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!")}
+        className={"text-[17px] pl-[20px] h-[50px] w-[250px] componentes cursor-pointer flex gap-[12px] relative transition-all duration-300 ease-in-out group " + (isRouter ? (isRouter + " hover:bg-[rgba(255,255,255,1)]! shadow-md ") : "hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!")}
         onClick={() => trocarPagina()}
         data-test={dataTest || "sidebar-menu-button"}
       >
-        <img src={isHover} alt="" data-test={`${dataTest}-icon` || "sidebar-button-icon"} className="w-[26px] h-[26px]" />
-        <span className={"text-[19px] font-medium " + (isBlack ? isBlack : "text-[#B4BAC5]")} data-test={`${dataTest}-text` || "sidebar-button-text"}>{name}</span>
+        <img src={isHover} alt="" data-test={`${dataTest}-icon` || "sidebar-button-icon"} className="w-[22px] h-[22px]" />
+        <span className={"text-[16px] font-medium " + (isBlack ? isBlack : "text-[#B4BAC5]")} data-test={`${dataTest}-text` || "sidebar-button-text"}>{name}</span>
       </SidebarMenuButton>
     </>
   )
