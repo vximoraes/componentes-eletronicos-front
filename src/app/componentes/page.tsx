@@ -4,13 +4,15 @@ import StatCard from "@/components/stat-card";
 // import CustomSidebar from "@/components/sidebar";
 import ModalLocalizacoes from "@/components/modal-localizacoes";
 import ModalFiltros from "@/components/modal-filtros";
+import ModalEntradaComponente from "@/components/modal-entrada-componente";
+import ModalSaidaComponente from "@/components/modal-saida-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
 import { authenticatedRequest } from '@/utils/auth';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
 
 export default function ComponentesPage() {
@@ -18,11 +20,16 @@ export default function ComponentesPage() {
   const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
+  const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
+  const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
+  const [saidaComponenteId, setSaidaComponenteId] = useState<string | null>(null);
+  const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
   
-  const { data, isLoading, error, refetch } = useQuery<ApiResponse>({
+  const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>({
     queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter],
     queryFn: () => {
       const params = new URLSearchParams();
@@ -107,6 +114,46 @@ export default function ComponentesPage() {
     setCategoriaFilter(categoria);
     setStatusFilter(status);
   };
+
+  const handleEntrada = (id: string) => {
+    setEntradaComponenteId(id);
+    setIsEntradaModalOpen(true);
+  };
+
+  const handleSaida = (id: string) => {
+    setSaidaComponenteId(id);
+    setIsSaidaModalOpen(true);
+  };
+
+  const handleCloseEntradaModal = () => {
+    setIsEntradaModalOpen(false);
+    setEntradaComponenteId(null);
+  };
+
+  const handleEntradaSuccess = () => {
+    if (entradaComponenteId) {
+      setUpdatingComponenteId(entradaComponenteId);
+    }
+    refetch();
+  };
+
+  const handleCloseSaidaModal = () => {
+    setIsSaidaModalOpen(false);
+    setSaidaComponenteId(null);
+  };
+
+  const handleSaidaSuccess = () => {
+    if (saidaComponenteId) {
+      setUpdatingComponenteId(saidaComponenteId);
+    }
+    refetch();
+  };
+
+  useEffect(() => {
+    if (!isFetching && updatingComponenteId) {
+      setUpdatingComponenteId(null);
+    }
+  }, [isFetching, updatingComponenteId]);
 
   const componentes = data?.data?.docs || [];
   
@@ -257,11 +304,15 @@ export default function ComponentesPage() {
               nome={componente.nome}
               categoria={componente.categoria.nome}
               quantidade={componente.quantidade}
+              estoqueMinimo={componente.estoque_minimo}
               status={componente.status}
               imagem={componente.imagem}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onClick={handleComponenteClick}
+              onEntrada={handleEntrada}
+              onSaida={handleSaida}
+              isLoading={updatingComponenteId === componente._id && isFetching}
               data-test={`componente-card-${index}`}
             />
           ))}
@@ -302,6 +353,28 @@ export default function ComponentesPage() {
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
       />
+
+      {/* Modal de Entrada de Componente */}
+      {entradaComponenteId && (
+        <ModalEntradaComponente
+          isOpen={isEntradaModalOpen}
+          onClose={handleCloseEntradaModal}
+          componenteId={entradaComponenteId}
+          componenteNome={componentes.find(c => c._id === entradaComponenteId)?.nome || ''}
+          onSuccess={handleEntradaSuccess}
+        />
+      )}
+
+      {/* Modal de Saída de Componente */}
+      {saidaComponenteId && (
+        <ModalSaidaComponente
+          isOpen={isSaidaModalOpen}
+          onClose={handleCloseSaidaModal}
+          componenteId={saidaComponenteId}
+          componenteNome={componentes.find(c => c._id === saidaComponenteId)?.nome || ''}
+          onSuccess={handleSaidaSuccess}
+        />
+      )}
     </div>
   );
 }

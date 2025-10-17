@@ -10,6 +10,7 @@ import Header from "@/components/header/header";
 // });
 
 import { QueryProvider } from "@/providers/queryProvider";
+import { SessionProvider } from "@/providers/sessionProvider";
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 
@@ -46,14 +47,16 @@ export default function RootLayout({
         className="flex justify-center"
       // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Header />
+        <SessionProvider>
+          <Header />
         <main className="w-[100%]">
         <NuqsAdapter>
-          <QueryProvider>
-            {children}
-          </QueryProvider>
-        </NuqsAdapter>
+            <QueryProvider>
+              {children}
+            </QueryProvider>
+          </NuqsAdapter>
         </main>
+        </SessionProvider>
       </body>
     </html>
   );
