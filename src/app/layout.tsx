@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/queryProvider";
+import { SessionProvider } from "@/providers/sessionProvider";
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 const geistSans = Geist({
@@ -34,11 +35,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NuqsAdapter>
-          <QueryProvider>
-            {children}
-          </QueryProvider>
-        </NuqsAdapter>
+        <SessionProvider>
+          <NuqsAdapter>
+            <QueryProvider>
+              {children}
+            </QueryProvider>
+          </NuqsAdapter>
+        </SessionProvider>
       </body>
     </html>
   );
