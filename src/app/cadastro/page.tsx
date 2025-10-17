@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 export default function CadastroPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    return (
+
+  return (
       <div className="min-h-screen flex">
         <LogoEi></LogoEi>
         <div className="w-full md:w-1/2 flex items-center justify-center px-4">
