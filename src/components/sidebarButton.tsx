@@ -11,9 +11,10 @@ type sidebarMenuButton = {
   name: string,
   "data-test"?: string,
   route: string,
-  path?: string
+  path?: string,
+  onItemClick?: () => void
 }
-export default function SidebarButtonMenu({ src, srcHover, name, "data-test": dataTest, route, path }: sidebarMenuButton) {
+export default function SidebarButtonMenu({ src, srcHover, name, "data-test": dataTest, route, path, onItemClick }: sidebarMenuButton) {
   const [isHover, setIsHover] = useState<string>(src)
   const [isRouter, setIsRouter] = useState<string>()
   const [isBlack, setIsBlack] = useState<string>()
@@ -34,6 +35,9 @@ export default function SidebarButtonMenu({ src, srcHover, name, "data-test": da
   }, [path])
   function trocarPagina() {
     router.push(route)
+    if (onItemClick) {
+      onItemClick()
+    }
   }
   function hoverButton(svg: string) {
     if (!isRouter) {
