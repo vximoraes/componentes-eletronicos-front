@@ -1,33 +1,19 @@
-"use client"
-import Cabecalho from "@/components/cabecalho"
+"use client";
 
-"use client"; 
 import { useState } from "react";
 import Image from "next/image";
-import { Bell, Calendar, Clock, Key, Mail, Pencil, User as UserIcon } from "lucide-react";
+import { Calendar, Clock, Mail, Pencil, User as UserIcon } from "lucide-react";
+import Cabecalho from "@/components/cabecalho";
 
 export default function HomePage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
-      <main className="flex-1 p-6 ">
-        <header className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-bold">Perfil</h1>
-            <span className="text-sm text-gray-500">Informações do usuário</span>
-          </div>
+      <main className="flex-1">
+        <Cabecalho pagina="Perfil"/>
 
-          {/* Notificação */}
-          <div className="relative">
-            <Bell className="w-6 h-6 text-gray-500 cursor-pointer" />
-            <span className="absolute -top-1 -right-1 flex items-center justify-center h-4 w-4 bg-red-500 text-white rounded-full text-xs">
-              1
-            </span>
-          </div>
-        </header>
-
-        <div className="flex gap-3 p-6 ">
+        <div className="flex gap-3 px-6 pb-6">
           {/* Informações do usuário */}
           <div className="w-full max-w-xs [300px] p-8 bg-white rounded-lg shadow-sm">
             <div className="flex flex-col items-center space-y-4">
