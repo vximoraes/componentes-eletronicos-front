@@ -1,9 +1,13 @@
 "use client"
+import Cabecalho from "@/components/cabecalho"
+
 export default function RelarotiosPage() {
   return (
-    <div>
-      <h1>Página de Relatórios</h1>
-      <p>Conteúdo da página de ralatórios aqui...</p>
+    <div className="w-full">
+      <Cabecalho pagina="Relatórios" />
+      <div className="p-6 pt-0">
+        <p>Conteúdo da página de relatórios aqui...</p>
+      </div>
     </div>
   )
 }

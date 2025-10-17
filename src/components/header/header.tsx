@@ -8,10 +8,12 @@ interface ComponenteReact {
 
 export default function Header ({children}:ComponenteReact){
     const pathName = usePathname()
-    const rotasIgnoradas = ["/", "/login", "/perfil"]
+    const rotasIgnoradas = ["/", "/login", "/cadastro"]
+    const isPerfilPage = pathName === "/perfil"
+    
     if(!rotasIgnoradas.includes(pathName)){
         return(
-        <CustomSidebar path={pathName}/>
+        <CustomSidebar path={pathName} collapsed={isPerfilPage}/>
     )
     }
 }

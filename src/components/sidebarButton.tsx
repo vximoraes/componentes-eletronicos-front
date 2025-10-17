@@ -12,9 +12,10 @@ type sidebarMenuButton = {
   "data-test"?: string,
   route: string,
   path?: string,
-  onItemClick?: () => void
+  onItemClick?: () => void,
+  collapsed?: boolean
 }
-export default function SidebarButtonMenu({ src, srcHover, name, "data-test": dataTest, route, path, onItemClick }: sidebarMenuButton) {
+export default function SidebarButtonMenu({ src, srcHover, name, "data-test": dataTest, route, path, onItemClick, collapsed = false }: sidebarMenuButton) {
   const [isHover, setIsHover] = useState<string>(src)
   const [isRouter, setIsRouter] = useState<string>()
   const [isBlack, setIsBlack] = useState<string>()
@@ -44,6 +45,22 @@ export default function SidebarButtonMenu({ src, srcHover, name, "data-test": da
       setIsHover(svg)
     }
   }
+  
+  if (collapsed) {
+    return (
+      <>
+        <SidebarMenuButton
+          className={"flex justify-center items-center h-[50px] w-[80px] cursor-pointer relative transition-all duration-300 ease-in-out group rounded-lg " + (isRouter ? (isRouter + " hover:bg-[rgba(255,255,255,1)]! shadow-md ") : "hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!")}
+          onClick={() => trocarPagina()}
+          data-test={dataTest || "sidebar-menu-button"}
+          title={name}
+        >
+          <img src={isHover} alt={name} data-test={`${dataTest}-icon` || "sidebar-button-icon"} className="w-[24px] h-[24px]" />
+        </SidebarMenuButton>
+      </>
+    )
+  }
+  
   return (
     <>
       <SidebarMenuButton

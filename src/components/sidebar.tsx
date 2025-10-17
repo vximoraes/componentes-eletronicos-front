@@ -21,6 +21,7 @@ interface CustomSidebarProps {
 
 interface PathRouter {
   path: string
+  collapsed?: boolean
 }
 
 interface MobileMenuItemProps {
@@ -57,7 +58,7 @@ function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick }: Mob
   )
 }
 
-export default function CustomSidebar({ path }: PathRouter) {
+export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
   const [testNome, setTesteNome] = useState<string>("")
   const { isOpen, closeSidebar } = useSidebarContext()
@@ -88,15 +89,20 @@ export default function CustomSidebar({ path }: PathRouter) {
     <>
       {/* Sidebar Desktop - sempre visível */}
       <div
-        className="hidden md:block md:relative md:w-[280px]"
+        className={`hidden md:block md:relative transition-all duration-300 ${collapsed ? 'md:w-[100px]' : 'md:w-[280px]'}`}
         data-test="sidebar-container-desktop"
       >
-        <SidebarProvider data-test='sidebar-provider' className="m-0 p-0 w-[280px] h-full" >
-          <Sidebar data-test="sidebar-main" className="h-full w-[280px]">
-            <SidebarContent className="bg-[#0f1419] w-[280px] h-auto relative overflow-y-auto" data-test="sidebar-content">
+        <SidebarProvider data-test='sidebar-provider' className={`m-0 p-0 h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`} >
+          <Sidebar data-test="sidebar-main" className={`h-full transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`}>
+            <SidebarContent className={`bg-[#0f1419] h-auto relative overflow-y-auto transition-all duration-300 ${collapsed ? 'w-[100px]' : 'w-[280px]'}`} data-test="sidebar-content">
             <SidebarGroup data-test="sidebar-logo-group" className="">
               <SidebarGroupLabel className="mt-[50px] flex justify-center items-center h-8 rounded-md text-xs font-medium transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2" data-test="sidebar-logo-label">
-                <img src="/logo-componentes.svg" className="w-[140px]" alt="" data-test="sidebar-logo-image" />
+                <img 
+                  src={collapsed ? "/ei.png" : "/logo-componentes.svg"} 
+                  className={collapsed ? 'w-[50px]' : 'w-[140px]'}
+                  alt="" 
+                  data-test="sidebar-logo-image" 
+                />
                 </SidebarGroupLabel>
             </SidebarGroup>
             <SidebarMenu className="mt-[50px]" data-test="sidebar-menu">
@@ -109,6 +115,7 @@ export default function CustomSidebar({ path }: PathRouter) {
                   data-test="sidebar-btn-componentes"
                   path={path}
                   onItemClick={handleItemClick}
+                  collapsed={collapsed}
                 />
                 <SidebarButtonMenu
                   src="/relatorios.svg"
@@ -118,6 +125,7 @@ export default function CustomSidebar({ path }: PathRouter) {
                   data-test="sidebar-btn-relatorios"
                   path={path}
                   onItemClick={handleItemClick}
+                  collapsed={collapsed}
                 />
                 <SidebarButtonMenu
                   src="/orcamentos.svg"
@@ -127,26 +135,30 @@ export default function CustomSidebar({ path }: PathRouter) {
                   data-test="sidebar-btn-orcamentos"
                   path={path}
                   onItemClick={handleItemClick}
+                  collapsed={collapsed}
                 />
                 <SidebarButtonMenu
                   src="/fornecedores.svg"
                   srcHover="/fornecedores-hover.svg"
                   name="Fornecedores"
                   route="/fornecedores"
+                  data-test="sidebar-btn-fornecedores"
                   path={path}
                   onItemClick={handleItemClick}
+                  collapsed={collapsed}
                 />
-                <hr className="w-[250px] border-[#D9D9D9]" data-test="sidebar-divider" />
+                <hr className={`border-[#D9D9D9] transition-all duration-300 ${collapsed ? 'w-[80px]' : 'w-[250px]'}`} data-test="sidebar-divider" />
                 <SidebarMenuButton
-                  className="text-[17px] pl-[20px] h-[50px] w-[250px] cursor-pointer flex gap-[12px] relative transition-all duration-300 ease-in-out hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit!"
+                  className={`cursor-pointer relative transition-all duration-300 ease-in-out hover:bg-[rgba(255,255,255,0.08)]! hover:text-inherit! ${collapsed ? 'flex justify-center items-center h-[50px] w-[80px] rounded-lg' : 'text-[17px] pl-[20px] h-[50px] w-[250px] flex gap-[12px]'}`}
                   onClick={() => {
                     handleLogout()
                     handleItemClick()
                   }}
                   data-test="sidebar-btn-sair"
+                  title={collapsed ? "Sair" : undefined}
                 >
                   <img src="/sair.svg" alt="" className="w-[22px] h-[22px]" />
-                  <span className="text-[16px] font-medium text-[#B4BAC5]">Sair</span>
+                  {!collapsed && <span className="text-[16px] font-medium text-[#B4BAC5]">Sair</span>}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
