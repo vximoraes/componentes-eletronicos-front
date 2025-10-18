@@ -181,15 +181,15 @@ export default function AdicionarComponentePage() {
   const categoriaSelecionada = categorias.find((cat: Categoria) => cat._id === categoriaId)
 
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full min-h-screen flex flex-col">
       <Cabecalho pagina="Componentes" acao="Adicionar" />
 
-      <div className="flex-1 p-6 pt-0 flex flex-col overflow-hidden">
+      <div className="flex-1 p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 p-8 flex flex-col gap-6 overflow-y-auto">
+            <div className="flex-1 p-4 md:p-8 flex flex-col gap-4 md:gap-6 overflow-y-auto">
               {/* Grid de 2 colunas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Nome */}
                 <div>
                   <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
@@ -298,7 +298,7 @@ export default function AdicionarComponentePage() {
               </div>
 
               {/* Grid de 2 colunas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {/* Estoque mínimo */}
                 <div>
                   <Label htmlFor="estoqueMinimo" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
@@ -342,9 +342,9 @@ export default function AdicionarComponentePage() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 w-full justify-between">
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
-                          <ImageIcon className="w-4 h-4 text-gray-400" />
-                          <span>Arrastar uma imagem ou</span>
+                        <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500">
+                          <ImageIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="hidden sm:inline">Arrastar uma imagem ou</span>
                         </div>
                         <Button
                           type="button"
@@ -368,7 +368,7 @@ export default function AdicionarComponentePage() {
               </div>
 
               {/* Descrição - largura total */}
-              <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex flex-col min-h-[120px] md:flex-1 md:min-h-0">
                 <div className="flex justify-between items-center mb-2">
                   <Label htmlFor="descricao" className="text-sm md:text-base font-medium text-gray-900">
                     Descrição
@@ -383,13 +383,13 @@ export default function AdicionarComponentePage() {
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   maxLength={200}
-                  className="w-full flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[100px]"
                 />
               </div>
             </div>
 
             {/* Footer com botões */}
-            <div className="flex justify-end gap-3 px-8 py-4 border-t bg-gray-50 flex-shrink-0">
+            <div className="flex justify-end gap-3 px-4 md:px-8 py-4 border-t bg-gray-50 flex-shrink-0">
               <Button
                 type="button"
                 variant="outline"
