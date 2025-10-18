@@ -14,8 +14,10 @@ import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
+import { useRouter } from 'next/navigation';
 
 export default function ComponentesPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,6 +151,10 @@ export default function ComponentesPage() {
     refetch();
   };
 
+  const handleAdicionarClick = () => {
+    router.push('/componentes/adicionar');
+  };
+
   useEffect(() => {
     if (!isFetching && updatingComponenteId) {
       setUpdatingComponenteId(null);
@@ -233,9 +239,10 @@ export default function ComponentesPage() {
           Filtros
         </Button>
         <Button 
-          className="flex items-center gap-2 text-white hover:opacity-90" 
+          className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" 
           style={{ backgroundColor: '#306FCC' }}
           data-test="adicionar-button"
+          onClick={handleAdicionarClick}
         >
           <Plus className="w-4 h-4" />
           Adicionar
@@ -336,6 +343,7 @@ export default function ComponentesPage() {
           onClose={handleCloseModal}
           componenteId={selectedComponenteId}
           componenteNome={componentes.find(c => c._id === selectedComponenteId)?.nome || ''}
+          componenteDescricao={componentes.find(c => c._id === selectedComponenteId)?.descricao}
           estoques={estoquesData?.data?.docs || []}
           isLoading={isLoadingEstoques}
           totalQuantidade={

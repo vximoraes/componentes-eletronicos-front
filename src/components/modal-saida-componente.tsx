@@ -323,7 +323,7 @@ export default function ModalSaidaComponente({
           {/* Campo Quantidade */}
           <div className="space-y-2">
             <label htmlFor="quantidade" className="block text-base font-medium text-gray-700">
-              Quantidade
+              Quantidade <span className="text-red-500">*</span>
             </label>
             <input
               id="quantidade"
@@ -343,7 +343,7 @@ export default function ModalSaidaComponente({
           {/* Campo Localização */}
           <div className="space-y-2">
             <label className="block text-base font-medium text-gray-700">
-              Localização
+              Localização <span className="text-red-500">*</span>
             </label>
             <div className="relative" data-dropdown>
               <button

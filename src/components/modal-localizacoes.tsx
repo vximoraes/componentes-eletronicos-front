@@ -8,6 +8,7 @@ interface ModalLocalizacoesProps {
   onClose: () => void;
   componenteId: string;
   componenteNome: string;
+  componenteDescricao?: string;
   estoques: EstoqueData[];
   isLoading: boolean;
   totalQuantidade: number;
@@ -18,6 +19,7 @@ export default function ModalLocalizacoes({
   onClose,
   componenteId,
   componenteNome,
+  componenteDescricao,
   estoques,
   isLoading,
   totalQuantidade
@@ -84,7 +86,10 @@ export default function ModalLocalizacoes({
             <X size={20} />
           </button>
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">{componenteNome}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">{componenteNome}</h2>
+            {componenteDescricao && (
+              <p className="text-sm text-gray-600 mb-3 px-6 break-words text-center max-w-full">{componenteDescricao}</p>
+            )}
             <p className="text-xl font-semibold text-blue-600">
               {isLoading ? "Carregando..." : totalQuantidade}
             </p>
