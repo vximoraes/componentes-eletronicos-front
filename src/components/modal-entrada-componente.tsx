@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authenticatedRequest } from '@/utils/auth';
+import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 
 interface Localizacao {
@@ -65,10 +65,10 @@ export default function ModalEntradaComponente({
   // Query para buscar localizações
   const { data: localizacoesData, isLoading: isLoadingLocalizacoes } = useQuery<LocalizacoesApiResponse>({
     queryKey: ['localizacoes'],
-    queryFn: () => authenticatedRequest<LocalizacoesApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/localizacoes`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get<LocalizacoesApiResponse>('/localizacoes');
+      return response.data;
+    },
     enabled: isOpen,
     staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
@@ -80,17 +80,10 @@ export default function ModalEntradaComponente({
   });
 
   const entradaMutation = useMutation({
-    mutationFn: (data: MovimentacaoRequest) => 
-      authenticatedRequest(
-        `${process.env.NEXT_PUBLIC_API_URL}/movimentacoes`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: data,
-        }
-      ),
+    mutationFn: async (data: MovimentacaoRequest) => {
+      const response = await api.post('/movimentacoes', data);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['componentes']

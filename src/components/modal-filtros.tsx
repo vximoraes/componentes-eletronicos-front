@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { authenticatedRequest } from '@/utils/auth';
+import api from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 
 interface Categoria {
@@ -63,10 +63,10 @@ export default function ModalFiltros({
   // Query para buscar categorias
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
-    queryFn: () => authenticatedRequest<CategoriasApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/categorias`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get<CategoriasApiResponse>('/categorias');
+      return response.data;
+    },
     staleTime: 1000 * 60 * 10, 
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {

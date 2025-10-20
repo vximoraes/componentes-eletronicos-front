@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Cabecalho from "@/components/cabecalho"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { authenticatedRequest } from '@/utils/auth'
+import api from '@/lib/api'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -36,25 +36,18 @@ export default function AdicionarComponentePage() {
 
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
     queryKey: ['categorias'],
-    queryFn: () => authenticatedRequest(
-      `${process.env.NEXT_PUBLIC_API_URL}/categorias`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get('/categorias');
+      return response.data;
+    },
     staleTime: 1000 * 60 * 10,
   })
 
   const createCategoriaMutation = useMutation({
-    mutationFn: (nomeCategoria: string) =>
-      authenticatedRequest(
-        `${process.env.NEXT_PUBLIC_API_URL}/categorias`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: { nome: nomeCategoria },
-        }
-      ),
+    mutationFn: async (nomeCategoria: string) => {
+      const response = await api.post('/categorias', { nome: nomeCategoria });
+      return response.data;
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
       setCategoriaId(data.data._id)
@@ -72,19 +65,16 @@ export default function AdicionarComponentePage() {
       })
     },
     onError: (error: any) => {
-      setErrors(prev => ({ ...prev, novaCategoria: `Erro: ${error.message}` }))
+      const errorMessage = error?.response?.data?.message || error.message
+      setErrors(prev => ({ ...prev, novaCategoria: errorMessage }))
     }
   })
 
   const createComponenteMutation = useMutation({
-    mutationFn: async (data: any) =>
-      authenticatedRequest(
-        `${process.env.NEXT_PUBLIC_API_URL}/componentes`,
-        {
-          method: 'POST',
-          data: data,
-        }
-      ),
+    mutationFn: async (data: any) => {
+      const response = await api.post('/componentes', data);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
       router.push('/componentes?success=created')

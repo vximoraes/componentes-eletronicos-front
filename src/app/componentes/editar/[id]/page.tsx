@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import Cabecalho from "@/components/cabecalho"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { authenticatedRequest } from '@/utils/auth'
+import api from '@/lib/api'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -53,19 +53,21 @@ export default function EditarComponentePage() {
 
   const { data: componenteData, isLoading: isLoadingComponente } = useQuery({
     queryKey: ['componente', componenteId],
-    queryFn: () => authenticatedRequest<{ data: ComponenteData }>(
-      `${process.env.NEXT_PUBLIC_API_URL}/componentes/${componenteId}`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get<{ data: ComponenteData }>(
+        `/componentes/${componenteId}`
+      );
+      return response.data;
+    },
     enabled: !!componenteId,
   })
 
   const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
     queryKey: ['categorias'],
-    queryFn: () => authenticatedRequest(
-      `${process.env.NEXT_PUBLIC_API_URL}/categorias`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get('/categorias');
+      return response.data;
+    },
     staleTime: 1000 * 60 * 10,
   })
 
@@ -84,17 +86,10 @@ export default function EditarComponentePage() {
   }, [componenteData])
 
   const createCategoriaMutation = useMutation({
-    mutationFn: (nomeCategoria: string) =>
-      authenticatedRequest(
-        `${process.env.NEXT_PUBLIC_API_URL}/categorias`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: { nome: nomeCategoria },
-        }
-      ),
+    mutationFn: async (nomeCategoria: string) => {
+      const response = await api.post('/categorias', { nome: nomeCategoria });
+      return response.data;
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
       setCategoriaId(data.data._id)
@@ -112,19 +107,16 @@ export default function EditarComponentePage() {
       })
     },
     onError: (error: any) => {
-      setErrors(prev => ({ ...prev, novaCategoria: `Erro: ${error.message}` }))
+      const errorMessage = error?.response?.data?.message || error.message
+      setErrors(prev => ({ ...prev, novaCategoria: errorMessage }))
     }
   })
 
   const updateComponenteMutation = useMutation({
-    mutationFn: async (data: any) =>
-      authenticatedRequest(
-        `${process.env.NEXT_PUBLIC_API_URL}/componentes/${componenteId}`,
-        {
-          method: 'PATCH',
-          data: data,
-        }
-      ),
+    mutationFn: async (data: any) => {
+      const response = await api.patch(`/componentes/${componenteId}`, data);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
       queryClient.invalidateQueries({ queryKey: ['componente', componenteId] })

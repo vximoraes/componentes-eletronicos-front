@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authenticatedRequest } from '@/utils/auth';
+import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 
 interface Localizacao {
@@ -84,10 +84,10 @@ export default function ModalSaidaComponente({
   // Query para buscar localizações
   const { data: localizacoesData, isLoading: isLoadingLocalizacoes } = useQuery<LocalizacoesApiResponse>({
     queryKey: ['localizacoes'],
-    queryFn: () => authenticatedRequest<LocalizacoesApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/localizacoes`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get<LocalizacoesApiResponse>('/localizacoes');
+      return response.data;
+    },
     enabled: isOpen,
     staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
@@ -101,10 +101,12 @@ export default function ModalSaidaComponente({
   // Query para buscar estoques do componente
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', componenteId],
-    queryFn: () => authenticatedRequest<EstoqueApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/estoques/componente/${componenteId}`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get<EstoqueApiResponse>(
+        `/estoques/componente/${componenteId}`
+      );
+      return response.data;
+    },
     enabled: isOpen && !!componenteId,
     staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
@@ -116,17 +118,10 @@ export default function ModalSaidaComponente({
   });
 
   const saidaMutation = useMutation({
-    mutationFn: (data: MovimentacaoRequest) =>
-      authenticatedRequest(
-        `${process.env.NEXT_PUBLIC_API_URL}/movimentacoes`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: data,
-        }
-      ),
+    mutationFn: async (data: MovimentacaoRequest) => {
+      const response = await api.post('/movimentacoes', data);
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: ['componentes']

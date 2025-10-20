@@ -10,7 +10,7 @@ import ModalExcluirComponente from "@/components/modal-excluir-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
-import { authenticatedRequest } from '@/utils/auth';
+import api from '@/lib/api';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -63,7 +63,7 @@ export default function ComponentesPage() {
   
   const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>({
     queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter, currentPage, itemsPerPage],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
       if (categoriaFilter) params.append('categoria', categoriaFilter);
@@ -72,9 +72,10 @@ export default function ComponentesPage() {
       params.append('page', currentPage.toString());
       
       const queryString = params.toString();
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/componentes${queryString ? `?${queryString}` : ''}`;
+      const url = `/componentes${queryString ? `?${queryString}` : ''}`;
       
-      return authenticatedRequest<ApiResponse>(url, { method: 'GET' });
+      const response = await api.get<ApiResponse>(url);
+      return response.data;
     },
     staleTime: 1000 * 60 * 5, 
     retry: (failureCount, error: any) => {
@@ -88,10 +89,12 @@ export default function ComponentesPage() {
   // Query para buscar estoques de um componente específico
   const { data: estoquesData, isLoading: isLoadingEstoques } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', selectedComponenteId],
-    queryFn: () => authenticatedRequest<EstoqueApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/estoques/componente/${selectedComponenteId}`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get<EstoqueApiResponse>(
+        `/estoques/componente/${selectedComponenteId}`
+      );
+      return response.data;
+    },
     enabled: !!selectedComponenteId,
     staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
@@ -105,10 +108,10 @@ export default function ComponentesPage() {
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery({
     queryKey: ['categorias'],
-    queryFn: () => authenticatedRequest(
-      `${process.env.NEXT_PUBLIC_API_URL}/categorias`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      const response = await api.get('/categorias');
+      return response.data;
+    },
     staleTime: 1000 * 60 * 10, 
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
