@@ -6,6 +6,7 @@ import ModalLocalizacoes from "@/components/modal-localizacoes";
 import ModalFiltros from "@/components/modal-filtros";
 import ModalEntradaComponente from "@/components/modal-entrada-componente";
 import ModalSaidaComponente from "@/components/modal-saida-componente";
+import ModalExcluirComponente from "@/components/modal-excluir-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
@@ -29,6 +30,9 @@ export default function ComponentesPage() {
   const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
   const [saidaComponenteId, setSaidaComponenteId] = useState<string | null>(null);
+  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
+  const [excluirComponenteId, setExcluirComponenteId] = useState<string | null>(null);
+  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -152,7 +156,8 @@ export default function ComponentesPage() {
   };
 
   const handleDelete = (id: string) => {
-    console.log("Delete clicked for component:", id);
+    setExcluirComponenteId(id);
+    setIsExcluirModalOpen(true);
   };
 
   const handleComponenteClick = (id: string) => {
@@ -228,6 +233,36 @@ export default function ComponentesPage() {
       transition: Slide,
     });
     refetch();
+  };
+
+  const handleCloseExcluirModal = () => {
+    setIsExcluirModalOpen(false);
+    setExcluirComponenteId(null);
+  };
+
+  const handleExcluirSuccess = async () => {
+    setIsRefetchingAfterDelete(true);
+
+    const isLastComponentOnPage = componentes.length === 1;
+    const shouldGoToPreviousPage = isLastComponentOnPage && currentPage > 1;
+    
+    toast.success('Componente excluído com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+
+    if (shouldGoToPreviousPage) {
+      setCurrentPage(prev => prev - 1);
+    }
+    
+    router.refresh();
+    await refetch();
+    setIsRefetchingAfterDelete(false);
   };
 
   const handleAdicionarClick = () => {
@@ -388,7 +423,7 @@ export default function ComponentesPage() {
         </div>
       )}
 
-      {isLoading ? (
+      {isLoading || isRefetchingAfterDelete ? (
         <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
           <div className="relative w-12 h-12">
             <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
@@ -578,6 +613,17 @@ export default function ComponentesPage() {
           componenteId={saidaComponenteId}
           componenteNome={componentes.find(c => c._id === saidaComponenteId)?.nome || ''}
           onSuccess={handleSaidaSuccess}
+        />
+      )}
+
+      {/* Modal de Excluir Componente */}
+      {excluirComponenteId && (
+        <ModalExcluirComponente
+          isOpen={isExcluirModalOpen}
+          onClose={handleCloseExcluirModal}
+          componenteId={excluirComponenteId}
+          componenteNome={componentes.find(c => c._id === excluirComponenteId)?.nome || ''}
+          onSuccess={handleExcluirSuccess}
         />
       )}
 
