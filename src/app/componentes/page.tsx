@@ -37,22 +37,6 @@ export default function ComponentesPage() {
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
 
   useEffect(() => {
-    const success = searchParams.get('success');
-    if (success === 'created') {
-      toast.success('Componente criado com sucesso!', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      });
-      router.replace('/componentes');
-    }
-  }, [searchParams, router]);
-
-  useEffect(() => {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       if (width >= 2560) {
@@ -130,8 +114,41 @@ export default function ComponentesPage() {
     },
   });
 
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const componenteId = searchParams.get('id');
+    
+    if (success === 'created') {
+      toast.success('Componente criado com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      router.replace('/componentes');
+    } else if (success === 'updated') {
+      if (componenteId) {
+        setUpdatingComponenteId(componenteId);
+      }
+      toast.success('Componente atualizado com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      refetch();
+      router.replace('/componentes');
+    }
+  }, [searchParams, router, refetch]);
+
   const handleEdit = (id: string) => {
-    console.log("Edit clicked for component:", id);
+    router.push(`/componentes/editar/${id}`);
   };
 
   const handleDelete = (id: string) => {
