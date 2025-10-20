@@ -14,10 +14,13 @@ import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ComponentesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +35,22 @@ export default function ComponentesPage() {
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
+
+  useEffect(() => {
+    const success = searchParams.get('success');
+    if (success === 'created') {
+      toast.success('Componente criado com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      router.replace('/componentes');
+    }
+  }, [searchParams, router]);
 
   useEffect(() => {
     const updateItemsPerPage = () => {
@@ -161,6 +180,15 @@ export default function ComponentesPage() {
     if (entradaComponenteId) {
       setUpdatingComponenteId(entradaComponenteId);
     }
+    toast.success('Entrada registrada com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
     refetch();
   };
 
@@ -173,6 +201,15 @@ export default function ComponentesPage() {
     if (saidaComponenteId) {
       setUpdatingComponenteId(saidaComponenteId);
     }
+    toast.success('Saída registrada com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
     refetch();
   };
 
@@ -526,6 +563,16 @@ export default function ComponentesPage() {
           onSuccess={handleSaidaSuccess}
         />
       )}
+
+      <ToastContainer 
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable={false}
+        transition={Slide}
+      />
     </div>
   );
 }
