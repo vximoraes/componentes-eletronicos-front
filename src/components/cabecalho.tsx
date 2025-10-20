@@ -1,7 +1,5 @@
 "use client"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useSession } from "@/hooks/use-session"
 import { useSidebarContext } from "@/contexts/SidebarContext"
 import { Bell, Menu } from "lucide-react"
 
@@ -11,19 +9,13 @@ export interface CabecalhoProps {
   fotoPerfil?: string
 }
 
-export default function Cabecalho({ pagina, acao, fotoPerfil }: CabecalhoProps) {
-  const router = useRouter()
-  const { user } = useSession()
+export default function Cabecalho({ pagina, acao }: CabecalhoProps) {
   const { toggleSidebar } = useSidebarContext()
   const [showNotifications, setShowNotifications] = useState(false)
 
   const handleNotificationsClick = () => {
     // TODO: Implementar funcionalidade de notificações
     setShowNotifications(!showNotifications)
-  }
-
-  const handleProfileClick = () => {
-    router.push("/perfil")
   }
 
   const handleMenuClick = () => {
@@ -55,19 +47,6 @@ export default function Cabecalho({ pagina, acao, fotoPerfil }: CabecalhoProps) 
           aria-label="Notificações"
         >
           <Bell className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-gray-700" strokeWidth={2.3} />
-        </button>
-
-        {/* Ícone de Perfil */}
-        <button
-          onClick={handleProfileClick}
-          className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full transition-all duration-200 cursor-pointer overflow-hidden"
-          aria-label="Perfil do usuário"
-        >
-          <img 
-            src={fotoPerfil || "/foto-default.svg"} 
-            alt="Foto de perfil" 
-            className="w-full h-full object-cover"
-          />
         </button>
       </div>
     </div>

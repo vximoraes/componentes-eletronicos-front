@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, Trash2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Edit, Trash2, ArrowUpCircle, ArrowDownCircle, Package } from 'lucide-react';
 
 interface ComponenteEletronicoProps {
   id?: string;
@@ -93,7 +93,7 @@ export default function ComponenteEletronico({
       <div className="flex items-start justify-between mb-2 gap-2" data-test="header">
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0" data-test="component-info">
           {/* Ícone/Imagem do componente */}
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" data-test="component-icon">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" data-test="component-icon">
             {imagem ? (
               <img 
                 src={imagem} 
@@ -102,7 +102,7 @@ export default function ComponenteEletronico({
                 title={`Imagem do componente: ${nome}`}
               />
             ) : (
-              <div className="w-4 h-4 md:w-6 md:h-6 bg-blue-500 rounded" title="Ícone padrão do componente"></div>
+              <Package className="w-4 h-4 md:w-5 md:h-5 text-gray-600" title="Ícone padrão do componente" />
             )}
           </div>
           

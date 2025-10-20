@@ -6,16 +6,22 @@ import ModalLocalizacoes from "@/components/modal-localizacoes";
 import ModalFiltros from "@/components/modal-filtros";
 import ModalEntradaComponente from "@/components/modal-entrada-componente";
 import ModalSaidaComponente from "@/components/modal-saida-componente";
+import ModalExcluirComponente from "@/components/modal-excluir-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
 import { authenticatedRequest } from '@/utils/auth';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
+import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useQueryState } from 'nuqs';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ToastContainer, toast, Slide } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ComponentesPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,18 +30,46 @@ export default function ComponentesPage() {
   const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
   const [saidaComponenteId, setSaidaComponenteId] = useState<string | null>(null);
+  const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false);
+  const [excluirComponenteId, setExcluirComponenteId] = useState<string | null>(null);
+  const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false);
   const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
+
+  useEffect(() => {
+    const updateItemsPerPage = () => {
+      const width = window.innerWidth;
+      if (width >= 2560) {
+        setItemsPerPage(24); 
+      } else if (width >= 1920) {
+        setItemsPerPage(18); 
+      } else if (width >= 1024) {
+        setItemsPerPage(12); 
+      } else if (width >= 768) {
+        setItemsPerPage(9); 
+      } else {
+        setItemsPerPage(6); 
+      }
+    };
+
+    updateItemsPerPage();
+    window.addEventListener('resize', updateItemsPerPage);
+    return () => window.removeEventListener('resize', updateItemsPerPage);
+  }, []);
   
   const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>({
-    queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter],
+    queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter, currentPage, itemsPerPage],
     queryFn: () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('nome', searchTerm);
       if (categoriaFilter) params.append('categoria', categoriaFilter);
       if (statusFilter) params.append('status', statusFilter);
+      params.append('limit', itemsPerPage.toString());
+      params.append('page', currentPage.toString());
       
       const queryString = params.toString();
       const url = `${process.env.NEXT_PUBLIC_API_URL}/componentes${queryString ? `?${queryString}` : ''}`;
@@ -84,12 +118,46 @@ export default function ComponentesPage() {
     },
   });
 
+  useEffect(() => {
+    const success = searchParams.get('success');
+    const componenteId = searchParams.get('id');
+    
+    if (success === 'created') {
+      toast.success('Componente criado com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      router.replace('/componentes');
+    } else if (success === 'updated') {
+      if (componenteId) {
+        setUpdatingComponenteId(componenteId);
+      }
+      toast.success('Componente atualizado com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+      refetch();
+      router.replace('/componentes');
+    }
+  }, [searchParams, router, refetch]);
+
   const handleEdit = (id: string) => {
-    console.log("Edit clicked for component:", id);
+    router.push(`/componentes/editar/${id}`);
   };
 
   const handleDelete = (id: string) => {
-    console.log("Delete clicked for component:", id);
+    setExcluirComponenteId(id);
+    setIsExcluirModalOpen(true);
   };
 
   const handleComponenteClick = (id: string) => {
@@ -134,6 +202,15 @@ export default function ComponentesPage() {
     if (entradaComponenteId) {
       setUpdatingComponenteId(entradaComponenteId);
     }
+    toast.success('Entrada registrada com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
     refetch();
   };
 
@@ -146,7 +223,50 @@ export default function ComponentesPage() {
     if (saidaComponenteId) {
       setUpdatingComponenteId(saidaComponenteId);
     }
+    toast.success('Saída registrada com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
     refetch();
+  };
+
+  const handleCloseExcluirModal = () => {
+    setIsExcluirModalOpen(false);
+    setExcluirComponenteId(null);
+  };
+
+  const handleExcluirSuccess = async () => {
+    setIsRefetchingAfterDelete(true);
+
+    const isLastComponentOnPage = componentes.length === 1;
+    const shouldGoToPreviousPage = isLastComponentOnPage && currentPage > 1;
+    
+    toast.success('Componente excluído com sucesso!', {
+      position: 'bottom-right',
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+      transition: Slide,
+    });
+
+    if (shouldGoToPreviousPage) {
+      setCurrentPage(prev => prev - 1);
+    }
+    
+    router.refresh();
+    await refetch();
+    setIsRefetchingAfterDelete(false);
+  };
+
+  const handleAdicionarClick = () => {
+    router.push('/componentes/adicionar');
   };
 
   useEffect(() => {
@@ -155,7 +275,22 @@ export default function ComponentesPage() {
     }
   }, [isFetching, updatingComponenteId]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoriaFilter, statusFilter, itemsPerPage]);
+
   const componentes = data?.data?.docs || [];
+  const paginationInfo = data?.data || {
+    totalDocs: 0,
+    limit: 0,
+    totalPages: 0,
+    page: 1,
+    pagingCounter: 1,
+    hasPrevPage: false,
+    hasNextPage: false,
+    prevPage: null,
+    nextPage: null
+  };
   
   // Calcular estatísticas
   const totalComponentes = componentes.length;
@@ -164,10 +299,11 @@ export default function ComponentesPage() {
   const indisponiveis = componentes.filter(c => c.status === 'Indisponível').length;
   // console.log(totalComponentes)
   return (
-    <div className="w-[100%]" data-test="componentes-page">
+    <div className="w-[100%] h-screen flex flex-col" data-test="componentes-page">
       <Cabecalho pagina="Componentes" />
       
-      <div className="p-6 pt-0">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
+        <div className="flex-1 overflow-y-auto pb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
         <StatCard
           title="Total de"
@@ -233,9 +369,10 @@ export default function ComponentesPage() {
           Filtros
         </Button>
         <Button 
-          className="flex items-center gap-2 text-white hover:opacity-90" 
+          className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" 
           style={{ backgroundColor: '#306FCC' }}
           data-test="adicionar-button"
+          onClick={handleAdicionarClick}
         >
           <Plus className="w-4 h-4" />
           Adicionar
@@ -286,7 +423,7 @@ export default function ComponentesPage() {
         </div>
       )}
 
-      {isLoading ? (
+      {isLoading || isRefetchingAfterDelete ? (
         <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
           <div className="relative w-12 h-12">
             <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
@@ -328,6 +465,105 @@ export default function ComponentesPage() {
           </p>
         </div>
       )}
+        </div>
+
+      {/* Controles de Paginação */}
+      {componentes.length > 0 && paginationInfo.totalPages > 1 && (
+        <div className="bg-white py-4 px-6 flex justify-center items-center flex-shrink-0" data-test="pagination-controls">
+          <div className="flex items-center gap-1">
+            {/* Botão Anterior */}
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={!paginationInfo.hasPrevPage || isFetching}
+              className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              data-test="prev-page-button"
+              aria-label="Página anterior"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+
+            {/* Números das páginas */}
+            {(() => {
+              const totalPages = paginationInfo.totalPages;
+              const current = paginationInfo.page;
+              const pages = [];
+              
+              if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) {
+                  pages.push(i);
+                }
+              } else {
+                pages.push(1);
+                
+                if (current > 3) {
+                  pages.push('...');
+                }
+
+                const start = Math.max(2, current - 1);
+                const end = Math.min(totalPages - 1, current + 1);
+                
+                for (let i = start; i <= end; i++) {
+                  if (!pages.includes(i)) {
+                    pages.push(i);
+                  }
+                }
+                
+                if (current < totalPages - 2) {
+                  pages.push('...');
+                }
+
+                if (!pages.includes(totalPages)) {
+                  pages.push(totalPages);
+                }
+              }
+              
+              return pages.map((page, index) => {
+                if (page === '...') {
+                  return (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="px-3 py-2 text-gray-500"
+                    >
+                      ...
+                    </span>
+                  );
+                }
+                
+                const pageNum = page as number;
+                const isActive = pageNum === current;
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    disabled={isFetching}
+                    className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-blue-600 text-white font-medium'
+                        : 'hover:bg-gray-100 text-gray-700'
+                    } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
+                    data-test={`page-${pageNum}-button`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              });
+            })()}
+
+            {/* Botão Próxima */}
+            <button
+              onClick={() => setCurrentPage(prev => prev + 1)}
+              disabled={!paginationInfo.hasNextPage || isFetching}
+              className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              data-test="next-page-button"
+              aria-label="Próxima página"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+        </div>
+      )}
+      </div>
 
       {/* Modal de Localizações */}
       {selectedComponenteId && (
@@ -336,6 +572,7 @@ export default function ComponentesPage() {
           onClose={handleCloseModal}
           componenteId={selectedComponenteId}
           componenteNome={componentes.find(c => c._id === selectedComponenteId)?.nome || ''}
+          componenteDescricao={componentes.find(c => c._id === selectedComponenteId)?.descricao}
           estoques={estoquesData?.data?.docs || []}
           isLoading={isLoadingEstoques}
           totalQuantidade={
@@ -347,7 +584,6 @@ export default function ComponentesPage() {
           }
         />
       )}
-      </div>
 
       {/* Modal de Filtros */}
       <ModalFiltros
@@ -379,6 +615,27 @@ export default function ComponentesPage() {
           onSuccess={handleSaidaSuccess}
         />
       )}
+
+      {/* Modal de Excluir Componente */}
+      {excluirComponenteId && (
+        <ModalExcluirComponente
+          isOpen={isExcluirModalOpen}
+          onClose={handleCloseExcluirModal}
+          componenteId={excluirComponenteId}
+          componenteNome={componentes.find(c => c._id === excluirComponenteId)?.nome || ''}
+          onSuccess={handleExcluirSuccess}
+        />
+      )}
+
+      <ToastContainer 
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable={false}
+        transition={Slide}
+      />
     </div>
   );
 }
