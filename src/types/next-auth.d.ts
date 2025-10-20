@@ -12,6 +12,7 @@ declare module "next-auth" {
       ativo: boolean;
       permissoes: any[];
       grupos: string[];
+      fotoPerfil?: string;
     } & DefaultSession["user"];
   }
 
@@ -24,6 +25,7 @@ declare module "next-auth" {
     ativo?: boolean;
     permissoes?: any[];
     grupos?: string[];
+    fotoPerfil?: string;
   }
 }
 
@@ -37,5 +39,6 @@ declare module "next-auth/jwt" {
     ativo: boolean;
     permissoes: any[];
     grupos: string[];
+    fotoPerfil?: string;
   }
 }

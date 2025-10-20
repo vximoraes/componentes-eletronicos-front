@@ -6,6 +6,7 @@ import { Plus, X, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import Cabecalho from "@/components/cabecalho"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { authenticatedRequest } from '@/utils/auth'
@@ -279,8 +280,51 @@ export default function EditarComponentePage() {
     return (
       <div className="w-full min-h-screen flex flex-col">
         <Cabecalho pagina="Componentes" acao="Editar" />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-500">Carregando...</p>
+        <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+
+                <div>
+                  <Skeleton className="h-5 w-20 mb-2" />
+                  <Skeleton className="w-full h-[38px] sm:h-[46px]" />
+                </div>
+
+                <div>
+                  <Skeleton className="h-5 w-24 mb-2" />
+                  <div className="flex gap-2">
+                    <Skeleton className="flex-1 h-[38px] sm:h-[46px]" />
+                    <Skeleton className="h-[38px] w-[38px] sm:h-[46px] sm:w-[46px]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                <div>
+                  <Skeleton className="h-5 w-32 mb-2" />
+                  <Skeleton className="w-full h-[38px] sm:h-[46px]" />
+                </div>
+
+                <div>
+                  <Skeleton className="h-5 w-20 mb-2" />
+                  <Skeleton className="w-full h-[38px] sm:h-[46px]" />
+                </div>
+              </div>
+
+              <div className="flex flex-col flex-1">
+                <div className="flex justify-between items-center mb-2">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <Skeleton className="w-full flex-1 min-h-[120px]" />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 flex-shrink-0">
+              <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
+              <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
+            </div>
+          </div>
         </div>
       </div>
     )
