@@ -11,6 +11,7 @@ let failedQueue: Array<{
   resolve: (value?: any) => void;
   reject: (error?: any) => void;
 }> = [];
+let cachedAccessToken: string | null = null;
 
 const processQueue = (error: any = null, token: string | null = null) => {
   failedQueue.forEach((prom) => {
@@ -26,10 +27,10 @@ const processQueue = (error: any = null, token: string | null = null) => {
 
 api.interceptors.request.use(
   async (config) => {
-    const session = await getSession();
+    const token = cachedAccessToken || (await getSession())?.user?.accessToken;
 
-    if (session?.user?.accessToken) {
-      config.headers.Authorization = `Bearer ${session.user.accessToken}`;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
@@ -44,7 +45,9 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status !== 401 || originalRequest._retry) {
+    const shouldRefresh = error.response?.status === 401 || error.response?.status === 498;
+
+    if (!shouldRefresh || originalRequest._retry) {
       return Promise.reject(error);
     }
 
@@ -67,15 +70,17 @@ api.interceptors.response.use(
     try {
       const session = await getSession();
 
-      if (!session?.user?.accessToken) {
-        throw new Error("Sem token de acesso disponível");
+      if (!session?.user?.refreshToken) {
+        throw new Error("Sem refresh token disponível");
       }
 
-      const newAccessToken = await refreshAccessToken(session.user.accessToken);
+      const newAccessToken = await refreshAccessToken(session.user.refreshToken);
 
       if (!newAccessToken) {
         throw new Error("Falha ao renovar token de acesso");
       }
+
+      cachedAccessToken = newAccessToken;
 
       processQueue(null, newAccessToken);
 
@@ -85,6 +90,7 @@ api.interceptors.response.use(
 
     } catch (refreshError) {
       processQueue(refreshError, null);
+      cachedAccessToken = null;
 
       await signOut({ redirect: false });
       window.location.href = "/login";

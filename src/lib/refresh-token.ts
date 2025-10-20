@@ -13,12 +13,22 @@ interface RefreshTokenResponse {
   };
 }
 
-export async function refreshAccessToken(currentAccessToken: string): Promise<string | null> {
+export async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
-    const response = await axios.post<RefreshTokenResponse>(
+    const axiosInstance = axios.create();
+    
+    const payload = {
+      accesstoken: refreshToken,
+    };
+    
+    const response = await axiosInstance.post<RefreshTokenResponse>(
       `${process.env.NEXT_PUBLIC_API_URL}/refresh`,
+      payload,
       {
-        accesstoken: currentAccessToken,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${refreshToken}`,
+        },
       }
     );
 
