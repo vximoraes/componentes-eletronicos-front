@@ -59,6 +59,7 @@ export default function ModalEntradaComponente({
   const [quantidade, setQuantidade] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [localizacaoPesquisa, setLocalizacaoPesquisa] = useState('');
   const [errors, setErrors] = useState<{ quantidade?: string; localizacao?: string; novaLocalizacao?: string }>({});
   const [isAddingLocalizacao, setIsAddingLocalizacao] = useState(false);
   const [novaLocalizacao, setNovaLocalizacao] = useState('');
@@ -189,6 +190,9 @@ export default function ModalEntradaComponente({
   if (!isOpen) return null;
 
   const localizacoes = localizacoesData?.data?.docs || [];
+  const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
+    loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase())
+  );
   const localizacaoSelecionadaObj = localizacoes.find(loc => loc._id === localizacaoSelecionada);
 
 
@@ -212,6 +216,7 @@ export default function ModalEntradaComponente({
   const handleLocalizacaoSelect = (localizacao: Localizacao) => {
     setLocalizacaoSelecionada(localizacao._id);
     setIsDropdownOpen(false);
+    setLocalizacaoPesquisa('');
     if (errors.localizacao) {
       setErrors(prev => ({ ...prev, localizacao: undefined }));
     }
@@ -352,25 +357,40 @@ export default function ModalEntradaComponente({
 
                 {/* Dropdown */}
                 {isDropdownOpen && !isLoadingLocalizacoes && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-                    {localizacoes.length > 0 ? (
-                      localizacoes.map((localizacao) => (
-                        <button
-                          key={localizacao._id}
-                          type="button"
-                          onClick={() => handleLocalizacaoSelect(localizacao)}
-                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
-                            localizacaoSelecionada === localizacao._id ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
-                          }`}
-                        >
-                          {localizacao.nome}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-4 py-8 text-center text-gray-500 text-sm">
-                        Nenhuma localização encontrada
-                      </div>
-                    )}
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                    {/* Input de pesquisa */}
+                    <div className="p-3 border-b border-gray-200 bg-gray-50">
+                      <input
+                        type="text"
+                        placeholder="Pesquisar..."
+                        value={localizacaoPesquisa}
+                        onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+
+                    {/* Lista de localizações */}
+                    <div className="overflow-y-auto">
+                      {localizacoesFiltradas.length > 0 ? (
+                        localizacoesFiltradas.map((localizacao) => (
+                          <button
+                            key={localizacao._id}
+                            type="button"
+                            onClick={() => handleLocalizacaoSelect(localizacao)}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
+                              localizacaoSelecionada === localizacao._id ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
+                            }`}
+                          >
+                            {localizacao.nome}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                          Nenhuma localização encontrada
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

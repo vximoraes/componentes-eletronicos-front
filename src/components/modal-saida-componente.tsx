@@ -77,6 +77,7 @@ export default function ModalSaidaComponente({
   const [quantidade, setQuantidade] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [localizacaoPesquisa, setLocalizacaoPesquisa] = useState('');
   const [errors, setErrors] = useState<{ quantidade?: string; localizacao?: string }>({});
 
 
@@ -203,6 +204,9 @@ export default function ModalSaidaComponente({
 
   const localizacoes = localizacoesData?.data?.docs || [];
   const estoques = estoquesData?.data?.docs || [];
+  const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
+    loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase())
+  );
   const localizacaoSelecionadaObj = localizacoes.find(loc => loc._id === localizacaoSelecionada);
   
   // Função para obter a quantidade disponível em uma localização
@@ -232,6 +236,7 @@ export default function ModalSaidaComponente({
   const handleLocalizacaoSelect = (localizacao: Localizacao) => {
     setLocalizacaoSelecionada(localizacao._id);
     setIsDropdownOpen(false);
+    setLocalizacaoPesquisa('');
     if (errors.localizacao) {
       setErrors(prev => ({ ...prev, localizacao: undefined }));
     }
@@ -371,39 +376,54 @@ export default function ModalSaidaComponente({
 
               {/* Dropdown */}
               {isDropdownOpen && !isLoadingLocalizacoes && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-                  {localizacoes.length > 0 ? (
-                    localizacoes.map((localizacao) => {
-                      const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
-                      return (
-                        <button
-                          key={localizacao._id}
-                          type="button"
-                          onClick={() => handleLocalizacaoSelect(localizacao)}
-                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
-                            localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className={localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'}>
-                              {localizacao.nome}
-                            </span>
-                            <span className={`text-sm px-2 py-0.5 rounded ${
-                              qtdDisponivel > 0 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-gray-100 text-gray-500'
-                            }`}>
-                              {qtdDisponivel} disponível
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })
-                  ) : (
-                    <div className="px-4 py-8 text-center text-gray-500 text-sm">
-                      Nenhuma localização encontrada
-                    </div>
-                  )}
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                  {/* Input de pesquisa */}
+                  <div className="p-3 border-b border-gray-200 bg-gray-50">
+                    <input
+                      type="text"
+                      placeholder="Pesquisar..."
+                      value={localizacaoPesquisa}
+                      onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* Lista de localizações */}
+                  <div className="overflow-y-auto">
+                    {localizacoesFiltradas.length > 0 ? (
+                      localizacoesFiltradas.map((localizacao) => {
+                        const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
+                        return (
+                          <button
+                            key={localizacao._id}
+                            type="button"
+                            onClick={() => handleLocalizacaoSelect(localizacao)}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
+                              localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className={localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'}>
+                                {localizacao.nome}
+                              </span>
+                              <span className={`text-sm px-2 py-0.5 rounded ${
+                                qtdDisponivel > 0 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-gray-100 text-gray-500'
+                              }`}>
+                                {qtdDisponivel} disponível
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                        Nenhuma localização encontrada
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
