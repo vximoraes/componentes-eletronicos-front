@@ -245,35 +245,33 @@ export default function PageFornecedores() {
                             </div>
                           </div>
                         )}
-                        <TableCell className="font-medium text-center">
-                          <div className="truncate px-2 sm:px-4 max-w-[150px] md:max-w-none mx-auto" title={fornecedor.nome}>
+                        <TableCell className="font-medium text-left px-2 sm:px-4">
+                          <div className="truncate max-w-[150px] md:max-w-none" title={fornecedor.nome}>
                             {fornecedor.nome}
                           </div>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-center">
-                          <div className="px-4">
-                            {fornecedor.url ? (
-                              <a
-                                href={fornecedor.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 hover:underline truncate block"
-                                title={fornecedor.url}
-                              >
-                                {fornecedor.url}
-                              </a>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </div>
+                        <TableCell className="hidden md:table-cell text-left px-4">
+                          {fornecedor.url ? (
+                            <a
+                              href={fornecedor.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 hover:underline truncate block"
+                              title={fornecedor.url}
+                            >
+                              {fornecedor.url}
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-center">
-                          <div className="truncate px-4" title={fornecedor.contato || 'Sem contato'}>
+                        <TableCell className="hidden md:table-cell text-left px-4">
+                          <div className="truncate" title={fornecedor.contato || 'Sem contato'}>
                             {fornecedor.contato || '-'}
                           </div>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-center">
-                          <div className="truncate px-4" title={fornecedor.descricao}>
+                        <TableCell className="hidden md:table-cell text-left px-4">
+                          <div className="truncate" title={fornecedor.descricao}>
                             {fornecedor.descricao || '-'}
                           </div>
                         </TableCell>
