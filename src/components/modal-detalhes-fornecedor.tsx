@@ -157,10 +157,10 @@ export default function ModalDetalhesFornecedor({
                   {fornecedor.nome && (
                     <button
                       onClick={() => handleCopy(fornecedor.nome, 'nome')}
-                      className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors flex-shrink-0 cursor-pointer"
+                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
                       title="Copiar nome"
                     >
-                      {copiedField === 'nome' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                      {copiedField === 'nome' ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                   )}
                 </div>
@@ -185,10 +185,10 @@ export default function ModalDetalhesFornecedor({
                     </a>
                     <button
                       onClick={() => handleCopy(fornecedor.url!, 'url')}
-                      className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors flex-shrink-0 cursor-pointer"
+                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
                       title="Copiar URL"
                     >
-                      {copiedField === 'url' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                      {copiedField === 'url' ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                   </div>
                 ) : (
@@ -208,10 +208,10 @@ export default function ModalDetalhesFornecedor({
                   {fornecedor.contato && (
                     <button
                       onClick={() => handleCopy(fornecedor.contato!, 'contato')}
-                      className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors flex-shrink-0 cursor-pointer"
+                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
                       title="Copiar contato"
                     >
-                      {copiedField === 'contato' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                      {copiedField === 'contato' ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                   )}
                 </div>
@@ -233,10 +233,10 @@ export default function ModalDetalhesFornecedor({
                     </p>
                     <button
                       onClick={() => handleCopy(fornecedor.descricao!, 'descricao')}
-                      className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors flex-shrink-0 cursor-pointer mt-0.5"
+                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer mt-0.5"
                       title="Copiar descrição"
                     >
-                      {copiedField === 'descricao' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                      {copiedField === 'descricao' ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                   </div>
                 ) : (

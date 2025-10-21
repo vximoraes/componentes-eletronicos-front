@@ -221,14 +221,14 @@ export default function PageFornecedores() {
           ) : fornecedores.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm min-w-[800px] md:table-fixed">
+                <table className="w-full caption-bottom text-xs sm:text-sm md:table-fixed">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">NOME</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">URL</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">CONTATO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">DESCRIÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 md:w-1/5">NOME</TableHead>
+                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">URL</TableHead>
+                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">CONTATO</TableHead>
+                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">DESCRIÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 md:w-1/5">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -246,12 +246,12 @@ export default function PageFornecedores() {
                           </div>
                         )}
                         <TableCell className="font-medium text-center">
-                          <div className="truncate px-2 sm:px-4 min-w-[200px] sm:min-w-0 max-w-[300px] sm:max-w-none mx-auto" title={fornecedor.nome}>
+                          <div className="truncate px-2 sm:px-4 max-w-[150px] md:max-w-none mx-auto" title={fornecedor.nome}>
                             {fornecedor.nome}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">
-                          <div className="px-2 sm:px-4 min-w-[250px] sm:min-w-0 max-w-[400px] sm:max-w-none mx-auto">
+                        <TableCell className="hidden md:table-cell text-center">
+                          <div className="px-4">
                             {fornecedor.url ? (
                               <a
                                 href={fornecedor.url}
@@ -267,13 +267,13 @@ export default function PageFornecedores() {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">
-                          <div className="truncate px-2 sm:px-4 min-w-[180px] sm:min-w-0 max-w-[250px] sm:max-w-none mx-auto" title={fornecedor.contato || 'Sem contato'}>
+                        <TableCell className="hidden md:table-cell text-center">
+                          <div className="truncate px-4" title={fornecedor.contato || 'Sem contato'}>
                             {fornecedor.contato || '-'}
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">
-                          <div className="truncate px-2 sm:px-4 min-w-[200px] sm:min-w-0 max-w-[300px] sm:max-w-none mx-auto" title={fornecedor.descricao}>
+                        <TableCell className="hidden md:table-cell text-center">
+                          <div className="truncate px-4" title={fornecedor.descricao}>
                             {fornecedor.descricao || '-'}
                           </div>
                         </TableCell>
