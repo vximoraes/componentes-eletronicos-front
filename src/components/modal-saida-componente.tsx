@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronDown } from 'lucide-react';
+import { X, ChevronDown, Edit, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import ModalEditarLocalizacao from './modal-editar-localizacao';
+import ModalExcluirLocalizacao from './modal-excluir-localizacao';
 
 interface Localizacao {
   _id: string;
@@ -79,6 +81,9 @@ export default function ModalSaidaComponente({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [localizacaoPesquisa, setLocalizacaoPesquisa] = useState('');
   const [errors, setErrors] = useState<{ quantidade?: string; localizacao?: string }>({});
+  const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] = useState(false);
+  const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] = useState(false);
+  const [localizacaoToEdit, setLocalizacaoToEdit] = useState<Localizacao | null>(null);
 
 
 
@@ -395,27 +400,57 @@ export default function ModalSaidaComponente({
                       localizacoesFiltradas.map((localizacao) => {
                         const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
                         return (
-                          <button
+                          <div
                             key={localizacao._id}
-                            type="button"
-                            onClick={() => handleLocalizacaoSelect(localizacao)}
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
+                            className={`flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors group ${
                               localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
                             }`}
                           >
-                            <div className="flex items-center justify-between">
-                              <span className={localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'}>
-                                {localizacao.nome}
-                              </span>
-                              <span className={`text-sm px-2 py-0.5 rounded ${
-                                qtdDisponivel > 0 
-                                  ? 'bg-green-100 text-green-700' 
-                                  : 'bg-gray-100 text-gray-500'
-                              }`}>
-                                {qtdDisponivel} disponível
-                              </span>
+                            <button
+                              type="button"
+                              onClick={() => handleLocalizacaoSelect(localizacao)}
+                              className="flex-1 text-left cursor-pointer"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className={localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'}>
+                                  {localizacao.nome}
+                                </span>
+                                <span className={`text-sm px-2 py-0.5 rounded ${
+                                  qtdDisponivel > 0 
+                                    ? 'bg-green-100 text-green-700' 
+                                    : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                  {qtdDisponivel} disponível
+                                </span>
+                              </div>
+                            </button>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setLocalizacaoToEdit(localizacao)
+                                  setIsEditarLocalizacaoModalOpen(true)
+                                }}
+                                className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                title="Editar localização"
+                              >
+                                <Edit size={20} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setLocalizacaoToEdit(localizacao)
+                                  setIsExcluirLocalizacaoModalOpen(true)
+                                }}
+                                className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                title="Excluir localização"
+                              >
+                                <Trash2 size={20} />
+                              </button>
                             </div>
-                          </button>
+                          </div>
                         );
                       })
                     ) : (
@@ -470,7 +505,33 @@ export default function ModalSaidaComponente({
     </div>
   );
 
-  return typeof window !== 'undefined'
-    ? createPortal(modalContent, document.body)
-    : null;
+  return (
+    <>
+      {typeof window !== 'undefined' && createPortal(modalContent, document.body)}
+      {localizacaoToEdit && (
+        <>
+          <ModalEditarLocalizacao
+            isOpen={isEditarLocalizacaoModalOpen}
+            onClose={() => {
+              setIsEditarLocalizacaoModalOpen(false)
+              setLocalizacaoToEdit(null)
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            onSuccess={onClose}
+          />
+          <ModalExcluirLocalizacao
+            isOpen={isExcluirLocalizacaoModalOpen}
+            onClose={() => {
+              setIsExcluirLocalizacaoModalOpen(false)
+              setLocalizacaoToEdit(null)
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            onSuccess={onClose}
+          />
+        </>
+      )}
+    </>
+  );
 }
