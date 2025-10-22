@@ -86,8 +86,14 @@ export default function EditarComponentePage() {
       setEstoqueMinimo(componente.estoque_minimo?.toString() || '0')
       setDescricao(componente.descricao || '')
       if (componente.imagem) {
+        console.log(componente.imagem)
         setImagemAtual(componente.imagem)
+        // Limpa a imagem temporária e define a do servidor
+        setImagem(null)
         setImagemPreview(componente.imagem)
+      } else {
+        setImagemAtual(null)
+        setImagemPreview(null)
       }
     }
   }, [componenteData])
@@ -119,22 +125,45 @@ export default function EditarComponentePage() {
     }
   })
   const sendComponenteImagem = useMutation({
-    mutationFn: async () =>  {
+    mutationFn: async (componenteIdParam: string) =>  {
       if (imagem) {
         let formData = new FormData()
         formData.append('file', imagem)
-        console.log(idComponente)
-        const response = await api.post<ComponentePatch>(`/componentes/${idComponente}/foto`, formData, {headers:{'Content-Type': 'multipart/form-data'},},)
+        const response = await api.post<ComponentePatch>(`/componentes/${componenteIdParam}/foto`, formData, {headers:{'Content-Type': 'multipart/form-data'},},)
         return response.data
       }
+      return null
     },
     onSuccess:(data) =>{
-      setIdComponente('')
-      router.push(`/componentes?success=updated&id=${componenteId}&imagem=${data?.data.imagem}`)
-      // updateComponenteMutation.mutate({imagem: data?.data.imagem})
+      if(data?.data.imagem){
+        console.log('Imagem atualizada com sucesso:', data.data.imagem)
+        if(componenteData?.data.imagem){
+          componenteData.data.imagem = data.data.imagem
+        }
+        setImagemPreview(data.data.imagem)
+        setImagemAtual(data.data.imagem)
+      }
+      // Invalida as queries e navega após o upload da imagem
+      queryClient.invalidateQueries({ queryKey: ['componentes'] })
+      queryClient.invalidateQueries({ queryKey: ['componente', componenteId] })
+      // Adiciona timestamp para forçar recarregamento da imagem (cache busting)
+      const timestamp = Date.now()
+      router.push(`/componentes?success=updated&id=${componenteId}&t=${timestamp}`)
     },
     onError:(error:any) =>{
       console.log("Erro ao enviar imagem:", error)
+      toast.error('Erro ao atualizar a imagem do componente', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+      // Mesmo com erro na imagem, navega de volta
+      const timestamp = Date.now()
+      router.push(`/componentes?success=updated&id=${componenteId}&t=${timestamp}`)
     }
   })
   const updateComponenteMutation = useMutation({
@@ -143,11 +172,19 @@ export default function EditarComponentePage() {
       return response.data;
     },
     onSuccess: (data) => {
-      setIdComponente(data.data._id)
+      const componenteIdAtualizado = data.data._id
+      setIdComponente(componenteIdAtualizado)
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
       queryClient.invalidateQueries({ queryKey: ['componente', componenteId] })
-      sendComponenteImagem.mutate()
-      router.push(`/componentes?success=updated&id=${componenteId}`)
+      
+      // Se há imagem para enviar, envia usando o ID retornado
+      if (imagem) {
+        sendComponenteImagem.mutate(componenteIdAtualizado)
+      } else {
+        // Se não há imagem nova, navega direto com timestamp para forçar refetch
+        const timestamp = Date.now()
+        router.push(`/componentes?success=updated&id=${componenteId}&t=${timestamp}`)
+      }
     },
     onError: (error: any) => {
       toast.error(`Erro ao atualizar componente: ${error?.response?.data?.message || error.message}`, {
@@ -244,11 +281,11 @@ export default function EditarComponentePage() {
       componenteData.descricao = descricao
     }
 
-    if (imagem) {
-      componenteData.imagem = imagem.name
-    } else if (!imagemPreview && imagemAtual) {
+    // Se o usuário removeu a imagem (sem preview e tinha imagem antes)
+    if (!imagemPreview && imagemAtual) {
       componenteData.imagem = ''
     }
+    // Não envia imagem.name no PATCH - o backend vai definir o nome como idComponente.jpeg após o POST /foto
 
     updateComponenteMutation.mutate(componenteData)
   }
@@ -494,9 +531,10 @@ export default function EditarComponentePage() {
                       <div className="flex items-center gap-2 sm:gap-3 w-full">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <img
-                            src={imagemPreview}
+                            src={imagemPreview.startsWith('data:') ? imagemPreview : `${imagemPreview}${imagemPreview.includes('?') ? '&' : '?'}t=${Date.now()}`}
                             alt="Preview"
                             className="h-6 w-6 sm:h-8 sm:w-8 object-cover rounded"
+                            key={imagemPreview}
                           />
                           <span className="text-xs sm:text-sm text-gray-700 truncate">Imagem selecionada</span>
                         </div>

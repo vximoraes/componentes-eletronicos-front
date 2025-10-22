@@ -71,6 +71,13 @@ export default function ComponenteEletronico({
 
   const componentTitle = `${nome} - ${categoria} - Qtd: ${quantidade} - Status: ${status}`;
 
+  // Adiciona timestamp na URL da imagem para evitar cache do navegador
+  const imagemComTimestamp = React.useMemo(() => {
+    if (!imagem) return undefined;
+    const separator = imagem.includes('?') ? '&' : '?';
+    return `${imagem}${separator}t=${Date.now()}`;
+  }, [imagem]);
+
   return (
     <div 
       className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] flex flex-col cursor-pointer relative"
@@ -95,9 +102,9 @@ export default function ComponenteEletronico({
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0" data-test="component-info">
           {/* Ícone/Imagem do componente */}
           <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" data-test="component-icon">
-            {imagem ? (
+            {imagemComTimestamp ? (
               <img 
-                src={imagem} 
+                src={imagemComTimestamp} 
                 alt={nome}
                 className="w-full h-full object-cover"
                 title={`Imagem do componente: ${nome}`}

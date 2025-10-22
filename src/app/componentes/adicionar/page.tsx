@@ -78,20 +78,39 @@ export default function AdicionarComponentePage() {
   })
 
   const sendComponenteImagem = useMutation({
-    mutationFn: async () =>  {
+    mutationFn: async (componenteId: string) =>  {
       if (imagem) {
         let formData = new FormData()
         formData.append('file', imagem)
-        console.log(idComponente)
-        const response = await api.post<ComponentePost>(`/componentes/${idComponente}/foto`, formData, {headers:{'Content-Type': 'multipart/form-data'},},)
+        const response = await api.post<ComponentePost>(`/componentes/${componenteId}/foto`, formData, {headers:{'Content-Type': 'multipart/form-data'},},)
         return response.data
       }
+      return null
     },
-    onSuccess:() =>{
-      setIdComponente('')
+    onSuccess:(data) =>{
+      if (data?.data.imagem) {
+        console.log('Imagem enviada com sucesso:', data.data.imagem)
+      }
+      // Invalida as queries e navega após o upload da imagem
+      queryClient.invalidateQueries({ queryKey: ['componentes'] })
+      // Adiciona timestamp para forçar recarregamento da imagem (cache busting)
+      const timestamp = Date.now()
+      router.push(`/componentes?success=created&t=${timestamp}`)
     },
     onError:(error:any) =>{
       console.log("Erro ao enviar imagem:", error)
+      toast.error('Erro ao fazer upload da imagem', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+      // Mesmo com erro na imagem, navega de volta (componente já foi criado)
+      const timestamp = Date.now()
+      router.push(`/componentes?success=created&t=${timestamp}`)
     }
   })
 
@@ -101,10 +120,18 @@ export default function AdicionarComponentePage() {
       return response.data;
     },
     onSuccess: (data) => {
-      setIdComponente(data.data._id)
-      sendComponenteImagem.mutate()
+      const novoComponenteId = data.data._id
+      setIdComponente(novoComponenteId)
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
-      router.push('/componentes?success=created')
+      
+      // Se há imagem para enviar, envia usando o ID retornado
+      if (imagem) {
+        sendComponenteImagem.mutate(novoComponenteId)
+      } else {
+        // Se não há imagem, navega direto com timestamp para forçar refetch
+        const timestamp = Date.now()
+        router.push(`/componentes?success=created&t=${timestamp}`)
+      }
     },
     onError: (error: any) => {
       toast.error(`Erro ao criar componente: ${error?.response?.data?.message || error.message}`, {
@@ -200,10 +227,8 @@ export default function AdicionarComponentePage() {
       componenteData.descricao = descricao
     }
 
-    if (imagem) {
-      componenteData.imagem = imagem.name
-    }
-
+    // Não envia o nome da imagem - o backend vai definir como idComponente.jpeg após o upload
+    
     createComponenteMutation.mutate(componenteData)
   }
 

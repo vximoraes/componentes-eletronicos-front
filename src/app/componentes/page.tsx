@@ -36,7 +36,6 @@ export default function ComponentesPage() {
   const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-  const [isImagem, setImagem] = useState<string>()
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
@@ -45,15 +44,15 @@ export default function ComponentesPage() {
     const updateItemsPerPage = () => {
       const width = window.innerWidth;
       if (width >= 2560) {
-        setItemsPerPage(24); 
+        setItemsPerPage(24);
       } else if (width >= 1920) {
-        setItemsPerPage(18); 
+        setItemsPerPage(18);
       } else if (width >= 1024) {
-        setItemsPerPage(12); 
+        setItemsPerPage(12);
       } else if (width >= 768) {
-        setItemsPerPage(9); 
+        setItemsPerPage(9);
       } else {
-        setItemsPerPage(6); 
+        setItemsPerPage(6);
       }
     };
 
@@ -61,7 +60,7 @@ export default function ComponentesPage() {
     window.addEventListener('resize', updateItemsPerPage);
     return () => window.removeEventListener('resize', updateItemsPerPage);
   }, []);
-  
+
   const { data, isLoading, isFetching, error, refetch } = useQuery<ApiResponse>({
     queryKey: ['componentes', searchTerm, categoriaFilter, statusFilter, currentPage, itemsPerPage],
     queryFn: async () => {
@@ -71,14 +70,15 @@ export default function ComponentesPage() {
       if (statusFilter) params.append('status', statusFilter);
       params.append('limit', itemsPerPage.toString());
       params.append('page', currentPage.toString());
-      
+
       const queryString = params.toString();
       const url = `/componentes${queryString ? `?${queryString}` : ''}`;
-      
+
       const response = await api.get<ApiResponse>(url);
       return response.data;
     },
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: 'always',
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -113,7 +113,7 @@ export default function ComponentesPage() {
       const response = await api.get('/categorias');
       return response.data;
     },
-    staleTime: 1000 * 60 * 10, 
+    staleTime: 1000 * 60 * 10,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -126,7 +126,7 @@ export default function ComponentesPage() {
     const success = searchParams.get('success');
     const componenteId = searchParams.get('id');
     const imagem = searchParams.get('imagem')
-    
+
     if (success === 'created') {
       toast.success('Componente criado com sucesso!', {
         position: 'bottom-right',
@@ -141,10 +141,7 @@ export default function ComponentesPage() {
     } else if (success === 'updated') {
       if (componenteId) {
         setUpdatingComponenteId(componenteId);
-        if(imagem){
-          setImagem(imagem)
-        }
-        
+
       }
       toast.success('Componente atualizado com sucesso!', {
         position: 'bottom-right',
@@ -254,7 +251,7 @@ export default function ComponentesPage() {
 
     const isLastComponentOnPage = componentes.length === 1;
     const shouldGoToPreviousPage = isLastComponentOnPage && currentPage > 1;
-    
+
     toast.success('Componente excluído com sucesso!', {
       position: 'bottom-right',
       autoClose: 5000,
@@ -268,7 +265,7 @@ export default function ComponentesPage() {
     if (shouldGoToPreviousPage) {
       setCurrentPage(prev => prev - 1);
     }
-    
+
     router.refresh();
     await refetch();
     setIsRefetchingAfterDelete(false);
@@ -300,7 +297,7 @@ export default function ComponentesPage() {
     prevPage: null,
     nextPage: null
   };
-  
+
   // Calcular estatísticas
   const totalComponentes = componentes.length;
   const emEstoque = componentes.filter(c => c.status === 'Em Estoque').length;
@@ -310,268 +307,267 @@ export default function ComponentesPage() {
   return (
     <div className="w-[100%] h-screen flex flex-col" data-test="componentes-page">
       <Cabecalho pagina="Componentes" />
-      
+
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
         <div className="flex-1 overflow-y-auto pb-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
-        <StatCard
-          title="Total de"
-          subtitle="componentes"
-          value={totalComponentes}
-          icon={Package}
-          iconColor="text-blue-600"
-          iconBgColor="bg-blue-100"
-          data-test="stat-total-componentes"
-          hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
-        />
-        
-        <StatCard
-          title="Em estoque"
-          value={emEstoque}
-          icon={CheckCircle}
-          iconColor="text-green-600"
-          iconBgColor="bg-green-100"
-          data-test="stat-em-estoque"
-          hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
-        />
-        
-        <StatCard
-          title="Baixo estoque"
-          value={baixoEstoque}
-          icon={AlertTriangle}
-          iconColor="text-yellow-600"
-          iconBgColor="bg-yellow-100"
-          data-test="stat-baixo-estoque"
-          hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
-        />
-        
-        <StatCard
-          title="Indisponível"
-          value={indisponiveis}
-          icon={XCircle}
-          iconColor="text-red-600"
-          iconBgColor="bg-red-100"
-          data-test="stat-indisponiveis"
-          hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
-        />
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
-        <div className="relative flex-1" data-test="search-container">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Pesquisar componentes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-            data-test="search-input"
-          />
-        </div>
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2 cursor-pointer"
-          data-test="filtros-button"
-          onClick={handleOpenFiltrosModal}
-        >
-          <Filter className="w-4 h-4" />
-          Filtros
-        </Button>
-        <Button 
-          className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer" 
-          style={{ backgroundColor: '#306FCC' }}
-          data-test="adicionar-button"
-          onClick={handleAdicionarClick}
-        >
-          <Plus className="w-4 h-4" />
-          Adicionar
-        </Button>
-      </div>
-
-      {/* Filtros aplicados */}
-      {(categoriaFilter || statusFilter) && (
-        <div className="mb-4" data-test="applied-filters">
-          <div className="flex flex-wrap items-center gap-2">
-            {categoriaFilter && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                <span className="font-medium">Categoria:</span>
-                <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
-                <button
-                  onClick={() => setCategoriaFilter('')}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                  title="Remover filtro de categoria"
-                >
-                  <X size={12} />
-                </button>
-              </div>
-            )}
-            {statusFilter && (
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                <span className="font-medium">Status:</span>
-                <span>{statusFilter}</span>
-                <button
-                  onClick={() => setStatusFilter('')}
-                  className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                  title="Remover filtro de status"
-                >
-                  <X size={12} />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div 
-          className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
-          data-test="error-message"
-          title={`Erro completo: ${error.message}`}
-        >
-          Erro ao carregar componentes: {error.message}
-        </div>
-      )}
-
-      {isLoading || isRefetchingAfterDelete ? (
-        <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
-          <div className="relative w-12 h-12">
-            <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
-          </div>
-          <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
-        </div>
-      ) : componentes.length > 0 ? (
-        <div 
-          className="grid gap-4 w-full" 
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))' }}
-          data-test="componentes-grid"
-        >
-          {componentes.map((componente, index) => (
-            <ComponenteEletronico
-              key={componente._id}
-              id={componente._id}
-              nome={componente.nome}
-              categoria={componente.categoria.nome}
-              quantidade={componente.quantidade}
-              estoqueMinimo={componente.estoque_minimo}
-              status={componente.status}
-              imagem={updatingComponenteId === componente._id && isImagem ? isImagem : componente.imagem}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onClick={handleComponenteClick}
-              onEntrada={handleEntrada}
-              onSaida={handleSaida}
-              isLoading={updatingComponenteId === componente._id && isFetching}
-              data-test={`componente-card-${index}`}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
+            <StatCard
+              title="Total de"
+              subtitle="componentes"
+              value={totalComponentes}
+              icon={Package}
+              iconColor="text-blue-600"
+              iconBgColor="bg-blue-100"
+              data-test="stat-total-componentes"
+              hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
             />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-8" data-test="empty-state">
-          <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">
-            {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
-          </p>
-        </div>
-      )}
-        </div>
 
-      {/* Controles de Paginação */}
-      {componentes.length > 0 && paginationInfo.totalPages > 1 && (
-        <div className="bg-white py-4 px-6 flex justify-center items-center flex-shrink-0" data-test="pagination-controls">
-          <div className="flex items-center gap-1">
-            {/* Botão Anterior */}
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={!paginationInfo.hasPrevPage || isFetching}
-              className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              data-test="prev-page-button"
-              aria-label="Página anterior"
+            <StatCard
+              title="Em estoque"
+              value={emEstoque}
+              icon={CheckCircle}
+              iconColor="text-green-600"
+              iconBgColor="bg-green-100"
+              data-test="stat-em-estoque"
+              hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
+            />
+
+            <StatCard
+              title="Baixo estoque"
+              value={baixoEstoque}
+              icon={AlertTriangle}
+              iconColor="text-yellow-600"
+              iconBgColor="bg-yellow-100"
+              data-test="stat-baixo-estoque"
+              hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
+            />
+
+            <StatCard
+              title="Indisponível"
+              value={indisponiveis}
+              icon={XCircle}
+              iconColor="text-red-600"
+              iconBgColor="bg-red-100"
+              data-test="stat-indisponiveis"
+              hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
+            <div className="relative flex-1" data-test="search-container">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Pesquisar componentes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+                data-test="search-input"
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 cursor-pointer"
+              data-test="filtros-button"
+              onClick={handleOpenFiltrosModal}
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
-            </button>
+              <Filter className="w-4 h-4" />
+              Filtros
+            </Button>
+            <Button
+              className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
+              style={{ backgroundColor: '#306FCC' }}
+              data-test="adicionar-button"
+              onClick={handleAdicionarClick}
+            >
+              <Plus className="w-4 h-4" />
+              Adicionar
+            </Button>
+          </div>
 
-            {/* Números das páginas */}
-            {(() => {
-              const totalPages = paginationInfo.totalPages;
-              const current = paginationInfo.page;
-              const pages = [];
-              
-              if (totalPages <= 7) {
-                for (let i = 1; i <= totalPages; i++) {
-                  pages.push(i);
-                }
-              } else {
-                pages.push(1);
-                
-                if (current > 3) {
-                  pages.push('...');
-                }
+          {/* Filtros aplicados */}
+          {(categoriaFilter || statusFilter) && (
+            <div className="mb-4" data-test="applied-filters">
+              <div className="flex flex-wrap items-center gap-2">
+                {categoriaFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">Categoria:</span>
+                    <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
+                    <button
+                      onClick={() => setCategoriaFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de categoria"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+                {statusFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">Status:</span>
+                    <span>{statusFilter}</span>
+                    <button
+                      onClick={() => setStatusFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de status"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-                const start = Math.max(2, current - 1);
-                const end = Math.min(totalPages - 1, current + 1);
-                
-                for (let i = start; i <= end; i++) {
-                  if (!pages.includes(i)) {
+          {error && (
+            <div
+              className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
+              data-test="error-message"
+              title={`Erro completo: ${error.message}`}
+            >
+              Erro ao carregar componentes: {error.message}
+            </div>
+          )}
+
+          {isLoading || isRefetchingAfterDelete ? (
+            <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+              </div>
+              <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
+            </div>
+          ) : componentes.length > 0 ? (
+            <div
+              className="grid gap-4 w-full"
+              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(max(300px, min(400px, calc((100% - 3rem) / 6))), 1fr))' }}
+              data-test="componentes-grid"
+            >
+              {componentes.map((componente, index) => (
+                <ComponenteEletronico
+                  key={componente._id}
+                  id={componente._id}
+                  nome={componente.nome}
+                  categoria={componente.categoria.nome}
+                  quantidade={componente.quantidade}
+                  estoqueMinimo={componente.estoque_minimo}
+                  status={componente.status}
+                  imagem={componente.imagem}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onClick={handleComponenteClick}
+                  onEntrada={handleEntrada}
+                  onSaida={handleSaida}
+                  isLoading={updatingComponenteId === componente._id && isFetching}
+                  data-test={`componente-card-${index}`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8" data-test="empty-state">
+              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">
+                {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Controles de Paginação */}
+        {componentes.length > 0 && paginationInfo.totalPages > 1 && (
+          <div className="bg-white py-4 px-6 flex justify-center items-center flex-shrink-0" data-test="pagination-controls">
+            <div className="flex items-center gap-1">
+              {/* Botão Anterior */}
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={!paginationInfo.hasPrevPage || isFetching}
+                className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                data-test="prev-page-button"
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
+              </button>
+
+              {/* Números das páginas */}
+              {(() => {
+                const totalPages = paginationInfo.totalPages;
+                const current = paginationInfo.page;
+                const pages = [];
+
+                if (totalPages <= 7) {
+                  for (let i = 1; i <= totalPages; i++) {
                     pages.push(i);
                   }
-                }
-                
-                if (current < totalPages - 2) {
-                  pages.push('...');
+                } else {
+                  pages.push(1);
+
+                  if (current > 3) {
+                    pages.push('...');
+                  }
+
+                  const start = Math.max(2, current - 1);
+                  const end = Math.min(totalPages - 1, current + 1);
+
+                  for (let i = start; i <= end; i++) {
+                    if (!pages.includes(i)) {
+                      pages.push(i);
+                    }
+                  }
+
+                  if (current < totalPages - 2) {
+                    pages.push('...');
+                  }
+
+                  if (!pages.includes(totalPages)) {
+                    pages.push(totalPages);
+                  }
                 }
 
-                if (!pages.includes(totalPages)) {
-                  pages.push(totalPages);
-                }
-              }
-              
-              return pages.map((page, index) => {
-                if (page === '...') {
+                return pages.map((page, index) => {
+                  if (page === '...') {
+                    return (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="px-3 py-2 text-gray-500"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+
+                  const pageNum = page as number;
+                  const isActive = pageNum === current;
+
                   return (
-                    <span
-                      key={`ellipsis-${index}`}
-                      className="px-3 py-2 text-gray-500"
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      disabled={isFetching}
+                      className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${isActive
+                          ? 'bg-blue-600 text-white font-medium'
+                          : 'hover:bg-gray-100 text-gray-700'
+                        } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
+                      data-test={`page-${pageNum}-button`}
                     >
-                      ...
-                    </span>
+                      {pageNum}
+                    </button>
                   );
-                }
-                
-                const pageNum = page as number;
-                const isActive = pageNum === current;
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    disabled={isFetching}
-                    className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${
-                      isActive
-                        ? 'bg-blue-600 text-white font-medium'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
-                    data-test={`page-${pageNum}-button`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              });
-            })()}
+                });
+              })()}
 
-            {/* Botão Próxima */}
-            <button
-              onClick={() => setCurrentPage(prev => prev + 1)}
-              disabled={!paginationInfo.hasNextPage || isFetching}
-              className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              data-test="next-page-button"
-              aria-label="Próxima página"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
-            </button>
+              {/* Botão Próxima */}
+              <button
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={!paginationInfo.hasNextPage || isFetching}
+                className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                data-test="next-page-button"
+                aria-label="Próxima página"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
 
       {/* Modal de Localizações */}
@@ -585,9 +581,9 @@ export default function ComponentesPage() {
           estoques={estoquesData?.data?.docs || []}
           isLoading={isLoadingEstoques}
           totalQuantidade={
-            estoquesData?.data?.docs?.filter(estoque => 
-              estoque.quantidade != null && 
-              !isNaN(Number(estoque.quantidade)) && 
+            estoquesData?.data?.docs?.filter(estoque =>
+              estoque.quantidade != null &&
+              !isNaN(Number(estoque.quantidade)) &&
               Number(estoque.quantidade) > 0
             ).reduce((total, estoque) => total + Number(estoque.quantidade), 0) || 0
           }
@@ -636,7 +632,7 @@ export default function ComponentesPage() {
         />
       )}
 
-      <ToastContainer 
+      <ToastContainer
         position="bottom-right"
         autoClose={5000}
         hideProgressBar={false}
