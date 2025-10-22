@@ -164,9 +164,14 @@ export default function ModalEditarCategoria({
           </div>
 
           <div>
-            <Label htmlFor="nome" className="text-sm font-medium text-gray-900 mb-2 block">
-              Nome da categoria <span className="text-red-500">*</span>
-            </Label>
+            <div className="flex justify-between items-center mb-2">
+              <Label htmlFor="nome" className="text-sm font-medium text-gray-900">
+                Nome da categoria <span className="text-red-500">*</span>
+              </Label>
+              <span className="text-sm text-gray-500">
+                {nome.length}/100
+              </span>
+            </div>
             <Input
               id="nome"
               type="text"
@@ -178,6 +183,7 @@ export default function ModalEditarCategoria({
                   setErrors(prev => ({ ...prev, nome: undefined }))
                 }
               }}
+              maxLength={100}
               className={errors.nome ? 'border-red-500' : ''}
               disabled={updateCategoriaMutation.isPending}
             />

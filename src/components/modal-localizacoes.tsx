@@ -24,7 +24,6 @@ export default function ModalLocalizacoes({
   isLoading,
   totalQuantidade
 }: ModalLocalizacoesProps) {
-  // Previne scroll do body quando modal está aberto
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -32,13 +31,11 @@ export default function ModalLocalizacoes({
       document.body.style.overflow = 'unset';
     }
 
-    // Cleanup ao desmontar componente
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 
-  // Fecha modal ao pressionar Escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -80,15 +77,17 @@ export default function ModalLocalizacoes({
         <div className="relative p-6 border-b border-gray-200">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer z-10"
             title="Fechar"
           >
             <X size={20} />
           </button>
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">{componenteNome}</h2>
+          <div className="text-center px-8">
+            <div className="max-h-[100px] overflow-y-auto mb-2">
+              <h2 className="text-xl font-semibold text-gray-900 break-words">{componenteNome}</h2>
+            </div>
             {componenteDescricao && (
-              <p className="text-sm text-gray-600 mb-3 px-6 break-words text-center max-w-full">{componenteDescricao}</p>
+              <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full">{componenteDescricao}</p>
             )}
             <p className="text-xl font-semibold text-blue-600">
               {isLoading ? "Carregando..." : totalQuantidade}
@@ -118,14 +117,14 @@ export default function ModalLocalizacoes({
             ).map((estoque) => (
               <div key={estoque._id} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="w-4 h-4 text-blue-600" />
-                    <span className="text-base text-gray-600">Localização:</span>
-                    <span className="text-base font-semibold text-gray-900">{estoque.localizacao.nome}</span>
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                    <span className="text-base text-gray-600 flex-shrink-0">Localização:</span>
+                    <span className="text-base font-semibold text-gray-900 truncate" title={estoque.localizacao.nome}>{estoque.localizacao.nome}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Package className="w-4 h-4 text-blue-600" />
-                    <span className="text-base text-gray-600">Quantidade:</span>
+                    <Package className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                    <span className="text-base text-gray-600 flex-shrink-0">Quantidade:</span>
                     <span className="text-base font-semibold text-gray-900">{estoque.quantidade}</span>
                   </div>
                 </div>
@@ -142,7 +141,6 @@ export default function ModalLocalizacoes({
     </div>
   );
 
-  // Usar portal para renderizar diretamente no body
   return typeof window !== 'undefined' 
     ? createPortal(modalContent, document.body)
     : null;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown, Plus, Edit, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
 import ModalExcluirLocalizacao from './modal-excluir-localizacao';
+import { PulseLoader } from 'react-spinners';
 
 interface Localizacao {
   _id: string;
@@ -68,15 +69,28 @@ export default function ModalEntradaComponente({
   const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] = useState(false);
   const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] = useState(false);
   const [localizacaoToEdit, setLocalizacaoToEdit] = useState<Localizacao | null>(null);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Query para buscar localizações
-  const { data: localizacoesData, isLoading: isLoadingLocalizacoes } = useQuery<LocalizacoesApiResponse>({
+  const {
+    data: localizacoesData,
+    isLoading: isLoadingLocalizacoes
+  } = useQuery({
     queryKey: ['localizacoes'],
     queryFn: async () => {
-      const response = await api.get<LocalizacoesApiResponse>('/localizacoes');
+      const response = await api.get<LocalizacoesApiResponse>('/localizacoes?limit=1000');
       return response.data;
     },
     enabled: isOpen,
+    staleTime: 1000 * 60 * 5
+  });
+
+  const { data: estoquesData } = useQuery({
+    queryKey: ['estoques', componenteId],
+    queryFn: async () => {
+      const response = await api.get(`/estoques/componente/${componenteId}`);
+      return response.data;
+    },
+    enabled: isOpen && !!componenteId,
     staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -114,14 +128,14 @@ export default function ModalEntradaComponente({
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: ['componentes']
       });
-      
-      queryClient.removeQueries({ 
+
+      queryClient.removeQueries({
         queryKey: ['estoques', componenteId]
       });
-      
+
       setQuantidade('');
       setLocalizacaoSelecionada('');
       setErrors({});
@@ -132,6 +146,44 @@ export default function ModalEntradaComponente({
       console.error('Erro ao registrar entrada:', error);
       if (error?.response?.data) {
         console.error('Resposta da API:', error.response.data);
+ 
+        const errorData = error.response.data;
+        let errorMessage = 'Não foi possível registrar a entrada';
+        
+        console.log('errorData completo:', JSON.stringify(errorData));
+        console.log('errorData.errors:', errorData.errors);
+
+        if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          const messages = errorData.errors.map((err: any) => err.message).filter(Boolean);
+          console.log('mensagens extraídas:', messages);
+          if (messages.length > 0) {
+            errorMessage = messages.join(', ');
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        console.log('mensagem final do toast:', errorMessage);
+        
+        toast.error(errorMessage, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } else {
+        toast.error('Não foi possível registrar a entrada', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     },
   });
@@ -193,12 +245,16 @@ export default function ModalEntradaComponente({
   if (!isOpen) return null;
 
   const localizacoes = localizacoesData?.data?.docs || [];
+  const estoques = estoquesData?.data?.docs || [];
   const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
     loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase())
   );
   const localizacaoSelecionadaObj = localizacoes.find(loc => loc._id === localizacaoSelecionada);
 
-
+  const getQuantidadeDisponivel = (localizacaoId: string): number => {
+    const estoque = estoques.find((e: any) => e.localizacao._id === localizacaoId);
+    return estoque?.quantidade || 0;
+  };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -253,7 +309,6 @@ export default function ModalEntradaComponente({
       return;
     }
 
-    // Verificar se todos os dados estão presentes antes de enviar
     if (!componenteId) {
       setErrors({ ...errors, quantidade: 'ID do componente não encontrado' });
       return;
@@ -280,15 +335,15 @@ export default function ModalEntradaComponente({
   };
 
   const modalContent = (
-    <div 
-      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4" 
-      style={{ 
+    <div
+      className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
+      style={{
         zIndex: 99999,
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
     >
-      <div 
+      <div
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
@@ -305,26 +360,33 @@ export default function ModalEntradaComponente({
 
         {/* Conteúdo do Modal */}
         <div className="px-6 pb-6 space-y-6">
-          <div className="text-center pt-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              Registrar entrada de {componenteNome}
-            </h2>
+          <div className="text-center pt-4 px-8">
+            <div className="max-h-[100px] overflow-y-auto">
+              <h2 className="text-xl font-semibold text-gray-900 mb-1 break-words">
+                Registrar entrada de {componenteNome}
+              </h2>
+            </div>
           </div>
 
           {/* Campo Quantidade */}
           <div className="space-y-2">
-            <label htmlFor="quantidade" className="block text-base font-medium text-gray-700">
-              Quantidade <span className="text-red-500">*</span>
-            </label>
+            <div className="flex justify-between items-center">
+              <label htmlFor="quantidade" className="block text-base font-medium text-gray-700">
+                Quantidade <span className="text-red-500">*</span>
+              </label>
+              <span className="text-sm text-gray-500">
+                {quantidade.length}/9
+              </span>
+            </div>
             <input
               id="quantidade"
               type="text"
               placeholder="Digite a quantidade"
               value={quantidade}
               onChange={handleQuantidadeChange}
-              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                errors.quantidade ? 'border-red-500' : 'border-gray-300'
-              }`}
+              maxLength={9}
+              className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.quantidade ? 'border-red-500' : 'border-gray-300'
+                }`}
               disabled={entradaMutation.isPending}
             />
             {errors.quantidade && (
@@ -342,20 +404,28 @@ export default function ModalEntradaComponente({
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${
-                    errors.localizacao ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${errors.localizacao ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   disabled={isLoadingLocalizacoes || entradaMutation.isPending}
                 >
-                  <span className={localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}>
-                    {isLoadingLocalizacoes 
-                      ? 'Carregando...' 
-                      : localizacaoSelecionadaObj?.nome || 'Selecione uma localização'
-                    }
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${
-                    isDropdownOpen ? 'rotate-180' : ''
-                  }`} />
+                  <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 overflow-hidden">
+                    <span className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}>
+                      {isLoadingLocalizacoes
+                        ? 'Carregando...'
+                        : localizacaoSelecionadaObj?.nome || 'Selecione uma localização'
+                      }
+                    </span>
+                    {localizacaoSelecionada && (
+                      <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-100 text-gray-500'
+                        }`}>
+                        {getQuantidadeDisponivel(localizacaoSelecionada)} disponível
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180' : ''
+                    }`} />
                 </button>
 
                 {/* Dropdown */}
@@ -376,50 +446,58 @@ export default function ModalEntradaComponente({
                     {/* Lista de localizações */}
                     <div className="overflow-y-auto">
                       {localizacoesFiltradas.length > 0 ? (
-                        localizacoesFiltradas.map((localizacao) => (
-                          <div
-                            key={localizacao._id}
-                            className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${
-                              localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
-                            }`}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => handleLocalizacaoSelect(localizacao)}
-                              className={`flex-1 text-left cursor-pointer ${
-                                localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
-                              }`}
+                        localizacoesFiltradas.map((localizacao) => {
+                          const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
+                          return (
+                            <div
+                              key={localizacao._id}
+                              className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
+                                }`}
                             >
-                              {localizacao.nome}
-                            </button>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
                                 type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setLocalizacaoToEdit(localizacao)
-                                  setIsEditarLocalizacaoModalOpen(true)
-                                }}
-                                className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                title="Editar localização"
+                                onClick={() => handleLocalizacaoSelect(localizacao)}
+                                className={`flex-1 text-left cursor-pointer truncate min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                                  }`}
+                                title={localizacao.nome}
                               >
-                                <Edit size={20} />
+                                {localizacao.nome}
                               </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setLocalizacaoToEdit(localizacao)
-                                  setIsExcluirLocalizacaoModalOpen(true)
-                                }}
-                                className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                title="Excluir localização"
-                              >
-                                <Trash2 size={20} />
-                              </button>
+                              <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ml-2 ${qtdDisponivel > 0
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                {qtdDisponivel} disponível
+                              </span>
+                              <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setLocalizacaoToEdit(localizacao)
+                                    setIsEditarLocalizacaoModalOpen(true)
+                                  }}
+                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  title="Editar localização"
+                                >
+                                  <Edit size={20} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setLocalizacaoToEdit(localizacao)
+                                    setIsExcluirLocalizacaoModalOpen(true)
+                                  }}
+                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  title="Excluir localização"
+                                >
+                                  <Trash2 size={20} />
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))
+                          );
+                        })
                       ) : (
                         <div className="px-4 py-8 text-center text-gray-500 text-sm">
                           Nenhuma localização encontrada
@@ -448,8 +526,8 @@ export default function ModalEntradaComponente({
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
               <div className="font-medium mb-1">Não foi possível registrar a entrada</div>
               <div className="text-red-500">
-                {(entradaMutation.error as any)?.response?.data?.message || 
-                  (entradaMutation.error as any)?.message || 
+                {(entradaMutation.error as any)?.response?.data?.message ||
+                  (entradaMutation.error as any)?.errors.message ||
                   'Erro desconhecido'}
               </div>
             </div>
@@ -524,9 +602,14 @@ export default function ModalEntradaComponente({
 
               {/* Campo Nome da Localização */}
               <div className="space-y-2">
-                <label htmlFor="novaLocalizacao" className="block text-base font-medium text-gray-700">
-                  Nome da Localização <span className="text-red-500">*</span>
-                </label>
+                <div className="flex justify-between items-center">
+                  <label htmlFor="novaLocalizacao" className="block text-base font-medium text-gray-700">
+                    Nome da Localização <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-sm text-gray-500">
+                    {novaLocalizacao.length}/100
+                  </span>
+                </div>
                 <input
                   id="novaLocalizacao"
                   type="text"
@@ -538,9 +621,9 @@ export default function ModalEntradaComponente({
                       setErrors(prev => ({ ...prev, novaLocalizacao: undefined }));
                     }
                   }}
-                  className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                    errors.novaLocalizacao ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  maxLength={100}
+                  className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${errors.novaLocalizacao ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import api from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
+import { PulseLoader } from 'react-spinners';
 
 interface Categoria {
   _id: string;
@@ -60,20 +61,17 @@ export default function ModalFiltros({
   const [categoriaSearch, setCategoriaSearch] = useState('');
   const [showAllCategorias, setShowAllCategorias] = useState(false);
 
-  // Query para buscar categorias
-  const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery<CategoriasApiResponse>({
+  const {
+    data: categoriasData,
+    isLoading: isLoadingCategorias
+  } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      const response = await api.get<CategoriasApiResponse>('/categorias');
+      const response = await api.get<CategoriasApiResponse>('/categorias?limit=1000');
       return response.data;
     },
-    staleTime: 1000 * 60 * 10, 
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    enabled: isOpen,
+    staleTime: 1000 * 60 * 10
   });
 
   useEffect(() => {
@@ -163,7 +161,6 @@ export default function ModalFiltros({
     ...categorias.map(cat => ({ value: cat._id, label: cat.nome }))
   ];
 
-  // Filtrar categorias baseado na busca
   const filteredCategorias = categoriaOptions.filter(cat => 
     cat.label.toLowerCase().includes(categoriaSearch.toLowerCase())
   );
@@ -274,8 +271,8 @@ export default function ModalFiltros({
                           </button>
                         ))}
                         
-                        {/* Botão para carregar mais */}
-                        {hasMoreCategorias && (
+                        {/* Botão para carregar mais - mantido para busca local */}
+                        {hasMoreCategorias && !categoriaSearch && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

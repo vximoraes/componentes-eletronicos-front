@@ -7,16 +7,36 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Cabecalho from "@/components/cabecalho"
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ModalEditarCategoria from '@/components/modal-editar-categoria'
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria'
+import { PulseLoader } from 'react-spinners'
 
 interface Categoria {
   _id: string
   nome: string
+}
+
+interface CategoriasApiResponse {
+  error: boolean;
+  code: number;
+  message: string;
+  data: {
+    docs: Categoria[];
+    totalDocs: number;
+    limit: number;
+    totalPages: number;
+    page: number;
+    pagingCounter: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+    prevPage: number | null;
+    nextPage: number | null;
+  };
+  errors: any[];
 }
 
 export default function AdicionarComponentePage() {
@@ -34,18 +54,22 @@ export default function AdicionarComponentePage() {
   const [errors, setErrors] = useState<{ nome?: string; categoria?: string; novaCategoria?: string }>({})
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const observerTarget = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
   const [isEditarCategoriaModalOpen, setIsEditarCategoriaModalOpen] = useState(false)
   const [isExcluirCategoriaModalOpen, setIsExcluirCategoriaModalOpen] = useState(false)
   const [categoriaToEdit, setCategoriaToEdit] = useState<Categoria | null>(null)
 
-  const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery({
+  const {
+    data: categoriasData,
+    isLoading: isLoadingCategorias
+  } = useQuery({
     queryKey: ['categorias'],
     queryFn: async () => {
-      const response = await api.get('/categorias');
+      const response = await api.get<CategoriasApiResponse>('/categorias?limit=1000');
       return response.data;
     },
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 10
   })
 
   const createCategoriaMutation = useMutation({
@@ -85,7 +109,27 @@ export default function AdicionarComponentePage() {
       router.push('/componentes?success=created')
     },
     onError: (error: any) => {
-      toast.error(`Erro ao criar componente: ${error?.response?.data?.message || error.message}`, {
+      let errorMessage = 'Erro ao criar componente';
+      
+      if (error?.response?.data) {
+        const errorData = error.response.data;
+        
+        // Priorizar mensagens do array errors
+        if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          const messages = errorData.errors.map((err: any) => err.message).filter(Boolean);
+          if (messages.length > 0) {
+            errorMessage = messages.join(', ');
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage, {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,
@@ -239,9 +283,14 @@ export default function AdicionarComponentePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
                 <div>
-                  <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                    Nome <span className="text-red-500">*</span>
-                  </Label>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900">
+                      Nome <span className="text-red-500">*</span>
+                    </Label>
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      {nome.length}/100
+                    </span>
+                  </div>
                   <Input
                     id="nome"
                     type="text"
@@ -253,6 +302,7 @@ export default function AdicionarComponentePage() {
                         setErrors(prev => ({ ...prev, nome: undefined }))
                       }
                     }}
+                    maxLength={100}
                     className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
                   />
                   {errors.nome && (
@@ -308,48 +358,51 @@ export default function AdicionarComponentePage() {
                             {/* Lista de categorias */}
                             <div className="overflow-y-auto">
                               {categoriasFiltradas.length > 0 ? (
-                                categoriasFiltradas.map((categoria: Categoria) => (
-                                  <div
-                                    key={categoria._id}
-                                    className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-gray-50 transition-colors group ${categoriaId === categoria._id ? 'bg-blue-50' : ''
-                                      }`}
-                                  >
-                                    <button
-                                      type="button"
-                                      onClick={() => handleCategoriaSelect(categoria)}
-                                      className={`flex-1 text-left cursor-pointer text-sm sm:text-base ${categoriaId === categoria._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                                <>
+                                  {categoriasFiltradas.map((categoria: Categoria) => (
+                                    <div
+                                      key={categoria._id}
+                                      className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-gray-50 transition-colors group ${categoriaId === categoria._id ? 'bg-blue-50' : ''
                                         }`}
                                     >
-                                      {categoria.nome}
-                                    </button>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                       <button
                                         type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          setCategoriaToEdit(categoria)
-                                          setIsEditarCategoriaModalOpen(true)
-                                        }}
-                                        className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                        title="Editar categoria"
+                                        onClick={() => handleCategoriaSelect(categoria)}
+                                        className={`flex-1 text-left cursor-pointer text-sm sm:text-base truncate ${categoriaId === categoria._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                                          }`}
+                                        title={categoria.nome}
                                       >
-                                        <Edit size={20} />
+                                        {categoria.nome}
                                       </button>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation()
-                                          setCategoriaToEdit(categoria)
-                                          setIsExcluirCategoriaModalOpen(true)
-                                        }}
-                                        className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                        title="Excluir categoria"
-                                      >
-                                        <Trash2 size={20} />
-                                      </button>
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            setCategoriaToEdit(categoria)
+                                            setIsEditarCategoriaModalOpen(true)
+                                          }}
+                                          className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                          title="Editar categoria"
+                                        >
+                                          <Edit size={20} />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                            setCategoriaToEdit(categoria)
+                                            setIsExcluirCategoriaModalOpen(true)
+                                          }}
+                                          className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                          title="Excluir categoria"
+                                        >
+                                          <Trash2 size={20} />
+                                        </button>
+                                      </div>
                                     </div>
-                                  </div>
-                                ))
+                                  ))}
+                                </>
                               ) : (
                                 <div className="px-4 py-6 sm:py-8 text-center text-gray-500 text-xs sm:text-sm">
                                   Nenhuma categoria encontrada
@@ -379,16 +432,26 @@ export default function AdicionarComponentePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Estoque mínimo */}
                 <div>
-                  <Label htmlFor="estoqueMinimo" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                    Estoque mínimo
-                  </Label>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label htmlFor="estoqueMinimo" className="text-sm md:text-base font-medium text-gray-900">
+                      Estoque mínimo
+                    </Label>
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      {estoqueMinimo.length}/9
+                    </span>
+                  </div>
                   <Input
                     id="estoqueMinimo"
                     type="number"
                     min="0"
                     placeholder="0"
                     value={estoqueMinimo}
-                    onChange={(e) => setEstoqueMinimo(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 9) {
+                        setEstoqueMinimo(value);
+                      }
+                    }}
                     className="w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base"
                   />
                 </div>
@@ -536,9 +599,14 @@ export default function AdicionarComponentePage() {
 
               {/* Campo Nome da Categoria */}
               <div className="space-y-2">
-                <label htmlFor="novaCategoria" className="block text-sm sm:text-base font-medium text-gray-700">
-                  Nome da Categoria
-                </label>
+                <div className="flex justify-between items-center">
+                  <label htmlFor="novaCategoria" className="block text-sm sm:text-base font-medium text-gray-700">
+                    Nome da Categoria <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    {novaCategoria.length}/100
+                  </span>
+                </div>
                 <input
                   id="novaCategoria"
                   type="text"
@@ -550,6 +618,7 @@ export default function AdicionarComponentePage() {
                       setErrors(prev => ({ ...prev, novaCategoria: undefined }))
                     }
                   }}
+                  maxLength={100}
                   className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base ${errors.novaCategoria ? 'border-red-500' : 'border-gray-300'
                     }`}
                   onKeyPress={(e) => {

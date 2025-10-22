@@ -113,13 +113,15 @@ export default function ModalExcluirComponente({
 
         {/* Conteúdo do Modal */}
         <div className="px-6 pb-6 space-y-6">
-          <div className="text-center pt-4">
+          <div className="text-center pt-4 px-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Excluir componente
             </h2>
-            <p className="text-gray-600">
-              Tem certeza que deseja excluir o componente <span className="font-semibold">{componenteNome}</span>?
-            </p>
+            <div className="max-h-[120px] overflow-y-auto">
+              <p className="text-gray-600 break-words">
+                Tem certeza que deseja excluir o componente <span className="font-semibold">{componenteNome}</span>?
+              </p>
+            </div>
           </div>
 
           {/* Mensagem de erro da API */}
