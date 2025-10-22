@@ -60,6 +60,7 @@ export default function ModalExcluirCategoria({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
+      queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] })
       toast.success('Categoria excluída com sucesso!', {
         position: 'top-right',
         autoClose: 3000,
@@ -179,4 +180,3 @@ export default function ModalExcluirCategoria({
 
   return createPortal(modalContent, document.body)
 }
-

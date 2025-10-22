@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import Cabecalho from "@/components/cabecalho"
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -90,13 +90,20 @@ export default function EditarComponentePage() {
 
   const {
     data: categoriasData,
-    isLoading: isLoadingCategorias
-  } = useQuery({
-    queryKey: ['categorias'],
-    queryFn: async () => {
-      const response = await api.get<CategoriasApiResponse>('/categorias?limit=1000');
+    isLoading: isLoadingCategorias,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
+    queryKey: ['categorias-infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await api.get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
       return response.data;
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
     staleTime: 1000 * 60 * 10
   })
 
@@ -121,6 +128,7 @@ export default function EditarComponentePage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
+      queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] })
       setCategoriaId(data.data._id)
       setNovaCategoria('')
       setIsAddingCategoria(false)
@@ -311,11 +319,30 @@ export default function EditarComponentePage() {
     }
   }, [])
 
-  const categorias = categoriasData?.data?.docs || []
+  const categorias = categoriasData?.pages ? categoriasData.pages.flatMap(page => page.data.docs) : []
   const categoriasFiltradas = categorias.filter((cat: Categoria) =>
     cat.nome.toLowerCase().includes(categoriaPesquisa.toLowerCase())
   )
   const categoriaSelecionada = categorias.find((cat: Categoria) => cat._id === categoriaId)
+
+  useEffect(() => {
+    if (!observerTarget.current || !isCategoriaDropdownOpen) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isCategoriaDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoadingComponente) {
     return (
@@ -502,6 +529,14 @@ export default function EditarComponentePage() {
                                       </div>
                                     </div>
                                   ))}
+                                  {/* Infinite scroll trigger */}
+                                  <div ref={observerTarget} className="h-1" />
+                                  {/* Loading indicator */}
+                                  {isFetchingNextPage && (
+                                    <div className="flex justify-center py-4">
+                                      <PulseLoader color="#306FCC" size={8} />
+                                    </div>
+                                  )}
                                 </>
                               ) : (
                                 <div className="px-4 py-6 sm:py-8 text-center text-gray-500 text-xs sm:text-sm">

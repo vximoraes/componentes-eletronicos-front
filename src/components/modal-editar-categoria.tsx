@@ -69,6 +69,7 @@ export default function ModalEditarCategoria({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
+      queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] })
       toast.success('Categoria atualizada com sucesso!', {
         position: 'top-right',
         autoClose: 3000,
