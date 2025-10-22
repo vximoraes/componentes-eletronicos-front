@@ -125,7 +125,7 @@ export default function ModalExcluirFornecedor({
           {/* Mensagem de erro da API */}
           {excluirMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível inativar o fornecedor</div>
+              <div className="font-medium mb-1">Não foi possível excluir o fornecedor</div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||

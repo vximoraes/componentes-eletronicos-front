@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronDown, Plus } from 'lucide-react';
+import { X, ChevronDown, Plus, Edit, Trash2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
+import ModalEditarLocalizacao from './modal-editar-localizacao';
+import ModalExcluirLocalizacao from './modal-excluir-localizacao';
 
 interface Localizacao {
   _id: string;
@@ -63,8 +65,9 @@ export default function ModalEntradaComponente({
   const [errors, setErrors] = useState<{ quantidade?: string; localizacao?: string; novaLocalizacao?: string }>({});
   const [isAddingLocalizacao, setIsAddingLocalizacao] = useState(false);
   const [novaLocalizacao, setNovaLocalizacao] = useState('');
-
-
+  const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] = useState(false);
+  const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] = useState(false);
+  const [localizacaoToEdit, setLocalizacaoToEdit] = useState<Localizacao | null>(null);
 
   // Query para buscar localizações
   const { data: localizacoesData, isLoading: isLoadingLocalizacoes } = useQuery<LocalizacoesApiResponse>({
@@ -374,16 +377,48 @@ export default function ModalEntradaComponente({
                     <div className="overflow-y-auto">
                       {localizacoesFiltradas.length > 0 ? (
                         localizacoesFiltradas.map((localizacao) => (
-                          <button
+                          <div
                             key={localizacao._id}
-                            type="button"
-                            onClick={() => handleLocalizacaoSelect(localizacao)}
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
-                              localizacaoSelecionada === localizacao._id ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
+                            className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${
+                              localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
                             }`}
                           >
-                            {localizacao.nome}
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => handleLocalizacaoSelect(localizacao)}
+                              className={`flex-1 text-left cursor-pointer ${
+                                localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                              }`}
+                            >
+                              {localizacao.nome}
+                            </button>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setLocalizacaoToEdit(localizacao)
+                                  setIsEditarLocalizacaoModalOpen(true)
+                                }}
+                                className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                title="Editar localização"
+                              >
+                                <Edit size={20} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setLocalizacaoToEdit(localizacao)
+                                  setIsExcluirLocalizacaoModalOpen(true)
+                                }}
+                                className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                title="Excluir localização"
+                              >
+                                <Trash2 size={20} />
+                              </button>
+                            </div>
+                          </div>
                         ))
                       ) : (
                         <div className="px-4 py-8 text-center text-gray-500 text-sm">
@@ -553,7 +588,33 @@ export default function ModalEntradaComponente({
     </div>
   );
 
-  return typeof window !== 'undefined' 
-    ? createPortal(modalContent, document.body)
-    : null;
+  return (
+    <>
+      {typeof window !== 'undefined' && createPortal(modalContent, document.body)}
+      {localizacaoToEdit && (
+        <>
+          <ModalEditarLocalizacao
+            isOpen={isEditarLocalizacaoModalOpen}
+            onClose={() => {
+              setIsEditarLocalizacaoModalOpen(false)
+              setLocalizacaoToEdit(null)
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            onSuccess={onClose}
+          />
+          <ModalExcluirLocalizacao
+            isOpen={isExcluirLocalizacaoModalOpen}
+            onClose={() => {
+              setIsExcluirLocalizacaoModalOpen(false)
+              setLocalizacaoToEdit(null)
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            onSuccess={onClose}
+          />
+        </>
+      )}
+    </>
+  );
 }

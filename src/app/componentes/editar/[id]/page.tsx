@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { Plus, X, ChevronDown } from "lucide-react"
+import { Plus, X, ChevronDown, Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import ModalEditarCategoria from '@/components/modal-editar-categoria'
+import ModalExcluirCategoria from '@/components/modal-excluir-categoria'
 
 interface Categoria {
   _id: string
@@ -50,6 +52,9 @@ export default function EditarComponentePage() {
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
+  const [isEditarCategoriaModalOpen, setIsEditarCategoriaModalOpen] = useState(false)
+  const [isExcluirCategoriaModalOpen, setIsExcluirCategoriaModalOpen] = useState(false)
+  const [categoriaToEdit, setCategoriaToEdit] = useState<Categoria | null>(null)
 
   const { data: componenteData, isLoading: isLoadingComponente } = useQuery({
     queryKey: ['componente', componenteId],
@@ -404,15 +409,46 @@ export default function EditarComponentePage() {
                             <div className="overflow-y-auto">
                               {categoriasFiltradas.length > 0 ? (
                                 categoriasFiltradas.map((categoria: Categoria) => (
-                                  <button
+                                  <div
                                     key={categoria._id}
-                                    type="button"
-                                    onClick={() => handleCategoriaSelect(categoria)}
-                                    className={`w-full text-left px-3 sm:px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer text-sm sm:text-base ${categoriaId === categoria._id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-900'
+                                    className={`flex items-center justify-between px-3 sm:px-4 py-2 hover:bg-gray-50 transition-colors group ${categoriaId === categoria._id ? 'bg-blue-50' : ''
                                       }`}
                                   >
-                                    {categoria.nome}
-                                  </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCategoriaSelect(categoria)}
+                                      className={`flex-1 text-left cursor-pointer text-sm sm:text-base ${categoriaId === categoria._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                                        }`}
+                                    >
+                                      {categoria.nome}
+                                    </button>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setCategoriaToEdit(categoria)
+                                          setIsEditarCategoriaModalOpen(true)
+                                        }}
+                                        className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                        title="Editar categoria"
+                                      >
+                                        <Edit size={20} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setCategoriaToEdit(categoria)
+                                          setIsExcluirCategoriaModalOpen(true)
+                                        }}
+                                        className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                        title="Excluir categoria"
+                                      >
+                                        <Trash2 size={20} />
+                                      </button>
+                                    </div>
+                                  </div>
                                 ))
                               ) : (
                                 <div className="px-4 py-6 sm:py-8 text-center text-gray-500 text-xs sm:text-sm">
@@ -657,6 +693,32 @@ export default function EditarComponentePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modais de Categoria */}
+      {categoriaToEdit && (
+        <>
+          <ModalEditarCategoria
+            isOpen={isEditarCategoriaModalOpen}
+            onClose={() => {
+              setIsEditarCategoriaModalOpen(false)
+              setCategoriaToEdit(null)
+            }}
+            categoriaId={categoriaToEdit._id}
+            categoriaNome={categoriaToEdit.nome}
+            onSuccess={() => setIsCategoriaDropdownOpen(false)}
+          />
+          <ModalExcluirCategoria
+            isOpen={isExcluirCategoriaModalOpen}
+            onClose={() => {
+              setIsExcluirCategoriaModalOpen(false)
+              setCategoriaToEdit(null)
+            }}
+            categoriaId={categoriaToEdit._id}
+            categoriaNome={categoriaToEdit.nome}
+            onSuccess={() => setIsCategoriaDropdownOpen(false)}
+          />
+        </>
       )}
 
       <ToastContainer
