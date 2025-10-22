@@ -69,6 +69,7 @@ export default function ModalEditarLocalizacao({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] })
+      queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] })
       toast.success('Localização atualizada com sucesso!', {
         position: 'top-right',
         autoClose: 3000,

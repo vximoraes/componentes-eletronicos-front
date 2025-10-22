@@ -60,6 +60,7 @@ export default function ModalExcluirLocalizacao({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] })
+      queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] })
       toast.success('Localização excluída com sucesso!', {
         position: 'top-right',
         autoClose: 3000,
