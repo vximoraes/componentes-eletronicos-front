@@ -16,6 +16,12 @@ interface Categoria {
   _id: string
   nome: string
 }
+interface ComponentePost {
+  data:{
+    _id:string,
+    imagem?:string
+  }
+}
 
 export default function AdicionarComponentePage() {
   const router = useRouter()
@@ -31,6 +37,7 @@ export default function AdicionarComponentePage() {
   const [categoriaPesquisa, setCategoriaPesquisa] = useState('')
   const [errors, setErrors] = useState<{ nome?: string; categoria?: string; novaCategoria?: string }>({})
   const [isDragging, setIsDragging] = useState(false)
+  const [idComponente, setIdComponente] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
 
@@ -70,12 +77,32 @@ export default function AdicionarComponentePage() {
     }
   })
 
+  const sendComponenteImagem = useMutation({
+    mutationFn: async () =>  {
+      if (imagem) {
+        let formData = new FormData()
+        formData.append('file', imagem)
+        console.log(idComponente)
+        const response = await api.post<ComponentePost>(`/componentes/${idComponente}/foto`, formData, {headers:{'Content-Type': 'multipart/form-data'},},)
+        return response.data
+      }
+    },
+    onSuccess:() =>{
+      setIdComponente('')
+    },
+    onError:(error:any) =>{
+      console.log("Erro ao enviar imagem:", error)
+    }
+  })
+
   const createComponenteMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await api.post('/componentes', data);
+    mutationFn:async (data: any) =>{
+      const response = await api.post<ComponentePost>('/componentes', data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setIdComponente(data.data._id)
+      sendComponenteImagem.mutate()
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
       router.push('/componentes?success=created')
     },
@@ -389,11 +416,10 @@ export default function AdicionarComponentePage() {
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
-                      className={`relative border-2 border-dashed rounded-md min-h-[38px] sm:min-h-[46px] flex items-center justify-center px-3 sm:px-4 transition-all cursor-pointer ${
-                        isDragging
+                      className={`relative border-2 border-dashed rounded-md min-h-[38px] sm:min-h-[46px] flex items-center justify-center px-3 sm:px-4 transition-all cursor-pointer ${isDragging
                           ? 'border-[#306FCC] bg-blue-50'
                           : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
-                      }`}
+                        }`}
                     >
                       <p className="text-center text-xs sm:text-sm">
                         <span className="font-semibold text-[#306FCC]">Adicione ou arraste</span>{' '}
@@ -407,6 +433,7 @@ export default function AdicionarComponentePage() {
                     accept="image/*"
                     onChange={handleImageChange}
                     className="hidden"
+                    name="file"
                   />
                 </div>
               </div>
@@ -560,7 +587,7 @@ export default function AdicionarComponentePage() {
         </div>
       )}
 
-      <ToastContainer 
+      <ToastContainer
         position="bottom-right"
         autoClose={5000}
         hideProgressBar={false}

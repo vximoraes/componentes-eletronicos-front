@@ -29,6 +29,12 @@ interface ComponenteData {
   descricao?: string
   imagem?: string
 }
+interface ComponentePatch{
+  data:{
+    _id:string,
+    imagem?:string
+  }
+}
 
 export default function EditarComponentePage() {
   const router = useRouter()
@@ -48,6 +54,7 @@ export default function EditarComponentePage() {
   const [categoriaPesquisa, setCategoriaPesquisa] = useState('')
   const [errors, setErrors] = useState<{ nome?: string; categoria?: string; novaCategoria?: string }>({})
   const [isDragging, setIsDragging] = useState(false)
+  const [idComponente, setIdComponente] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
 
@@ -111,15 +118,35 @@ export default function EditarComponentePage() {
       setErrors(prev => ({ ...prev, novaCategoria: errorMessage }))
     }
   })
-
+  const sendComponenteImagem = useMutation({
+    mutationFn: async () =>  {
+      if (imagem) {
+        let formData = new FormData()
+        formData.append('file', imagem)
+        console.log(idComponente)
+        const response = await api.post<ComponentePatch>(`/componentes/${idComponente}/foto`, formData, {headers:{'Content-Type': 'multipart/form-data'},},)
+        return response.data
+      }
+    },
+    onSuccess:(data) =>{
+      setIdComponente('')
+      router.push(`/componentes?success=updated&id=${componenteId}&imagem=${data?.data.imagem}`)
+      // updateComponenteMutation.mutate({imagem: data?.data.imagem})
+    },
+    onError:(error:any) =>{
+      console.log("Erro ao enviar imagem:", error)
+    }
+  })
   const updateComponenteMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.patch(`/componentes/${componenteId}`, data);
+      const response = await api.patch<ComponentePatch>(`/componentes/${componenteId}`, data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setIdComponente(data.data._id)
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
       queryClient.invalidateQueries({ queryKey: ['componente', componenteId] })
+      sendComponenteImagem.mutate()
       router.push(`/componentes?success=updated&id=${componenteId}`)
     },
     onError: (error: any) => {

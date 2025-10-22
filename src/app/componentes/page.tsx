@@ -36,6 +36,7 @@ export default function ComponentesPage() {
   const [updatingComponenteId, setUpdatingComponenteId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [isImagem, setImagem] = useState<string>()
 
   const [categoriaFilter, setCategoriaFilter] = useQueryState('categoria', { defaultValue: '' });
   const [statusFilter, setStatusFilter] = useQueryState('status', { defaultValue: '' });
@@ -124,6 +125,7 @@ export default function ComponentesPage() {
   useEffect(() => {
     const success = searchParams.get('success');
     const componenteId = searchParams.get('id');
+    const imagem = searchParams.get('imagem')
     
     if (success === 'created') {
       toast.success('Componente criado com sucesso!', {
@@ -139,6 +141,10 @@ export default function ComponentesPage() {
     } else if (success === 'updated') {
       if (componenteId) {
         setUpdatingComponenteId(componenteId);
+        if(imagem){
+          setImagem(imagem)
+        }
+        
       }
       toast.success('Componente atualizado com sucesso!', {
         position: 'bottom-right',
@@ -449,7 +455,7 @@ export default function ComponentesPage() {
               quantidade={componente.quantidade}
               estoqueMinimo={componente.estoque_minimo}
               status={componente.status}
-              imagem={componente.imagem}
+              imagem={updatingComponenteId === componente._id && isImagem ? isImagem : componente.imagem}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onClick={handleComponenteClick}

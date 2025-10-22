@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 import { Edit, Trash2, ArrowUpCircle, ArrowDownCircle, Package } from 'lucide-react';
 
