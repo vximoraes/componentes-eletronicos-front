@@ -305,11 +305,11 @@ export default function ComponentesPage() {
   const indisponiveis = componentes.filter(c => c.status === 'Indisponível').length;
   // console.log(totalComponentes)
   return (
-    <div className="w-[100%] h-screen flex flex-col" data-test="componentes-page">
+    <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="componentes-page">
       <Cabecalho pagina="Componentes" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        <div className="flex-1 overflow-y-auto pb-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
             <StatCard
               title="Total de"
@@ -544,8 +544,8 @@ export default function ComponentesPage() {
                       onClick={() => setCurrentPage(pageNum)}
                       disabled={isFetching}
                       className={`min-w-[40px] px-3 py-2 rounded-md transition-colors cursor-pointer ${isActive
-                          ? 'bg-blue-600 text-white font-medium'
-                          : 'hover:bg-gray-100 text-gray-700'
+                        ? 'bg-blue-600 text-white font-medium'
+                        : 'hover:bg-gray-100 text-gray-700'
                         } ${isFetching ? 'opacity-60 cursor-wait' : ''}`}
                       data-test={`page-${pageNum}-button`}
                     >

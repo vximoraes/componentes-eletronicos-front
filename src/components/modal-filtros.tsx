@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { useQuery } from '@tanstack/react-query';
+import { PulseLoader } from 'react-spinners';
 
 interface Categoria {
   _id: string;
@@ -58,22 +59,26 @@ export default function ModalFiltros({
   const [categoriaDropdownOpen, setCategoriaDropdownOpen] = useState(false);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [categoriaSearch, setCategoriaSearch] = useState('');
-  const [showAllCategorias, setShowAllCategorias] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Query para buscar categorias
-  const { data: categoriasData, isLoading: isLoadingCategorias } = useQuery<CategoriasApiResponse>({
-    queryKey: ['categorias'],
-    queryFn: async () => {
-      const response = await api.get<CategoriasApiResponse>('/categorias');
+  const {
+    data: categoriasData,
+    isLoading: isLoadingCategorias,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
+    queryKey: ['categorias-infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await api.get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
       return response.data;
     },
-    staleTime: 1000 * 60 * 10, 
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
+    initialPageParam: 1,
+    enabled: isOpen,
+    staleTime: 1000 * 60 * 10
   });
 
   useEffect(() => {
@@ -116,7 +121,6 @@ export default function ModalFiltros({
         setCategoriaDropdownOpen(false);
         setStatusDropdownOpen(false);
         setCategoriaSearch('');
-        setShowAllCategorias(false);
       }
     };
 
@@ -128,6 +132,25 @@ export default function ModalFiltros({
       document.removeEventListener('click', handleClickOutside);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!observerTarget.current || !categoriaDropdownOpen) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [categoriaDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (!isOpen) return null;
 
@@ -153,27 +176,18 @@ export default function ModalFiltros({
     setCategoriaDropdownOpen(false);
     setStatusDropdownOpen(false);
     setCategoriaSearch('');
-    setShowAllCategorias(false);
     onClose();
   };
 
-  const categorias = categoriasData?.data?.docs || [];
+  const categorias = categoriasData?.pages ? categoriasData.pages.flatMap(page => page.data.docs) : [];
   const categoriaOptions = [
     { value: '', label: 'Todas as categorias' },
     ...categorias.map(cat => ({ value: cat._id, label: cat.nome }))
   ];
 
-  // Filtrar categorias baseado na busca
   const filteredCategorias = categoriaOptions.filter(cat => 
     cat.label.toLowerCase().includes(categoriaSearch.toLowerCase())
   );
-
-  const INITIAL_LIMIT = 50;
-  const categoriasToShow = showAllCategorias 
-    ? filteredCategorias 
-    : filteredCategorias.slice(0, INITIAL_LIMIT);
-
-  const hasMoreCategorias = filteredCategorias.length > INITIAL_LIMIT && !showAllCategorias;
 
   const getSelectedCategoriaLabel = () => {
     const selected = categoriaOptions.find(opt => opt.value === selectedCategoria);
@@ -224,7 +238,6 @@ export default function ModalFiltros({
                   setStatusDropdownOpen(false);
                   if (isOpening) {
                     setCategoriaSearch('');
-                    setShowAllCategorias(false);
                   }
                 }}
                 disabled={isLoadingCategorias}
@@ -246,7 +259,6 @@ export default function ModalFiltros({
                       value={categoriaSearch}
                       onChange={(e) => {
                         setCategoriaSearch(e.target.value);
-                        setShowAllCategorias(false); 
                       }}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       onClick={(e) => e.stopPropagation()}
@@ -255,16 +267,15 @@ export default function ModalFiltros({
                   
                   {/* Lista de categorias com scroll */}
                   <div className="max-h-60 overflow-y-auto">
-                    {categoriasToShow.length > 0 ? (
+                    {filteredCategorias.length > 0 ? (
                       <>
-                        {categoriasToShow.map((option) => (
+                        {filteredCategorias.map((option) => (
                           <button
                             key={option.value}
                             onClick={() => {
                               setSelectedCategoria(option.value);
                               setCategoriaDropdownOpen(false);
                               setCategoriaSearch('');
-                              setShowAllCategorias(false);
                             }}
                             className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
                               selectedCategoria === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
@@ -273,18 +284,13 @@ export default function ModalFiltros({
                             {option.label}
                           </button>
                         ))}
-                        
-                        {/* Botão para carregar mais */}
-                        {hasMoreCategorias && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowAllCategorias(true);
-                            }}
-                            className="w-full px-4 py-3 text-sm text-blue-600 hover:bg-blue-50 border-t border-gray-200 font-medium cursor-pointer"
-                          >
-                            Mostrar mais {filteredCategorias.length - INITIAL_LIMIT} categoria{filteredCategorias.length - INITIAL_LIMIT !== 1 ? 's' : ''}...
-                          </button>
+                        {/* Infinite scroll trigger */}
+                        <div ref={observerTarget} className="h-1" />
+                        {/* Loading indicator */}
+                        {isFetchingNextPage && (
+                          <div className="flex justify-center py-4">
+                            <PulseLoader color="#306FCC" size={8} />
+                          </div>
                         )}
                       </>
                     ) : (

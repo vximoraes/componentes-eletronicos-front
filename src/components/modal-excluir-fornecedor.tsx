@@ -5,38 +5,38 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 
-interface ModalExcluirComponenteProps {
+interface ModalExcluirFornecedorProps {
   isOpen: boolean;
   onClose: () => void;
-  componenteId: string;
-  componenteNome: string;
+  fornecedorId: string;
+  fornecedorNome: string;
   onSuccess?: () => void;
 }
 
-export default function ModalExcluirComponente({
+export default function ModalExcluirFornecedor({
   isOpen,
   onClose,
-  componenteId,
-  componenteNome,
+  fornecedorId,
+  fornecedorNome,
   onSuccess
-}: ModalExcluirComponenteProps) {
+}: ModalExcluirFornecedorProps) {
   const queryClient = useQueryClient();
 
   const excluirMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.patch(`/componentes/${componenteId}/inativar`);
+      const response = await api.patch(`/fornecedores/${fornecedorId}/inativar`);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['componentes']
+        queryKey: ['fornecedores']
       });
 
       onSuccess?.();
       onClose();
     },
     onError: (error: any) => {
-      console.error('Erro ao inativar componente:', error);
+      console.error('Erro ao inativar fornecedor:', error);
       if (error?.response?.data) {
         console.error('Resposta da API:', error.response.data);
       }
@@ -80,7 +80,7 @@ export default function ModalExcluirComponente({
   };
 
   const handleExcluir = () => {
-    if (!componenteId) {
+    if (!fornecedorId) {
       return;
     }
 
@@ -115,11 +115,11 @@ export default function ModalExcluirComponente({
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Excluir componente
+              Excluir fornecedor
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o componente <span className="font-semibold">{componenteNome}</span>?
+                Tem certeza que deseja excluir o fornecedor <span className="font-semibold">{fornecedorNome}</span>?
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function ModalExcluirComponente({
           {/* Mensagem de erro da API */}
           {excluirMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível excluir o componente</div>
+              <div className="font-medium mb-1">Não foi possível excluir o fornecedor</div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||
