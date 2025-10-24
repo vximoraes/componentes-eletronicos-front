@@ -39,6 +39,13 @@ interface CategoriasApiResponse {
   errors: any[];
 }
 
+interface ComponentePost {
+  data: {
+    _id: string,
+    imagem?: string
+  }
+}
+
 export default function AdicionarComponentePage() {
   const router = useRouter()
   const [nome, setNome] = useState('')
@@ -53,6 +60,7 @@ export default function AdicionarComponentePage() {
   const [categoriaPesquisa, setCategoriaPesquisa] = useState('')
   const [errors, setErrors] = useState<{ nome?: string; categoria?: string; novaCategoria?: string }>({})
   const [isDragging, setIsDragging] = useState(false)
+  const [idComponente, setIdComponente] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
@@ -107,21 +115,68 @@ export default function AdicionarComponentePage() {
     }
   })
 
+  const sendComponenteImagem = useMutation({
+    mutationFn: async (componenteId: string) => {
+      if (imagem) {
+        let formData = new FormData()
+        formData.append('file', imagem)
+        const response = await api.post<ComponentePost>(`/componentes/${componenteId}/foto`, formData, { headers: { 'Content-Type': 'multipart/form-data' }, },)
+        return response.data
+      }
+      return null
+    },
+    onSuccess: (data) => {
+      if (data?.data.imagem) {
+        console.log('Imagem enviada com sucesso:', data.data.imagem)
+      }
+      // Invalida as queries e navega após o upload da imagem
+      queryClient.invalidateQueries({ queryKey: ['componentes'] })
+      // Adiciona timestamp para forçar recarregamento da imagem (cache busting)
+      const timestamp = Date.now()
+      router.push(`/componentes?success=created&t=${timestamp}`)
+    },
+    onError: (error: any) => {
+      console.log("Erro ao enviar imagem:", error)
+      toast.error('Erro ao fazer upload da imagem', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+      // Mesmo com erro na imagem, navega de volta (componente já foi criado)
+      const timestamp = Date.now()
+      router.push(`/componentes?success=created&t=${timestamp}`)
+    }
+  })
+
   const createComponenteMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/componentes', data);
+      const response = await api.post<ComponentePost>('/componentes', data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const novoComponenteId = data.data._id
+      setIdComponente(novoComponenteId)
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
-      router.push('/componentes?success=created')
+
+      // Se há imagem para enviar, envia usando o ID retornado
+      if (imagem) {
+        sendComponenteImagem.mutate(novoComponenteId)
+      } else {
+        // Se não há imagem, navega direto com timestamp para forçar refetch
+        const timestamp = Date.now()
+        router.push(`/componentes?success=created&t=${timestamp}`)
+      }
     },
     onError: (error: any) => {
       let errorMessage = 'Erro ao criar componente';
-      
+
       if (error?.response?.data) {
         const errorData = error.response.data;
-        
+
         // Priorizar mensagens do array errors
         if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
           const messages = errorData.errors.map((err: any) => err.message).filter(Boolean);
@@ -136,7 +191,7 @@ export default function AdicionarComponentePage() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       toast.error(errorMessage, {
         position: 'bottom-right',
         autoClose: 5000,
@@ -230,9 +285,7 @@ export default function AdicionarComponentePage() {
       componenteData.descricao = descricao
     }
 
-    if (imagem) {
-      componenteData.imagem = imagem.name
-    }
+    // Não envia o nome da imagem - o backend vai definir como idComponente.jpeg após o upload
 
     createComponenteMutation.mutate(componenteData)
   }
@@ -305,7 +358,7 @@ export default function AdicionarComponentePage() {
       <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
@@ -523,11 +576,10 @@ export default function AdicionarComponentePage() {
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
-                      className={`relative border-2 border-dashed rounded-md min-h-[38px] sm:min-h-[46px] flex items-center justify-center px-3 sm:px-4 transition-all cursor-pointer ${
-                        isDragging
-                          ? 'border-[#306FCC] bg-blue-50'
-                          : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
-                      }`}
+                      className={`relative border-2 border-dashed rounded-md min-h-[38px] sm:min-h-[46px] flex items-center justify-center px-3 sm:px-4 transition-all cursor-pointer ${isDragging
+                        ? 'border-[#306FCC] bg-blue-50'
+                        : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
+                        }`}
                     >
                       <p className="text-center text-xs sm:text-sm">
                         <span className="font-semibold text-[#306FCC]">Adicione ou arraste</span>{' '}
@@ -541,6 +593,7 @@ export default function AdicionarComponentePage() {
                     accept="image/*"
                     onChange={handleImageChange}
                     className="hidden"
+                    name="file"
                   />
                 </div>
               </div>
@@ -726,7 +779,7 @@ export default function AdicionarComponentePage() {
         </>
       )}
 
-      <ToastContainer 
+      <ToastContainer
         position="bottom-right"
         autoClose={5000}
         hideProgressBar={false}
