@@ -432,7 +432,7 @@ export default function ModalSaidaComponente({
                     }
                   </span>
                   {localizacaoSelecionada && (
-                    <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
+                    <span className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
                         ? 'bg-green-100 text-green-700'
                         : 'bg-gray-100 text-gray-500'
                       }`}>
@@ -474,18 +474,18 @@ export default function ModalSaidaComponente({
                               <button
                                 type="button"
                                 onClick={() => handleLocalizacaoSelect(localizacao)}
-                                className={`flex-1 text-left cursor-pointer truncate min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                                className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
                                   }`}
                                 title={localizacao.nome}
                               >
-                                {localizacao.nome}
-                              </button>
-                              <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ml-2 ${qtdDisponivel > 0
+                                <span className="truncate">{localizacao.nome}</span>
+                                <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${qtdDisponivel > 0
                                   ? 'bg-green-100 text-green-700'
                                   : 'bg-gray-100 text-gray-500'
-                                }`}>
-                                {qtdDisponivel} disponível
-                              </span>
+                                  }`}>
+                                  {qtdDisponivel} disponível
+                                </span>
+                              </button>
                               <div className="flex items-center gap-1 flex-shrink-0 ml-1">
                                 <button
                                   type="button"
