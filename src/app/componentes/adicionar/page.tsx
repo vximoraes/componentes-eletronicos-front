@@ -358,7 +358,7 @@ export default function AdicionarComponentePage() {
       <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
