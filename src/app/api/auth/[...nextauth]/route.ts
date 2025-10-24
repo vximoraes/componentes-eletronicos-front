@@ -37,8 +37,9 @@ export const authOptions: AuthOptions = {
         }
 
         try {
+          const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
           const response = await axios.post<LoginResponse>(
-            `${process.env.NEXT_PUBLIC_API_URL}/login`,
+            `${apiUrl}/login`,
             {
               email: credentials.email,
               senha: credentials.senha
