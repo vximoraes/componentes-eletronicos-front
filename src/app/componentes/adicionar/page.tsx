@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Cabecalho from "@/components/cabecalho"
 import { useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { get, post } from '@/lib/fetchData'
+import { getSession } from 'next-auth/react'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ModalEditarCategoria from '@/components/modal-editar-categoria'
@@ -77,8 +78,7 @@ export default function AdicionarComponentePage() {
   } = useInfiniteQuery({
     queryKey: ['categorias-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
-      return response.data;
+      return await get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -89,10 +89,9 @@ export default function AdicionarComponentePage() {
 
   const createCategoriaMutation = useMutation({
     mutationFn: async (nomeCategoria: string) => {
-      const response = await api.post('/categorias', { nome: nomeCategoria });
-      return response.data;
+      return await post('/categorias', { nome: nomeCategoria });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
       queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] })
       setCategoriaId(data.data._id)
@@ -120,12 +119,19 @@ export default function AdicionarComponentePage() {
       if (imagem) {
         let formData = new FormData()
         formData.append('file', imagem)
-        const response = await api.post<ComponentePost>(`/componentes/${componenteId}/foto`, formData, { headers: { 'Content-Type': 'multipart/form-data' }, },)
-        return response.data
+        const session = await getSession();
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/componentes/${componenteId}/foto`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.user?.accessToken}`
+          },
+          body: formData
+        });
+        return await response.json();
       }
       return null
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       if (data?.data.imagem) {
         console.log('Imagem enviada com sucesso:', data.data.imagem)
       }
@@ -154,10 +160,9 @@ export default function AdicionarComponentePage() {
 
   const createComponenteMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post<ComponentePost>('/componentes', data);
-      return response.data;
+      return await post<ComponentePost>('/componentes', data);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       const novoComponenteId = data.data._id
       setIdComponente(novoComponenteId)
       queryClient.invalidateQueries({ queryKey: ['componentes'] })

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 
 interface ModalExcluirComponenteProps {
@@ -24,8 +24,7 @@ export default function ModalExcluirComponente({
 
   const excluirMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.patch(`/componentes/${componenteId}/inativar`);
-      return response.data;
+      return await patch(`/componentes/${componenteId}/inativar`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

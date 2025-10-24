@@ -12,7 +12,7 @@ import {
 import ModalExcluirFornecedor from "@/components/modal-excluir-fornecedor"
 import ModalDetalhesFornecedor from "@/components/modal-detalhes-fornecedor"
 import { useInfiniteQuery } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { get } from '@/lib/fetchData'
 import { FornecedorApiResponse } from '@/types/fornecedores'
 import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react'
 import { useState, useEffect, useRef, Suspense } from 'react'
@@ -54,8 +54,7 @@ function PageFornecedoresContent() {
       const queryString = params.toString()
       const url = `/fornecedores${queryString ? `?${queryString}` : ''}`
 
-      const response = await api.get<FornecedorApiResponse>(url)
-      return response.data
+      return await get<FornecedorApiResponse>(url)
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined

@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { patch } from '@/lib/fetchData'
 import { toast } from 'react-toastify'
 import { Button } from '@/components/ui/button'
 
@@ -55,8 +55,7 @@ export default function ModalExcluirLocalizacao({
 
   const inativarLocalizacaoMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.patch(`/localizacoes/${localizacaoId}/inativar`)
-      return response.data
+      return await patch(`/localizacoes/${localizacaoId}/inativar`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] })

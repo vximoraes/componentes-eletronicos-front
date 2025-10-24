@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { get } from '@/lib/fetchData';
 import { PulseLoader } from 'react-spinners';
 
 interface Categoria {
@@ -70,8 +70,7 @@ export default function ModalFiltros({
   } = useInfiniteQuery({
     queryKey: ['categorias-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
-      return response.data;
+      return await get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;

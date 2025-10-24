@@ -2,8 +2,12 @@
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, ExternalLink, Copy, Check } from 'lucide-react'
-import api from '@/lib/api'
+import { get } from '@/lib/fetchData'
 import { Fornecedor } from '@/types/fornecedores'
+
+interface FornecedorApiResponse {
+  data: Fornecedor;
+}
 
 interface ModalDetalhesFornecedorProps {
   isOpen: boolean
@@ -32,8 +36,8 @@ export default function ModalDetalhesFornecedor({
     setError(null)
 
     try {
-      const response = await api.get(`/fornecedores/${fornecedorId}`)
-      setFornecedor(response.data.data)
+      const response = await get<FornecedorApiResponse>(`/fornecedores/${fornecedorId}`)
+      setFornecedor(response.data)
     } catch (err: any) {
       console.error('Erro ao carregar fornecedor:', err)
       setError(err?.response?.data?.message || 'Erro ao carregar dados do fornecedor')

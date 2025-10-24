@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown, Plus, Edit, Trash2 } from 'lucide-react';
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
@@ -43,6 +43,12 @@ interface MovimentacaoRequest {
   localizacao: string;
 }
 
+interface EstoqueApiResponse {
+  data: {
+    docs: any[];
+  };
+}
+
 interface ModalEntradaComponenteProps {
   isOpen: boolean;
   onClose: () => void;
@@ -80,8 +86,7 @@ export default function ModalEntradaComponente({
   } = useInfiniteQuery({
     queryKey: ['localizacoes-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
-      return response.data;
+      return await get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -91,11 +96,10 @@ export default function ModalEntradaComponente({
     staleTime: 1000 * 60 * 5
   });
 
-  const { data: estoquesData } = useQuery({
+  const { data: estoquesData } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', componenteId],
     queryFn: async () => {
-      const response = await api.get(`/estoques/componente/${componenteId}`);
-      return response.data;
+      return await get<EstoqueApiResponse>(`/estoques/componente/${componenteId}`);
     },
     enabled: isOpen && !!componenteId,
     staleTime: 1000 * 60 * 5,
@@ -109,10 +113,9 @@ export default function ModalEntradaComponente({
 
   const createLocalizacaoMutation = useMutation({
     mutationFn: async (nomeLocalizacao: string) => {
-      const response = await api.post('/localizacoes', { nome: nomeLocalizacao });
-      return response.data;
+      return await post('/localizacoes', { nome: nomeLocalizacao });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] });
       queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] });
       setLocalizacaoSelecionada(data.data._id);
@@ -132,8 +135,7 @@ export default function ModalEntradaComponente({
 
   const entradaMutation = useMutation({
     mutationFn: async (data: MovimentacaoRequest) => {
-      const response = await api.post('/movimentacoes', data);
-      return response.data;
+      return await post('/movimentacoes', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

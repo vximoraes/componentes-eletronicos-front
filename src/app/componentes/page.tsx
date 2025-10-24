@@ -10,7 +10,7 @@ import ModalExcluirComponente from "@/components/modal-excluir-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { get } from '@/lib/fetchData';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
@@ -18,6 +18,12 @@ import { useQueryState } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+interface CategoriasApiResponse {
+  data: {
+    docs: any[];
+  };
+}
 
 function ComponentesPageContent() {
   const router = useRouter();
@@ -74,8 +80,7 @@ function ComponentesPageContent() {
       const queryString = params.toString();
       const url = `/componentes${queryString ? `?${queryString}` : ''}`;
 
-      const response = await api.get<ApiResponse>(url);
-      return response.data;
+      return await get<ApiResponse>(url);
     },
     staleTime: 1000 * 60 * 5,
     refetchOnMount: 'always',
@@ -91,10 +96,9 @@ function ComponentesPageContent() {
   const { data: estoquesData, isLoading: isLoadingEstoques } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', selectedComponenteId],
     queryFn: async () => {
-      const response = await api.get<EstoqueApiResponse>(
+      return await get<EstoqueApiResponse>(
         `/estoques/componente/${selectedComponenteId}`
       );
-      return response.data;
     },
     enabled: !!selectedComponenteId,
     staleTime: 1000 * 60 * 5,
@@ -107,11 +111,10 @@ function ComponentesPageContent() {
   });
 
   // Query para buscar categorias para mostrar o nome nos filtros
-  const { data: categoriasData } = useQuery({
+  const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      const response = await api.get('/categorias');
-      return response.data;
+      return await get<CategoriasApiResponse>('/categorias');
     },
     staleTime: 1000 * 60 * 10,
     retry: (failureCount, error: any) => {

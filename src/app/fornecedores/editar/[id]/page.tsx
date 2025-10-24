@@ -8,10 +8,14 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import Cabecalho from "@/components/cabecalho"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { get, patch } from '@/lib/fetchData'
 import { Fornecedor } from '@/types/fornecedores'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+
+interface FornecedorApiResponse {
+  data: Fornecedor;
+}
 
 export default function EditarFornecedorPage() {
   const router = useRouter()
@@ -24,11 +28,10 @@ export default function EditarFornecedorPage() {
   const [errors, setErrors] = useState<{ nome?: string; contato?: string; url?: string }>({})
   const queryClient = useQueryClient()
 
-  const { data: fornecedorData, isLoading: isLoadingFornecedor } = useQuery({
+  const { data: fornecedorData, isLoading: isLoadingFornecedor } = useQuery<FornecedorApiResponse>({
     queryKey: ['fornecedor', fornecedorId],
     queryFn: async () => {
-      const response = await api.get(`/fornecedores/${fornecedorId}`)
-      return response.data
+      return await get<FornecedorApiResponse>(`/fornecedores/${fornecedorId}`)
     },
     enabled: !!fornecedorId,
   })
@@ -45,8 +48,7 @@ export default function EditarFornecedorPage() {
 
   const updateFornecedorMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.put(`/fornecedores/${fornecedorId}`, data)
-      return response.data
+      return await patch(`/fornecedores/${fornecedorId}`, data)
     },
     onSuccess: () => {
       queryClient.resetQueries({ queryKey: ['fornecedores'] })

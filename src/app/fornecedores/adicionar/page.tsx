@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Cabecalho from "@/components/cabecalho"
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { post } from '@/lib/fetchData'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -22,10 +22,9 @@ export default function AdicionarFornecedorPage() {
 
   const createFornecedorMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.post('/fornecedores', data)
-      return response.data
+      return await post('/fornecedores', data)
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.resetQueries({ queryKey: ['fornecedores'] })
       const fornecedorId = data.data?._id || data._id
       router.push(`/fornecedores?success=created&id=${fornecedorId}`)
