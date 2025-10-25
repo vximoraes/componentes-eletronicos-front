@@ -1,13 +1,14 @@
+import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
-
 interface ICard {
   title: string,
   descricao: string,
-  imagem: string
-  bg_imagem:string
+  imagem: string,
+  bg_imagem:string,
+  url:string
 }
 
-export default function Card({ title, descricao, imagem, bg_imagem }: ICard) {
+export default function Card({ title, descricao, imagem, bg_imagem, url }: ICard) {
 
   // obter card
   const cardRef = useRef<HTMLDivElement>(null)
@@ -23,7 +24,7 @@ export default function Card({ title, descricao, imagem, bg_imagem }: ICard) {
   }, [])
 
   return (
-    <div className="bg-[#FFFFFF] rounded-[10px] max-w-[475px] cursor-pointer hover drop-shadow-[2px_2px_4px_rgba(0,0,0,0.20)] overflow-hidden transition-transform duration-300 hover:scale-105">
+    <div className="bg-[#FFFFFF] rounded-[10px] max-w-[475px] hover drop-shadow-[2px_2px_4px_rgba(0,0,0,0.20)] overflow-hidden transition-transform duration-300 hover:scale-105">
       <div ref={cardRef} className={isCompact ? "flex flex-col gap-[30px] p-[35px] items-center text-center" : "flex flex-row gap-[30px] p-[35px]"}>
         <div className={isCompact ? "" : "pt-[10px] flex-shrink-0"}>
           <div className={"flex items-center justify-center w-[100px] h-[100px] rounded-[50%] " + bg_imagem}>
@@ -36,11 +37,11 @@ export default function Card({ title, descricao, imagem, bg_imagem }: ICard) {
         </div>
       </div>
       <hr className=" border-[#4f668c71]" />
-      <div className="text-center p-[16px] text-[#5676A1]overflow-hidden">
-        <a className="inline-flex font-medium items-center group transition-colors duration-300 hover:text-[#3d5576]" href="/relatorios/componentes">
+      <div className="text-center p-[16px] text-[#5676A1] overflow-hidden">
+        <Link href={url} className="inline-flex items-center group font-medium transition-all duration-300 hover:text-[#3d5576] hover:scale-105">
           Acessar
           <img className="ml-[8px] w-[6px] transition-transform duration-300 group-hover:translate-x-1" src="/acessar.svg" alt="" />
-        </a>
+        </Link>
       </div>
     </div>
   )

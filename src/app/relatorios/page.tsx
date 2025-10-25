@@ -26,18 +26,21 @@ export default function RelarotiosPage() {
         descricao="Visualize relatórios completos sobre componentes e status de estoque."
         imagem="./relatorios-componentes.svg"
         bg_imagem="bg-[#DBEAFE]"
+        url="/relatorios/componentes"
         />
         <Card
         title="Movimentações"
         descricao="Acompanhe entradas e saídas de componentes do estoque."
         imagem="./relatorios-movimentacoes.svg"
         bg_imagem="bg-[#E5DDFE]"
+        url="/relatorios/movimentacoes"
         />
         <Card
         title="Orçamentos"
         descricao="Acesse o histórico completo de orçamentos."
         imagem="./relatorios-orcamentos.svg"
         bg_imagem="bg-[#DCFCE7]"
+        url="/relatorios/orcamentos"
         />
       </div>
       </div>
