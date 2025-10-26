@@ -96,7 +96,7 @@ export default function AdicionarFornecedorPage() {
     <div className="w-full min-h-screen flex flex-col">
       <Cabecalho pagina="Fornecedores" acao="Adicionar" />
 
-      <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
+      <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
