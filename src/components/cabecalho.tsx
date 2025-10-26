@@ -23,7 +23,7 @@ export default function Cabecalho({ pagina, acao }: CabecalhoProps) {
   }
 
   return (
-    <div className="flex justify-between w-full px-6 md:px-6 py-[20px] md:py-[40px] pt-[30px] md:pt-[50px]">
+    <div className="flex justify-between w-full px-6 md:px-6 pb-3 sm:pb-4 md:pb-6 pt-[30px] md:pt-[50px]">
       <div className="flex items-center gap-[12px] md:gap-[20px]">
         {/* Botão de menu hambúrguer para mobile */}
         <button
