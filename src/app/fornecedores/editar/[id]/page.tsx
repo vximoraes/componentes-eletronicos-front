@@ -178,14 +178,20 @@ export default function EditarFornecedorPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
                 <div>
-                  <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                    Nome <span className="text-red-500">*</span>
-                  </Label>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900">
+                      Nome <span className="text-red-500">*</span>
+                    </Label>
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      {nome.length}/100
+                    </span>
+                  </div>
                   <Input
                     id="nome"
                     type="text"
                     placeholder="Nome do fornecedor"
                     value={nome}
+                    maxLength={100}
                     onChange={(e) => {
                       setNome(e.target.value)
                       if (errors.nome) {
@@ -225,14 +231,20 @@ export default function EditarFornecedorPage() {
 
               {/* Contato - largura total */}
               <div>
-                <Label htmlFor="contato" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                  Contato
-                </Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="contato" className="text-sm md:text-base font-medium text-gray-900">
+                    Contato
+                  </Label>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    {contato.length}/100
+                  </span>
+                </div>
                 <Input
                   id="contato"
                   type="text"
                   placeholder="email@exemplo.com ou telefone"
                   value={contato}
+                  maxLength={100}
                   onChange={(e) => {
                     setContato(e.target.value)
                     if (errors.contato) {
