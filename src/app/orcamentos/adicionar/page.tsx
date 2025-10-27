@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { createPortal } from "react-dom"
 import Cabecalho from "@/components/cabecalho"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +15,7 @@ import { ComponenteOrcamento } from '@/types/orcamentos'
 import { ApiResponse } from '@/types/componentes'
 import { FornecedorApiResponse } from '@/types/fornecedores'
 import { PulseLoader } from 'react-spinners'
+import ModalSelecionarComponente from '@/components/modal-selecionar-componente'
 
 export default function AdicionarOrcamentoPage() {
   const router = useRouter()
@@ -24,37 +26,13 @@ export default function AdicionarOrcamentoPage() {
   const [componentes, setComponentes] = useState<ComponenteOrcamento[]>([])
   const [errors, setErrors] = useState<{ nome?: string }>({})
 
-  const [isComponenteDropdownOpen, setIsComponenteDropdownOpen] = useState<number | null>(null)
-  const [componentePesquisa, setComponentePesquisa] = useState('')
+  const [isComponenteModalOpen, setIsComponenteModalOpen] = useState(false)
   const [isFornecedorDropdownOpen, setIsFornecedorDropdownOpen] = useState<number | null>(null)
   const [fornecedorPesquisa, setFornecedorPesquisa] = useState('')
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null)
 
-  const observerTargetComponente = useRef<HTMLDivElement>(null)
   const observerTargetFornecedor = useRef<HTMLDivElement>(null)
-
-  const {
-    data: componentesData,
-    isLoading: isLoadingComponentes,
-    fetchNextPage: fetchNextPageComponentes,
-    hasNextPage: hasNextPageComponentes,
-    isFetchingNextPage: isFetchingNextPageComponentes
-  } = useInfiniteQuery({
-    queryKey: ['componentes-infinite', componentePesquisa],
-    queryFn: async ({ pageParam = 1 }) => {
-      const params = new URLSearchParams();
-      if (componentePesquisa) params.append('nome', componentePesquisa);
-      params.append('limit', '20');
-      params.append('page', pageParam.toString());
-
-      return await get<ApiResponse>(`/componentes?${params.toString()}`);
-    },
-    getNextPageParam: (lastPage) => {
-      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
-    },
-    initialPageParam: 1,
-    staleTime: 1000 * 60 * 5,
-    enabled: isComponenteDropdownOpen !== null,
-  })
+  const fornecedorButtonRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   const {
     data: fornecedoresData,
@@ -81,22 +59,6 @@ export default function AdicionarOrcamentoPage() {
   })
 
   useEffect(() => {
-    if (!observerTargetComponente.current || isComponenteDropdownOpen === null) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasNextPageComponentes && !isFetchingNextPageComponentes) {
-          fetchNextPageComponentes();
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    observer.observe(observerTargetComponente.current);
-    return () => observer.disconnect();
-  }, [isComponenteDropdownOpen, hasNextPageComponentes, isFetchingNextPageComponentes, fetchNextPageComponentes]);
-
-  useEffect(() => {
     if (!observerTargetFornecedor.current || isFornecedorDropdownOpen === null) return;
 
     const observer = new IntersectionObserver(
@@ -105,7 +67,7 @@ export default function AdicionarOrcamentoPage() {
           fetchNextPageFornecedores();
         }
       },
-      { threshold: 1.0 }
+      { threshold: 0.1 }
     );
 
     observer.observe(observerTargetFornecedor.current);
@@ -166,7 +128,7 @@ export default function AdicionarOrcamentoPage() {
 
     const componentesInvalidos = componentes.filter(c => !c.componente || !c.fornecedor)
     if (componentesInvalidos.length > 0) {
-      toast.error('Preencha todos os campos dos componentes (Nome e Fornecedor).', {
+      toast.error('Preencha todos os campos do(s) componente(s)', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,
@@ -192,15 +154,19 @@ export default function AdicionarOrcamentoPage() {
   }
 
   const handleAdicionarComponente = () => {
-    const novoComponente: ComponenteOrcamento = {
-      componente: '',
-      nome: '',
+    setIsComponenteModalOpen(true)
+  }
+
+  const handleAdicionarComponentesMultiplos = (componentesSelecionados: Array<{ id: string; nome: string }>) => {
+    const novosComponentes = componentesSelecionados.map(comp => ({
+      componente: comp.id,
+      nome: comp.nome,
       fornecedor: '',
       quantidade: 1,
       valor_unitario: 0,
       subtotal: 0
-    }
-    setComponentes([...componentes, novoComponente])
+    }))
+    setComponentes([...componentes, ...novosComponentes])
   }
 
   const handleRemoverComponente = (index: number) => {
@@ -208,14 +174,6 @@ export default function AdicionarOrcamentoPage() {
     setComponentes(novosComponentes)
   }
 
-  const handleComponenteSelect = (index: number, componenteId: string, componenteNome: string) => {
-    const novosComponentes = [...componentes]
-    novosComponentes[index].componente = componenteId
-    novosComponentes[index].nome = componenteNome
-    setComponentes(novosComponentes)
-    setIsComponenteDropdownOpen(null)
-    setComponentePesquisa('')
-  }
 
   const handleFornecedorSelect = (index: number, fornecedorId: string, fornecedorNome: string) => {
     const novosComponentes = [...componentes]
@@ -224,6 +182,21 @@ export default function AdicionarOrcamentoPage() {
     setComponentes(novosComponentes)
     setIsFornecedorDropdownOpen(null)
     setFornecedorPesquisa('')
+    setDropdownPosition(null)
+  }
+
+  const handleOpenFornecedorDropdown = (index: number) => {
+    const button = fornecedorButtonRefs.current[index]
+    if (button) {
+      const rect = button.getBoundingClientRect()
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      })
+      setIsFornecedorDropdownOpen(index)
+      setFornecedorPesquisa('')
+    }
   }
 
   const handleQuantidadeChange = (index: number, delta: number) => {
@@ -250,21 +223,43 @@ export default function AdicionarOrcamentoPage() {
     router.push('/orcamentos')
   }
 
-  const componentesLista = componentesData?.pages ? componentesData.pages.flatMap(page => page.data.docs) : []
   const fornecedoresLista = fornecedoresData?.pages ? fornecedoresData.pages.flatMap(page => page.data.docs) : []
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
-      if (!target.closest('[data-dropdown]')) {
-        setIsComponenteDropdownOpen(null)
+      if (!target.closest('[data-dropdown]') && !target.closest('[data-dropdown-portal]')) {
         setIsFornecedorDropdownOpen(null)
+        setDropdownPosition(null)
       }
     }
 
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isFornecedorDropdownOpen !== null) {
+        const button = fornecedorButtonRefs.current[isFornecedorDropdownOpen]
+        if (button) {
+          const rect = button.getBoundingClientRect()
+          setDropdownPosition({
+            top: rect.bottom + window.scrollY,
+            left: rect.left + window.scrollX,
+            width: rect.width
+          })
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('resize', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('resize', handleScroll)
+    }
+  }, [isFornecedorDropdownOpen])
 
   return (
     <div className="w-full min-h-screen flex flex-col">
@@ -313,7 +308,7 @@ export default function AdicionarOrcamentoPage() {
               </div>
 
               {/* Itens do orçamento */}
-              <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex justify-between items-center mb-2 flex-shrink-0">
                   <Label className="text-sm md:text-base font-medium text-gray-900">Itens do orçamento</Label>
                   <Button
@@ -348,7 +343,15 @@ export default function AdicionarOrcamentoPage() {
                       </div>
                     </>
                   ) : (
-                    <table className="w-full caption-bottom text-xs sm:text-sm">
+                    <table className="w-full caption-bottom text-xs sm:text-sm table-fixed">
+                      <colgroup>
+                        <col style={{ width: '20%' }} />
+                        <col style={{ width: '20%' }} />
+                        <col style={{ width: '15%' }} />
+                        <col style={{ width: '15%' }} />
+                        <col style={{ width: '15%' }} />
+                        <col style={{ width: '15%' }} />
+                      </colgroup>
                       <thead className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                         <tr className="bg-gray-50 border-b">
                           <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">NOME</th>
@@ -364,65 +367,10 @@ export default function AdicionarOrcamentoPage() {
                           <tr key={index} className="hover:bg-gray-50 border-b">
                             {/* Nome */}
                             <td className="px-4 py-3">
-                              <div className="relative" data-dropdown>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setIsComponenteDropdownOpen(isComponenteDropdownOpen === index ? null : index)
-                                    setComponentePesquisa('')
-                                  }}
-                                  className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm cursor-pointer"
-                                >
-                                  <span className={comp.nome ? 'text-gray-900' : 'text-gray-500'}>
-                                    {comp.nome || 'Selecione'}
-                                  </span>
-                                  <ChevronDown className="w-4 h-4 text-gray-400 ml-2" />
-                                </button>
-
-                                {isComponenteDropdownOpen === index && (
-                                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
-                                    <div className="p-2 border-b">
-                                      <input
-                                        type="text"
-                                        placeholder="Pesquisar..."
-                                        value={componentePesquisa}
-                                        onChange={(e) => setComponentePesquisa(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        onClick={(e) => e.stopPropagation()}
-                                      />
-                                    </div>
-                                    <div className="overflow-y-auto">
-                                      {isLoadingComponentes ? (
-                                        <div className="flex justify-center py-4">
-                                          <PulseLoader color="#306FCC" size={8} />
-                                        </div>
-                                      ) : componentesLista.length > 0 ? (
-                                        <>
-                                          {componentesLista.map((componente) => (
-                                            <button
-                                              key={componente._id}
-                                              type="button"
-                                              onClick={() => handleComponenteSelect(index, componente._id, componente.nome)}
-                                              className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm cursor-pointer"
-                                            >
-                                              {componente.nome}
-                                            </button>
-                                          ))}
-                                          <div ref={observerTargetComponente} className="h-1" />
-                                          {isFetchingNextPageComponentes && (
-                                            <div className="flex justify-center py-2">
-                                              <PulseLoader color="#306FCC" size={6} />
-                                            </div>
-                                          )}
-                                        </>
-                                      ) : (
-                                        <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                                          Nenhum componente encontrado
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
+                              <div className="flex items-center px-3 py-2">
+                                <span className="text-gray-900 text-sm truncate" title={comp.nome}>
+                                  {comp.nome}
+                                </span>
                               </div>
                             </td>
 
@@ -430,64 +378,24 @@ export default function AdicionarOrcamentoPage() {
                             <td className="px-4 py-3">
                               <div className="relative" data-dropdown>
                                 <button
+                                  ref={(el) => { fornecedorButtonRefs.current[index] = el }}
                                   type="button"
                                   onClick={() => {
-                                    setIsFornecedorDropdownOpen(isFornecedorDropdownOpen === index ? null : index)
-                                    setFornecedorPesquisa('')
+                                    if (isFornecedorDropdownOpen === index) {
+                                      setIsFornecedorDropdownOpen(null)
+                                      setDropdownPosition(null)
+                                      setFornecedorPesquisa('')
+                                    } else {
+                                      handleOpenFornecedorDropdown(index)
+                                    }
                                   }}
-                                  className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm cursor-pointer"
-                                  disabled={!comp.componente}
+                                  className="w-full h-[38px] flex items-center justify-between px-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm cursor-pointer"
                                 >
-                                  <span className={comp.fornecedor_nome ? 'text-gray-900' : 'text-gray-500'}>
+                                  <span className={`truncate ${comp.fornecedor_nome ? 'text-gray-900' : 'text-gray-500'}`}>
                                     {comp.fornecedor_nome || 'Selecione'}
                                   </span>
-                                  <ChevronDown className="w-4 h-4 text-gray-400 ml-2" />
+                                  <ChevronDown className="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" />
                                 </button>
-
-                                {isFornecedorDropdownOpen === index && (
-                                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
-                                    <div className="p-2 border-b">
-                                      <input
-                                        type="text"
-                                        placeholder="Pesquisar..."
-                                        value={fornecedorPesquisa}
-                                        onChange={(e) => setFornecedorPesquisa(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        onClick={(e) => e.stopPropagation()}
-                                      />
-                                    </div>
-                                    <div className="overflow-y-auto">
-                                      {isLoadingFornecedores ? (
-                                        <div className="flex justify-center py-4">
-                                          <PulseLoader color="#306FCC" size={8} />
-                                        </div>
-                                      ) : fornecedoresLista.length > 0 ? (
-                                        <>
-                                          {fornecedoresLista.map((fornecedor) => (
-                                            <button
-                                              key={fornecedor._id}
-                                              type="button"
-                                              onClick={() => handleFornecedorSelect(index, fornecedor._id, fornecedor.nome)}
-                                              className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm cursor-pointer"
-                                            >
-                                              {fornecedor.nome}
-                                            </button>
-                                          ))}
-                                          <div ref={observerTargetFornecedor} className="h-1" />
-                                          {isFetchingNextPageFornecedores && (
-                                            <div className="flex justify-center py-2">
-                                              <PulseLoader color="#306FCC" size={6} />
-                                            </div>
-                                          )}
-                                        </>
-                                      ) : (
-                                        <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                                          Nenhum fornecedor encontrado
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             </td>
 
@@ -603,6 +511,71 @@ export default function AdicionarOrcamentoPage() {
         draggable={false}
         transition={Slide}
       />
+
+      {/* Modal de Seleção de Componentes */}
+      <ModalSelecionarComponente
+        isOpen={isComponenteModalOpen}
+        onClose={() => setIsComponenteModalOpen(false)}
+        onSelectMultiple={handleAdicionarComponentesMultiplos}
+        multiSelect={true}
+      />
+
+      {/* Dropdown de Fornecedor */}
+      {isFornecedorDropdownOpen !== null && dropdownPosition && typeof window !== 'undefined' && createPortal(
+        <div
+          data-dropdown-portal
+          style={{
+            position: 'absolute',
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+            zIndex: 9999
+          }}
+          className="mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden flex flex-col"
+        >
+          <div className="p-2 border-b">
+            <input
+              type="text"
+              placeholder="Pesquisar..."
+              value={fornecedorPesquisa}
+              onChange={(e) => setFornecedorPesquisa(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+          <div className="overflow-y-auto">
+            {isLoadingFornecedores ? (
+              <div className="flex justify-center py-4">
+                <PulseLoader color="#306FCC" size={8} />
+              </div>
+            ) : fornecedoresLista.length > 0 ? (
+              <>
+                {fornecedoresLista.map((fornecedor) => (
+                  <button
+                    key={fornecedor._id}
+                    type="button"
+                    onClick={() => handleFornecedorSelect(isFornecedorDropdownOpen, fornecedor._id, fornecedor.nome)}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm cursor-pointer"
+                  >
+                    {fornecedor.nome}
+                  </button>
+                ))}
+                <div ref={observerTargetFornecedor} className="h-1" />
+                {isFetchingNextPageFornecedores && (
+                  <div className="flex justify-center py-2">
+                    <PulseLoader color="#306FCC" size={6} />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                Nenhum fornecedor encontrado
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }
