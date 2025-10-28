@@ -13,12 +13,16 @@ interface ModalDetalhesOrcamentoProps {
   isOpen: boolean
   onClose: () => void
   orcamentoId: string
+  orcamentoNome?: string
+  orcamentoDescricao?: string
 }
 
 export default function ModalDetalhesOrcamento({
   isOpen,
   onClose,
-  orcamentoId
+  orcamentoId,
+  orcamentoNome,
+  orcamentoDescricao
 }: ModalDetalhesOrcamentoProps) {
   const [orcamento, setOrcamento] = useState<Orcamento | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -109,27 +113,37 @@ export default function ModalDetalhesOrcamento({
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="relative p-6 border-b border-gray-200">
+        <div className="relative p-6 border-b border-gray-200 flex-shrink-0">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer z-10"
             title="Fechar"
           >
             <X size={20} />
           </button>
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Detalhes do Orçamento
-            </h2>
+          <div className="text-center px-8">
+            <div className="max-h-[100px] overflow-y-auto mb-2">
+              <h2 className="text-xl font-semibold text-gray-900 break-words">
+                {orcamentoNome || orcamento?.nome || 'Detalhes do Orçamento'}
+              </h2>
+            </div>
+            {(orcamentoDescricao || orcamento?.descricao) && (
+              <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full">
+                {orcamentoDescricao || orcamento?.descricao}
+              </p>
+            )}
+            <p className="text-xl font-semibold text-blue-600">
+              {isLoading ? 'Carregando...' : orcamento ? `R$ ${orcamento.total.toFixed(2)}` : '-'}
+            </p>
           </div>
         </div>
 
         {/* Conteúdo */}
-        <div className="p-6 space-y-4 max-h-[500px] overflow-y-auto">
+        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
 
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
@@ -148,93 +162,37 @@ export default function ModalDetalhesOrcamento({
             </div>
           ) : orcamento ? (
             <div className="space-y-4 text-left">
-              {/* Nome */}
-              <div>
-                <label className="text-lg font-semibold text-gray-900 block mb-2">
-                  Nome
-                </label>
-                <div className="flex items-center gap-2">
-                  <p className="text-base text-gray-900 truncate flex-1" title={orcamento.nome}>
-                    {orcamento.nome || '-'}
-                  </p>
-                  {orcamento.nome && (
-                    <button
-                      onClick={() => handleCopy(orcamento.nome, 'nome')}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
-                      title="Copiar nome"
-                    >
-                      {copiedField === 'nome' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Descrição */}
-              <div>
-                <label className="text-lg font-semibold text-gray-900 block mb-2">
-                  Descrição
-                </label>
-                {orcamento.descricao ? (
-                  <div className="flex items-start gap-2">
-                    <p
-                      className="text-base text-gray-900 whitespace-pre-wrap flex-1"
-                      style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
-                      title={orcamento.descricao}
-                    >
-                      {orcamento.descricao}
-                    </p>
-                    <button
-                      onClick={() => handleCopy(orcamento.descricao!, 'descricao')}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer mt-0.5"
-                      title="Copiar descrição"
-                    >
-                      {copiedField === 'descricao' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                  </div>
-                ) : (
-                  <p className="text-base text-gray-900">-</p>
-                )}
-              </div>
-
-              {/* Total */}
-              <div>
-                <label className="text-lg font-semibold text-gray-900 block mb-2">
-                  Total
-                </label>
-                <p className="text-2xl text-gray-900 font-bold">
-                  R$ {orcamento.total.toFixed(2)}
-                </p>
-              </div>
-
               {/* Componentes */}
               {orcamento.componentes && orcamento.componentes.length > 0 && (
                 <div>
                   <label className="text-lg font-semibold text-gray-900 block mb-2">
                     Componentes ({orcamento.componentes.length})
                   </label>
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border rounded-lg overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50 border-b">
                         <tr>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-700">Nome</th>
-                          <th className="text-center px-4 py-2 font-semibold text-gray-700">Qtd</th>
-                          <th className="text-right px-4 py-2 font-semibold text-gray-700">Valor Unit.</th>
-                          <th className="text-right px-4 py-2 font-semibold text-gray-700">Subtotal</th>
+                          <th className="text-left px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[150px]">Nome</th>
+                          <th className="text-center px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[60px]">Qtd</th>
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">Valor Unit.</th>
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">Subtotal</th>
                         </tr>
                       </thead>
                       <tbody>
                         {orcamento.componentes.map((comp, index) => (
                           <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
-                            <td className="px-4 py-2 text-gray-900">
-                              {comp.nome || '-'}
+                            <td className="px-3 sm:px-4 py-2 text-gray-900 min-w-[150px]">
+                              <div className="truncate max-w-[200px]" title={comp.nome || '-'}>
+                                {comp.nome || '-'}
+                              </div>
                             </td>
-                            <td className="px-4 py-2 text-center text-gray-900">
+                            <td className="px-3 sm:px-4 py-2 text-center text-gray-900 min-w-[60px]">
                               {comp.quantidade}
                             </td>
-                            <td className="px-4 py-2 text-right text-gray-900">
+                            <td className="px-3 sm:px-4 py-2 text-right text-gray-900 min-w-[100px] whitespace-nowrap">
                               R$ {comp.valor_unitario.toFixed(2)}
                             </td>
-                            <td className="px-4 py-2 text-right text-gray-900 font-medium">
+                            <td className="px-3 sm:px-4 py-2 text-right text-gray-900 font-medium min-w-[100px] whitespace-nowrap">
                               R$ {(comp.quantidade * comp.valor_unitario).toFixed(2)}
                             </td>
                           </tr>

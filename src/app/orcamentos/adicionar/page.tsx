@@ -271,9 +271,14 @@ export default function AdicionarOrcamentoPage() {
             <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-hidden">
               {/* Nome */}
               <div className="flex-shrink-0">
-                <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                  Nome <span className="text-red-500">*</span>
-                </Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900">
+                    Nome <span className="text-red-500">*</span>
+                  </Label>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    {nome.length}/100
+                  </span>
+                </div>
                 <Input
                   id="nome"
                   type="text"
@@ -285,6 +290,7 @@ export default function AdicionarOrcamentoPage() {
                       setErrors(prev => ({ ...prev, nome: undefined }))
                     }
                   }}
+                  maxLength={100}
                   className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
                 />
                 {errors.nome && (
@@ -294,16 +300,21 @@ export default function AdicionarOrcamentoPage() {
 
               {/* Descrição */}
               <div className="flex-shrink-0">
-                <Label htmlFor="descricao" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                  Descrição
-                </Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="descricao" className="text-sm md:text-base font-medium text-gray-900">
+                    Descrição
+                  </Label>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    {descricao.length}/200
+                  </span>
+                </div>
                 <textarea
                   id="descricao"
                   placeholder="Desenvolvimento de uma horta automatizada por arduino."
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[100px]"
-                  maxLength={500}
+                  maxLength={200}
                 />
               </div>
 

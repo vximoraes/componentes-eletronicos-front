@@ -29,7 +29,8 @@ function PageOrcamentosContent() {
   const [excluirOrcamentoId, setExcluirOrcamentoId] = useState<string | null>(null)
   const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false)
   const [detalhesOrcamentoId, setDetalhesOrcamentoId] = useState<string | null>(null)
-  const [atualizandoOrcamentoId, setAtualizandoOrcamentoId] = useState<string | null>(null)
+  const [detalhesOrcamentoNome, setDetalhesOrcamentoNome] = useState<string>('')
+  const [detalhesOrcamentoDescricao, setDetalhesOrcamentoDescricao] = useState<string | undefined>(undefined)
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
 
@@ -94,12 +95,8 @@ function PageOrcamentosContent() {
 
   useEffect(() => {
     const success = searchParams.get('success')
-    const orcamentoId = searchParams.get('id')
 
     if (success === 'created') {
-      if (orcamentoId) {
-        setAtualizandoOrcamentoId(orcamentoId)
-      }
       toast.success('Orçamento criado com sucesso!', {
         position: 'bottom-right',
         autoClose: 5000,
@@ -112,9 +109,6 @@ function PageOrcamentosContent() {
       refetch()
       router.replace('/orcamentos')
     } else if (success === 'updated') {
-      if (orcamentoId) {
-        setAtualizandoOrcamentoId(orcamentoId)
-      }
       toast.success('Orçamento atualizado com sucesso!', {
         position: 'bottom-right',
         autoClose: 5000,
@@ -128,12 +122,6 @@ function PageOrcamentosContent() {
       router.replace('/orcamentos')
     }
   }, [searchParams, router, refetch])
-
-  useEffect(() => {
-    if (!isFetching && atualizandoOrcamentoId) {
-      setAtualizandoOrcamentoId(null)
-    }
-  }, [isFetching, atualizandoOrcamentoId])
 
   const handleAdicionarClick = () => {
     router.push('/orcamentos/adicionar')
@@ -167,7 +155,10 @@ function PageOrcamentosContent() {
   }
 
   const handleViewDetails = (id: string) => {
+    const orcamento = orcamentos.find(o => o._id === id)
     setDetalhesOrcamentoId(id)
+    setDetalhesOrcamentoNome(orcamento?.nome || '')
+    setDetalhesOrcamentoDescricao(orcamento?.descricao)
     setIsDetalhesModalOpen(true)
   }
 
@@ -220,7 +211,7 @@ function PageOrcamentosContent() {
 
         {/* Área da Tabela */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {isLoading || isRefetchingAfterDelete ? (
+          {isLoading || isRefetchingAfterDelete || (isFetching && !isLoading) ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
@@ -234,39 +225,28 @@ function PageOrcamentosContent() {
                 <table className="w-full caption-bottom text-xs sm:text-sm md:table-fixed">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center md:w-2/6">NOME</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-2/6">DESCRIÇÃO</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/6">TOTAL</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center md:w-1/6">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 lg:w-1/4">NOME</TableHead>
+                      <TableHead className="hidden lg:table-cell font-semibold text-gray-700 bg-gray-50 text-center lg:w-1/4">DESCRIÇÃO</TableHead>
+                      <TableHead className="hidden lg:table-cell font-semibold text-gray-700 bg-gray-50 text-center lg:w-1/4">TOTAL</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 lg:w-1/4">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orcamentos.map((orcamento) => (
                       <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b relative">
-                        {atualizandoOrcamentoId === orcamento._id && isFetching && (
-                          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
-                            <div className="flex flex-col items-center">
-                              <div className="relative w-8 h-8">
-                                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
-                              </div>
-                              <p className="mt-2 text-sm text-gray-600">Atualizando...</p>
-                            </div>
-                          </div>
-                        )}
                         <TableCell className="font-medium text-left px-2 sm:px-4">
-                          <div className="truncate max-w-[150px] md:max-w-none" title={orcamento.nome}>
+                          <div className="truncate max-w-[150px] lg:max-w-none" title={orcamento.nome}>
                             {orcamento.nome}
                           </div>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-4">
+                        <TableCell className="hidden lg:table-cell text-left px-4">
                           <div className="truncate" title={orcamento.descricao}>
                             {orcamento.descricao || '-'}
                           </div>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell px-4">
+                        <TableCell className="hidden lg:table-cell px-4">
                           <div className="font-semibold text-gray-900 flex justify-center">
-                            <span className="text-center min-w-[100px]">
+                            <span className="truncate text-center min-w-[100px] max-w-[150px]" title={`R$ ${orcamento.total.toFixed(2)}`}>
                               R$ {orcamento.total.toFixed(2)}
                             </span>
                           </div>
@@ -361,8 +341,12 @@ function PageOrcamentosContent() {
           onClose={() => {
             setIsDetalhesModalOpen(false)
             setDetalhesOrcamentoId(null)
+            setDetalhesOrcamentoNome('')
+            setDetalhesOrcamentoDescricao(undefined)
           }}
           orcamentoId={detalhesOrcamentoId}
+          orcamentoNome={detalhesOrcamentoNome}
+          orcamentoDescricao={detalhesOrcamentoDescricao}
         />
       )}
     </div>
