@@ -154,8 +154,6 @@ export default function EditarOrcamentoPage() {
       return await post(`/orcamentos/${orcamentoId}/componentes`, componenteData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orcamentos'] })
-      queryClient.invalidateQueries({ queryKey: ['orcamento', orcamentoId] })
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || error.message || 'Erro ao adicionar componente'
@@ -176,8 +174,6 @@ export default function EditarOrcamentoPage() {
       return await patch(`/orcamentos/${orcamentoId}/componentes/${componenteId}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orcamentos'] })
-      queryClient.invalidateQueries({ queryKey: ['orcamento', orcamentoId] })
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || error.message || 'Erro ao atualizar componente'
@@ -308,12 +304,18 @@ export default function EditarOrcamentoPage() {
         data: { fornecedor: fornecedorId }
       })
     } else if (novosComponentes[index].componente) {
-      await addComponenteMutation.mutateAsync({
+      const response = await addComponenteMutation.mutateAsync({
         componente: novosComponentes[index].componente,
         fornecedor: fornecedorId,
         quantidade: novosComponentes[index].quantidade,
         valor_unitario: novosComponentes[index].valor_unitario
       })
+
+      if (response && (response as any).data?._id) {
+        setComponentes(prev => prev.map((comp, i) =>
+          i === index ? { ...comp, _id: (response as any).data._id } : comp
+        ))
+      }
     }
   }
 
