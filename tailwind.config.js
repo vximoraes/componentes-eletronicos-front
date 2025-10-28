@@ -10,9 +10,11 @@ module.exports = {
     extend: {
       fontFamily: {
         poppins: ['Poppins', 'sans-serif'],
-        sans: ['Poppins', 'sans-serif'], // Define como fonte padrão
+        sans: ['Poppins', 'sans-serif'],
       },
-      // ...outras extensões...
+      screens: {
+        '3xl': '1800px',
+      },
     },
   },
   plugins: [],
