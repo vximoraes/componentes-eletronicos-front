@@ -232,6 +232,20 @@ export default function EditarOrcamentoPage() {
       return
     }
 
+    const componentesPendentes = componentes.filter(comp => !comp._id)
+    if (componentesPendentes.length > 0) {
+      toast.error('Selecione um fornecedor para todos os componentes antes de salvar o orçamento.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+      return
+    }
+
     const updateData = {
       nome,
       descricao: descricao || undefined,

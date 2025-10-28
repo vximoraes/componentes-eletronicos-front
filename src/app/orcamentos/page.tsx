@@ -245,7 +245,7 @@ function PageOrcamentosContent() {
                           </div>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell px-4">
-                          <div className="font-semibold text-gray-900 flex justify-center">
+                          <div className="text-gray-900 flex justify-center">
                             <span className="truncate text-center min-w-[100px] max-w-[150px]" title={`R$ ${orcamento.total.toFixed(2)}`}>
                               R$ {orcamento.total.toFixed(2)}
                             </span>
