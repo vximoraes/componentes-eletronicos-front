@@ -14,7 +14,7 @@ import ModalDetalhesOrcamento from "@/components/modal-detalhes-orcamento"
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { get } from '@/lib/fetchData'
 import { OrcamentoApiResponse } from '@/types/orcamentos'
-import { Search, Plus, Edit, Trash2, Eye, FileDown } from 'lucide-react'
+import { Search, Plus, Edit, Trash2, Eye, FileDown, Loader2 } from 'lucide-react'
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ToastContainer, toast, Slide } from 'react-toastify'
@@ -32,6 +32,7 @@ function PageOrcamentosContent() {
   const [detalhesOrcamentoNome, setDetalhesOrcamentoNome] = useState<string>('')
   const [detalhesOrcamentoDescricao, setDetalhesOrcamentoDescricao] = useState<string | undefined>(undefined)
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false)
+  const [pdfLoadingId, setPdfLoadingId] = useState<string | null>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   const {
@@ -162,16 +163,113 @@ function PageOrcamentosContent() {
     setIsDetalhesModalOpen(true)
   }
 
-  const handleExportarPDF = (id: string) => {
-    toast.info('Funcionalidade de exportação em desenvolvimento', {
-      position: 'bottom-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: false,
-      transition: Slide,
-    })
+  const handleExportarPDF = async (id: string) => {
+    setPdfLoadingId(id)
+    try {
+      const response = await get<{ data: any }>(`/orcamentos/${id}`)
+      const orcamento = response.data
+      
+      const jsPDF = (await import('jspdf')).default
+      const doc = new jsPDF()
+      
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const margin = 20
+      let yPosition = 20
+      
+      doc.setFontSize(18)
+      doc.setFont('helvetica', 'bold')
+      doc.text('ORÇAMENTO', pageWidth / 2, yPosition, { align: 'center' })
+      yPosition += 15
+      
+      doc.setFontSize(14)
+      const splitNome = doc.splitTextToSize(orcamento.nome, pageWidth - 2 * margin)
+      doc.text(splitNome, margin, yPosition)
+      yPosition += splitNome.length * 7 + 5
+      
+      if (orcamento.descricao) {
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+        const splitDescription = doc.splitTextToSize(orcamento.descricao, pageWidth - 2 * margin)
+        doc.text(splitDescription, margin, yPosition)
+        yPosition += splitDescription.length * 5 + 5
+      }
+      
+      yPosition += 5
+      
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Componentes:', margin, yPosition)
+      yPosition += 8
+      
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Nome', margin, yPosition)
+      doc.text('Qtd', margin + 80, yPosition)
+      doc.text('Valor Unit.', margin + 100, yPosition)
+      doc.text('Subtotal', margin + 140, yPosition)
+      yPosition += 2
+      
+      doc.line(margin, yPosition, pageWidth - margin, yPosition)
+      yPosition += 5
+      
+      doc.setFont('helvetica', 'normal')
+      orcamento.componentes.forEach((comp: any) => {
+        if (yPosition > 270) {
+          doc.addPage()
+          yPosition = 20
+        }
+        
+        const nomeComponente = doc.splitTextToSize(comp.nome || '-', 75)
+        doc.text(nomeComponente, margin, yPosition)
+        doc.text(comp.quantidade.toString(), margin + 80, yPosition)
+        doc.text(`R$ ${comp.valor_unitario.toFixed(2)}`, margin + 100, yPosition)
+        doc.text(`R$ ${comp.subtotal.toFixed(2)}`, margin + 140, yPosition)
+        yPosition += Math.max(nomeComponente.length * 5, 7)
+      })
+      
+      yPosition += 5
+      doc.line(margin, yPosition, pageWidth - margin, yPosition)
+      yPosition += 7
+
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text(`Total: R$ ${orcamento.total.toFixed(2)}`, margin + 100, yPosition)
+      
+      yPosition = doc.internal.pageSize.getHeight() - 15
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'normal')
+      doc.text(
+        `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
+        pageWidth / 2,
+        yPosition,
+        { align: 'center' }
+      )
+      
+      doc.save(`orcamento-${orcamento.nome.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`)
+      
+      toast.success('PDF gerado com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error)
+      toast.error('Erro ao gerar PDF. Tente novamente.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+    } finally {
+      setPdfLoadingId(null)
+    }
   }
 
   const orcamentos = data?.pages.flatMap((page) => page.data.docs) || []
@@ -269,10 +367,19 @@ function PageOrcamentosContent() {
                             </button>
                             <button
                               onClick={() => handleExportarPDF(orcamento._id)}
-                              className="p-1 sm:p-2 text-gray-900 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors duration-200 cursor-pointer"
-                              title="Exportar PDF"
+                              disabled={pdfLoadingId === orcamento._id}
+                              className={`p-1 sm:p-2 rounded-md transition-colors duration-200 ${
+                                pdfLoadingId === orcamento._id
+                                  ? 'text-gray-400 cursor-wait'
+                                  : 'text-gray-900 hover:text-green-600 hover:bg-green-50 cursor-pointer'
+                              }`}
+                              title={pdfLoadingId === orcamento._id ? "Gerando PDF..." : "Exportar PDF"}
                             >
-                              <FileDown size={16} className="sm:w-5 sm:h-5" />
+                              {pdfLoadingId === orcamento._id ? (
+                                <Loader2 size={16} className="sm:w-5 sm:h-5 animate-spin" />
+                              ) : (
+                                <FileDown size={16} className="sm:w-5 sm:h-5" />
+                              )}
                             </button>
                             <button
                               onClick={() => handleDelete(orcamento._id)}

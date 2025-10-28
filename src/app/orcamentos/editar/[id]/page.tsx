@@ -27,8 +27,10 @@ export default function EditarOrcamentoPage() {
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const [componentes, setComponentes] = useState<ComponenteOrcamento[]>([])
+  const [componentesOriginais, setComponentesOriginais] = useState<ComponenteOrcamento[]>([])
   const [errors, setErrors] = useState<{ nome?: string }>({})
   const [isLoadingComponentes, setIsLoadingComponentes] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const [isComponenteModalOpen, setIsComponenteModalOpen] = useState(false)
   const [isFornecedorDropdownOpen, setIsFornecedorDropdownOpen] = useState<number | null>(null)
@@ -47,7 +49,7 @@ export default function EditarOrcamentoPage() {
   })
 
   useEffect(() => {
-    if (orcamentoData?.data) {
+    if (orcamentoData?.data && componentes.length === 0) {
       setNome(orcamentoData.data.nome)
       setDescricao(orcamentoData.data.descricao || '')
 
@@ -63,6 +65,7 @@ export default function EditarOrcamentoPage() {
                   fornecedor_nome: fornecedorData?.data?.nome || ''
                 }
               } catch (error) {
+                console.error('Erro ao buscar fornecedor:', error)
                 return comp
               }
             }
@@ -70,6 +73,7 @@ export default function EditarOrcamentoPage() {
           })
         )
         setComponentes(componentesComFornecedores)
+        setComponentesOriginais(componentesComFornecedores)
         setIsLoadingComponentes(false)
       }
 
@@ -136,16 +140,8 @@ export default function EditarOrcamentoPage() {
       router.push(`/orcamentos?success=updated&id=${orcamentoId}`)
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error.message || 'Erro ao atualizar orçamento'
-      toast.error(errorMessage, {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
+      console.error('Erro ao atualizar orçamento:', error)
+      throw error
     }
   })
 
@@ -156,16 +152,8 @@ export default function EditarOrcamentoPage() {
     onSuccess: () => {
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error.message || 'Erro ao adicionar componente'
-      toast.error(errorMessage, {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
+      console.error('Erro ao adicionar componente:', error)
+      throw error
     }
   })
 
@@ -176,16 +164,8 @@ export default function EditarOrcamentoPage() {
     onSuccess: () => {
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error.message || 'Erro ao atualizar componente'
-      toast.error(errorMessage, {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
+      console.error('Erro ao atualizar componente:', error)
+      throw error
     }
   })
 
@@ -194,29 +174,10 @@ export default function EditarOrcamentoPage() {
       return await del(`/orcamentos/${orcamentoId}/componentes/${componenteId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orcamentos'] })
-      queryClient.invalidateQueries({ queryKey: ['orcamento', orcamentoId] })
-      toast.success('Componente removido com sucesso!', {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
     },
     onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || error.message || 'Erro ao remover componente'
-      toast.error(errorMessage, {
-        position: 'bottom-right',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
+      console.error('Erro ao remover componente:', error)
+      throw error
     }
   })
 
@@ -228,8 +189,8 @@ export default function EditarOrcamentoPage() {
       return
     }
 
-    const componentesPendentes = componentes.filter(comp => !comp._id)
-    if (componentesPendentes.length > 0) {
+    const componentesSemFornecedor = componentes.filter(comp => !comp.fornecedor)
+    if (componentesSemFornecedor.length > 0) {
       toast.error('Selecione um fornecedor para todos os componentes antes de salvar o orçamento.', {
         position: 'bottom-right',
         autoClose: 5000,
@@ -242,11 +203,59 @@ export default function EditarOrcamentoPage() {
       return
     }
 
-    const updateData = {
-      nome,
-      descricao: descricao || undefined,
+    setIsSaving(true)
+    try {
+      const idsAtuais = componentes.filter(comp => comp._id).map(comp => comp._id)
+      const componentesParaDeletar = componentesOriginais.filter(
+        comp => comp._id && !idsAtuais.includes(comp._id)
+      )
+      
+      for (const comp of componentesParaDeletar) {
+        await removeComponenteMutation.mutateAsync(comp._id!)
+      }
+
+      const componentesNovos = componentes.filter(comp => !comp._id && comp.componente)
+      for (const comp of componentesNovos) {
+        await addComponenteMutation.mutateAsync({
+          componente: comp.componente,
+          fornecedor: comp.fornecedor,
+          quantidade: comp.quantidade,
+          valor_unitario: comp.valor_unitario
+        })
+      }
+
+      const componentesExistentes = componentes.filter(comp => comp._id)
+      for (const comp of componentesExistentes) {
+        await updateComponenteMutation.mutateAsync({
+          componenteId: comp._id!,
+          data: {
+            fornecedor: comp.fornecedor,
+            quantidade: comp.quantidade,
+            valor_unitario: comp.valor_unitario
+          }
+        })
+      }
+
+      const updateData = {
+        nome,
+        descricao: descricao || undefined,
+      }
+      await updateOrcamentoMutation.mutateAsync(updateData)
+    } catch (error) {
+      console.error('Erro ao salvar alterações:', error)
+      const errorMessage = (error as any)?.response?.data?.message || (error as any)?.message || 'Erro ao salvar alterações.'
+      toast.error(errorMessage, {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+    } finally {
+      setIsSaving(false)
     }
-    updateOrcamentoMutation.mutate(updateData)
   }
 
   const handleAdicionarComponente = () => {
@@ -265,13 +274,9 @@ export default function EditarOrcamentoPage() {
     setComponentes([...componentes, ...novosComponentes])
   }
 
-  const handleRemoverComponente = async (index: number) => {
-    if (componentes[index]._id) {
-      await removeComponenteMutation.mutateAsync(componentes[index]._id!)
-    } else {
-      const novosComponentes = componentes.filter((_, i) => i !== index)
-      setComponentes(novosComponentes)
-    }
+  const handleRemoverComponente = (index: number) => {
+    const novosComponentes = componentes.filter((_, i) => i !== index)
+    setComponentes(novosComponentes)
   }
 
 
@@ -289,7 +294,7 @@ export default function EditarOrcamentoPage() {
     }
   }
 
-  const handleFornecedorSelect = async (index: number, fornecedorId: string, fornecedorNome: string) => {
+  const handleFornecedorSelect = (index: number, fornecedorId: string, fornecedorNome: string) => {
     const novosComponentes = [...componentes]
     novosComponentes[index].fornecedor = fornecedorId
     novosComponentes[index].fornecedor_nome = fornecedorNome
@@ -297,56 +302,22 @@ export default function EditarOrcamentoPage() {
     setIsFornecedorDropdownOpen(null)
     setFornecedorPesquisa('')
     setDropdownPosition(null)
-
-    if (novosComponentes[index]._id) {
-      await updateComponenteMutation.mutateAsync({
-        componenteId: novosComponentes[index]._id!,
-        data: { fornecedor: fornecedorId }
-      })
-    } else if (novosComponentes[index].componente) {
-      const response = await addComponenteMutation.mutateAsync({
-        componente: novosComponentes[index].componente,
-        fornecedor: fornecedorId,
-        quantidade: novosComponentes[index].quantidade,
-        valor_unitario: novosComponentes[index].valor_unitario
-      })
-
-      if (response && (response as any).data?._id) {
-        setComponentes(prev => prev.map((comp, i) =>
-          i === index ? { ...comp, _id: (response as any).data._id } : comp
-        ))
-      }
-    }
   }
 
-  const handleQuantidadeChange = async (index: number, delta: number) => {
+  const handleQuantidadeChange = (index: number, delta: number) => {
     const novosComponentes = [...componentes]
     const novaQuantidade = Math.max(1, novosComponentes[index].quantidade + delta)
     novosComponentes[index].quantidade = novaQuantidade
     novosComponentes[index].subtotal = novaQuantidade * novosComponentes[index].valor_unitario
     setComponentes(novosComponentes)
-
-    if (novosComponentes[index]._id) {
-      await updateComponenteMutation.mutateAsync({
-        componenteId: novosComponentes[index]._id!,
-        data: { quantidade: novaQuantidade }
-      })
-    }
   }
 
-  const handleValorUnitarioChange = async (index: number, valor: string) => {
+  const handleValorUnitarioChange = (index: number, valor: string) => {
     const novosComponentes = [...componentes]
     const valorNumerico = parseFloat(valor) || 0
     novosComponentes[index].valor_unitario = valorNumerico
     novosComponentes[index].subtotal = novosComponentes[index].quantidade * valorNumerico
     setComponentes(novosComponentes)
-
-    if (novosComponentes[index]._id) {
-      await updateComponenteMutation.mutateAsync({
-        componenteId: novosComponentes[index]._id!,
-        data: { valor_unitario: valorNumerico }
-      })
-    }
   }
 
   const calcularTotal = () => {
@@ -688,9 +659,9 @@ export default function EditarOrcamentoPage() {
                 type="submit"
                 className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
-                disabled={updateOrcamentoMutation.isPending}
+                disabled={isSaving}
               >
-                {updateOrcamentoMutation.isPending ? 'Salvando...' : 'Salvar'}
+                {isSaving ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           </form>
