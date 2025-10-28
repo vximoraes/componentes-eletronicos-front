@@ -109,27 +109,50 @@ export default function ModalDetalhesFornecedor({
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header do Modal */}
-        <div className="relative p-6 border-b border-gray-200">
+        {/* Header */}
+        <div className="relative p-6 border-b border-gray-200 flex-shrink-0">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer z-10"
             title="Fechar"
           >
             <X size={20} />
           </button>
-          <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Detalhes do Fornecedor
-            </h2>
+          <div className="text-center px-8">
+            <div className="max-h-[100px] overflow-y-auto mb-2">
+              <h2 className="text-xl font-semibold text-gray-900 break-words">
+                {fornecedor?.nome || 'Detalhes do Fornecedor'}
+              </h2>
+            </div>
+            {fornecedor?.descricao && (
+              <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full">
+                {fornecedor.descricao}
+              </p>
+            )}
+            {isLoading ? (
+              <p className="text-lg font-semibold text-blue-600">Carregando...</p>
+            ) : fornecedor?.url ? (
+              <a
+                href={fornecedor.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline max-w-full"
+                title={fornecedor.url}
+              >
+                <span className="truncate">{fornecedor.url}</span>
+                <ExternalLink size={18} className="flex-shrink-0" />
+              </a>
+            ) : (
+              <p className="text-lg font-semibold text-gray-400">Sem URL cadastrada</p>
+            )}
           </div>
         </div>
 
-        {/* Conteúdo do Modal */}
-        <div className="p-6 space-y-4 max-h-[400px] overflow-y-auto">
+        {/* Conteúdo */}
+        <div className="p-6 space-y-4 flex-1 overflow-y-auto">
 
           {/* Mensagem de erro */}
           {error && (
@@ -149,67 +172,16 @@ export default function ModalDetalhesFornecedor({
             </div>
           ) : fornecedor ? (
             <div className="space-y-4 text-left">
-              {/* Nome */}
-              <div>
-                <label className="text-lg font-semibold text-gray-900 block mb-2">
-                  Nome
-                </label>
-                <div className="flex items-center gap-2">
-                  <p className="text-base text-gray-900 truncate flex-1" title={fornecedor.nome}>
-                    {fornecedor.nome || '-'}
-                  </p>
-                  {fornecedor.nome && (
-                    <button
-                      onClick={() => handleCopy(fornecedor.nome, 'nome')}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
-                      title="Copiar nome"
-                    >
-                      {copiedField === 'nome' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* URL */}
-              <div>
-                <label className="text-lg font-semibold text-gray-900 block mb-2">
-                  URL
-                </label>
-                {fornecedor.url ? (
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={fornecedor.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-base text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-2 flex-1 min-w-0"
-                      title={fornecedor.url}
-                    >
-                      <span className="truncate">{fornecedor.url}</span>
-                      <ExternalLink size={16} className="flex-shrink-0" />
-                    </a>
-                    <button
-                      onClick={() => handleCopy(fornecedor.url!, 'url')}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
-                      title="Copiar URL"
-                    >
-                      {copiedField === 'url' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                  </div>
-                ) : (
-                  <p className="text-base text-gray-900">-</p>
-                )}
-              </div>
-
               {/* Contato */}
-              <div>
-                <label className="text-lg font-semibold text-gray-900 block mb-2">
-                  Contato
-                </label>
-                <div className="flex items-center gap-2">
-                  <p className="text-base text-gray-900 truncate flex-1" title={fornecedor.contato}>
-                    {fornecedor.contato || '-'}
-                  </p>
-                  {fornecedor.contato && (
+              {fornecedor.contato && (
+                <div>
+                  <label className="text-lg font-semibold text-gray-900 block mb-2">
+                    Contato
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <p className="text-base text-gray-900 truncate flex-1" title={fornecedor.contato}>
+                      {fornecedor.contato}
+                    </p>
                     <button
                       onClick={() => handleCopy(fornecedor.contato!, 'contato')}
                       className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
@@ -217,36 +189,9 @@ export default function ModalDetalhesFornecedor({
                     >
                       {copiedField === 'contato' ? <Check size={16} /> : <Copy size={16} />}
                     </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Descrição */}
-              <div>
-                <label className="text-lg font-semibold text-gray-900 block mb-2">
-                  Descrição
-                </label>
-                {fornecedor.descricao ? (
-                  <div className="flex items-start gap-2">
-                    <p
-                      className="text-base text-gray-900 whitespace-pre-wrap flex-1"
-                      style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
-                      title={fornecedor.descricao}
-                    >
-                      {fornecedor.descricao}
-                    </p>
-                    <button
-                      onClick={() => handleCopy(fornecedor.descricao!, 'descricao')}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer mt-0.5"
-                      title="Copiar descrição"
-                    >
-                      {copiedField === 'descricao' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
                   </div>
-                ) : (
-                  <p className="text-base text-gray-900">-</p>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Datas */}
               {(fornecedor.createdAt || fornecedor.updatedAt) && (
