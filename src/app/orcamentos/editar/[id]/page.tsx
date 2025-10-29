@@ -533,8 +533,8 @@ export default function EditarOrcamentoPage() {
                           <tr key={index} className="hover:bg-gray-50 border-b">
                             {/* Nome */}
                             <td className="px-4 py-3">
-                              <div className="flex items-center px-3 py-2">
-                                <span className="text-gray-900 text-sm truncate" title={comp.nome}>
+                              <div className="px-3 py-2">
+                                <span className="text-sm font-semibold text-gray-900 truncate block" title={comp.nome}>
                                   {comp.nome}
                                 </span>
                               </div>

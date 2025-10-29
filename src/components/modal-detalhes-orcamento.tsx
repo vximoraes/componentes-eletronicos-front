@@ -182,7 +182,7 @@ export default function ModalDetalhesOrcamento({
                         {orcamento.componentes.map((comp, index) => (
                           <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
                             <td className="px-3 sm:px-4 py-2 text-gray-900 min-w-[150px]">
-                              <div className="truncate max-w-[200px]" title={comp.nome || '-'}>
+                              <div className="text-sm font-semibold text-gray-900 truncate" title={comp.nome || '-'}>
                                 {comp.nome || '-'}
                               </div>
                             </td>

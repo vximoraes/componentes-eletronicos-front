@@ -47,12 +47,15 @@ export default function ComponenteCardSimples({
         </div>
 
         {/* Nome do componente */}
-        <h3
-          className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 min-h-[2.5rem]"
-          title={nome}
-        >
-          {nome}
-        </h3>
+        <div className="w-full min-h-[2.5rem] flex items-start">
+          <h3
+            className="text-sm font-semibold text-gray-900 leading-tight line-clamp-2 w-full"
+            style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
+            title={nome}
+          >
+            {nome}
+          </h3>
+        </div>
 
         {/* Categoria */}
         <p
