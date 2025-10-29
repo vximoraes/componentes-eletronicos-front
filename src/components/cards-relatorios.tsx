@@ -25,7 +25,7 @@ export default function Card({ title, descricao, imagem, bg_imagem, url }: ICard
 
   return (
     <div className="bg-[#FFFFFF] rounded-[10px] max-w-[475px] hover drop-shadow-[2px_2px_4px_rgba(0,0,0,0.20)] overflow-hidden transition-transform duration-300 hover:scale-105">
-      <div ref={cardRef} className={isCompact ? "flex flex-col gap-[30px] p-[35px] items-center text-center" : "flex flex-row gap-[30px] p-[35px]"}>
+      <div ref={cardRef} className={isCompact ? "flex flex-col gap-[30px] p-[35px] items-center text-center" : "flex flex-row gap-[30px] p-[35px] min-h-[190px]"}>
         <div className={isCompact ? "" : "pt-[10px] flex-shrink-0"}>
           <div className={"flex items-center justify-center w-[100px] h-[100px] rounded-[50%] " + bg_imagem}>
             <img src={imagem} alt="" />
