@@ -1,13 +1,331 @@
 "use client"
-import Cabecalho from "@/components/cabecalho"
+import StatCard from "@/components/stat-card";
+import Cabecalho from "@/components/cabecalho";
+import ModalFiltros from "@/components/modal-filtros";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useQuery } from '@tanstack/react-query';
+import { get } from '@/lib/fetchData';
+import { EstoqueApiResponse } from '@/types/componentes';
+import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface CategoriasApiResponse {
+  data: {
+    docs: any[];
+  };
+}
+
+function RelatorioComponentesPageContent() {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoriaFilter, setCategoriaFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+
+  // Buscar estoques ao invés de componentes diretamente
+  const { data, isLoading, error } = useQuery<EstoqueApiResponse>({
+    queryKey: ['estoques-relatorio'],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('limit', '1000'); // Buscar todos para relatório
+
+      const queryString = params.toString();
+      const url = `/estoques${queryString ? `?${queryString}` : ''}`;
+
+      return await get<EstoqueApiResponse>(url);
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: 'always',
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
+  const todosEstoques = data?.data?.docs || [];
+
+  // Filtrar estoques localmente baseado no searchTerm, categoriaFilter e statusFilter
+  const estoquesFiltrados = todosEstoques.filter((estoque) => {
+    const matchSearch = !searchTerm || 
+      estoque.componente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      estoque.componente._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      estoque.localizacao.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchCategoria = !categoriaFilter || 
+      estoque.componente.categoria === categoriaFilter;
+    
+    const matchStatus = !statusFilter || 
+      estoque.componente.status === statusFilter;
+    
+    return matchSearch && matchCategoria && matchStatus;
+  });
+
+  // Calcular estatísticas baseadas nos estoques filtrados
+  const totalComponentes = new Set(estoquesFiltrados.map(e => e.componente._id)).size;
+  const emEstoque = estoquesFiltrados.filter(e => e.componente.status === 'Em Estoque').length;
+  const baixoEstoque = estoquesFiltrados.filter(e => e.componente.status === 'Baixo Estoque').length;
+  const indisponiveis = estoquesFiltrados.filter(e => e.componente.status === 'Indisponível').length;
+
+  // Query para buscar categorias para mostrar o nome nos filtros
+  const { data: categoriasData } = useQuery<CategoriasApiResponse>({
+    queryKey: ['categorias'],
+    queryFn: async () => {
+      return await get<CategoriasApiResponse>('/categorias');
+    },
+    staleTime: 1000 * 60 * 10,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+
+  const handleOpenFiltrosModal = () => {
+    setIsFiltrosModalOpen(true);
+  };
+
+  const handleCloseFiltrosModal = () => {
+    setIsFiltrosModalOpen(false);
+  };
+
+  const handleFiltersChange = (categoria: string, status: string) => {
+    setCategoriaFilter(categoria);
+    setStatusFilter(status);
+  };
+
+  return (
+    <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-componentes-page">
+      <Cabecalho pagina="Relatórios" acao="Componentes" />
+
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
+            <StatCard
+              title="Total de"
+              subtitle="componentes"
+              value={totalComponentes}
+              icon={Package}
+              iconColor="text-blue-600"
+              iconBgColor="bg-blue-100"
+              data-test="stat-total-componentes"
+              hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
+            />
+
+            <StatCard
+              title="Em estoque"
+              value={emEstoque}
+              icon={CheckCircle}
+              iconColor="text-green-600"
+              iconBgColor="bg-green-100"
+              data-test="stat-em-estoque"
+              hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
+            />
+
+            <StatCard
+              title="Baixo estoque"
+              value={baixoEstoque}
+              icon={AlertTriangle}
+              iconColor="text-yellow-600"
+              iconBgColor="bg-yellow-100"
+              data-test="stat-baixo-estoque"
+              hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
+            />
+
+            <StatCard
+              title="Indisponível"
+              value={indisponiveis}
+              icon={XCircle}
+              iconColor="text-red-600"
+              iconBgColor="bg-red-100"
+              data-test="stat-indisponiveis"
+              hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
+            <div className="relative flex-1" data-test="search-container">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Pesquisar componentes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+                data-test="search-input"
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 cursor-pointer"
+              data-test="filtros-button"
+              onClick={handleOpenFiltrosModal}
+            >
+              <Filter className="w-4 h-4" />
+              Filtros
+            </Button>
+            <Button
+              className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
+              style={{ backgroundColor: '#306FCC' }}
+              data-test="adicionar-button"
+              onClick={() => {/* TODO: Implementar ação */}}
+            >
+              <img src="../gerar-pdf.svg" alt="" className="w-[20px]" />
+              Gerar PDF
+            </Button>
+          </div>
+
+          {/* Filtros aplicados */}
+          {(categoriaFilter || statusFilter) && (
+            <div className="mb-4" data-test="applied-filters">
+              <div className="flex flex-wrap items-center gap-2">
+                {categoriaFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">Categoria:</span>
+                    <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
+                    <button
+                      onClick={() => setCategoriaFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de categoria"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+                {statusFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">Status:</span>
+                    <span>{statusFilter}</span>
+                    <button
+                      onClick={() => setStatusFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de status"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div
+              className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
+              data-test="error-message"
+              title={`Erro completo: ${error.message}`}
+            >
+              Erro ao carregar componentes: {error.message}
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+              </div>
+              <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
+            </div>
+          ) : estoquesFiltrados.length > 0 ? (
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+              <div className="overflow-x-auto overflow-y-auto flex-1 relative">
+                <table className="w-full caption-bottom text-xs sm:text-sm">
+                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
+                    <TableRow className="bg-gray-50 border-b">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">COMPONENTE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">LOCALIZAÇÃO</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {estoquesFiltrados.map((estoque) => (
+                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b">
+                        <TableCell className="font-medium text-center px-2 sm:px-4">
+                          <div className="truncate" title={estoque.componente._id}>
+                            {estoque.componente._id.slice(-8)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-left px-2 sm:px-4">
+                          <div className="truncate font-medium" title={estoque.componente.nome}>
+                            {estoque.componente.nome}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center px-2 sm:px-4 font-medium">
+                          {estoque.quantidade}
+                        </TableCell>
+                        <TableCell className="text-center px-2 sm:px-">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-[10px] text-[14px] font-medium ${
+                              estoque.componente.status === 'Em Estoque'
+                                ? 'bg-green-100 text-green-800'
+                                : estoque.componente.status === 'Baixo Estoque'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
+                          >
+                            {estoque.componente.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center px-2 sm:px-4 font-medium">
+                          <div className="truncate" title={estoque.localizacao.nome}>
+                            {estoque.localizacao.nome}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8" data-test="empty-state">
+              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">
+                {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal de Filtros */}
+      <ModalFiltros
+        isOpen={isFiltrosModalOpen}
+        onClose={handleCloseFiltrosModal}
+        categoriaFilter={categoriaFilter}
+        statusFilter={statusFilter}
+        onFiltersChange={handleFiltersChange}
+      />
+    </div>
+  );
+}
 
 export default function RelatorioComponentesPage() {
   return (
-    <div className="w-full">
-      <Cabecalho pagina="Relatórios" acao="Componentes" />
-      <div className="p-6 pt-0">
-        <p>Conteúdo do relatório de componentes aqui...</p>
+    <Suspense fallback={
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+        </div>
+        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
       </div>
-    </div>
-  )
+    }>
+      <RelatorioComponentesPageContent />
+    </Suspense>
+  );
 }
