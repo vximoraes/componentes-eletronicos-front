@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import Cabecalho from "@/components/cabecalho"
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { get, post, patch } from '@/lib/fetchData'
+import { getSession } from 'next-auth/react'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ModalEditarCategoria from '@/components/modal-editar-categoria'
@@ -87,10 +88,9 @@ export default function EditarComponentePage() {
   const { data: componenteData, isLoading: isLoadingComponente } = useQuery({
     queryKey: ['componente', componenteId],
     queryFn: async () => {
-      const response = await api.get<{ data: ComponenteData }>(
+      return await get<{ data: ComponenteData }>(
         `/componentes/${componenteId}`
       );
-      return response.data;
     },
     enabled: !!componenteId,
   })
@@ -104,8 +104,7 @@ export default function EditarComponentePage() {
   } = useInfiniteQuery({
     queryKey: ['categorias-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
-      return response.data;
+      return await get<CategoriasApiResponse>(`/categorias?limit=20&page=${pageParam}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -136,10 +135,9 @@ export default function EditarComponentePage() {
 
   const createCategoriaMutation = useMutation({
     mutationFn: async (nomeCategoria: string) => {
-      const response = await api.post('/categorias', { nome: nomeCategoria });
-      return response.data;
+      return await post('/categorias', { nome: nomeCategoria });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
       queryClient.invalidateQueries({ queryKey: ['categorias-infinite'] })
       setCategoriaId(data.data._id)
@@ -166,13 +164,20 @@ export default function EditarComponentePage() {
       if (imagem) {
         let formData = new FormData()
         formData.append('file', imagem)
-        const response = await api.post<ComponentePatch>(`/componentes/${componenteIdParam}/foto`, formData, {headers:{'Content-Type': 'multipart/form-data'},},)
-        return response.data
+        const session = await getSession();
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/componentes/${componenteIdParam}/foto`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.user?.accessToken}`
+          },
+          body: formData
+        });
+        return await response.json();
       }
       return null
     },
-    onSuccess:(data) =>{
-      if(data?.data.imagem){
+    onSuccess: (data: any) => {
+      if (data?.data.imagem) {
         console.log('Imagem atualizada com sucesso:', data.data.imagem)
         if(componenteData?.data.imagem){
           componenteData.data.imagem = data.data.imagem
@@ -205,10 +210,9 @@ export default function EditarComponentePage() {
   })
   const updateComponenteMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.patch<ComponentePatch>(`/componentes/${componenteId}`, data);
-      return response.data;
+      return await patch<ComponentePatch>(`/componentes/${componenteId}`, data);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       const componenteIdAtualizado = data.data._id
       setIdComponente(componenteIdAtualizado)
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
@@ -412,7 +416,7 @@ export default function EditarComponentePage() {
     return (
       <div className="w-full min-h-screen flex flex-col">
         <Cabecalho pagina="Componentes" acao="Editar" />
-        <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
+        <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
           <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
@@ -466,7 +470,7 @@ export default function EditarComponentePage() {
     <div className="w-full min-h-screen flex flex-col">
       <Cabecalho pagina="Componentes" acao="Editar" />
 
-      <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
+      <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">

@@ -1,6 +1,32 @@
 import NextAuth, { AuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import axios from "axios";
+import type { JWT } from "next-auth/jwt";
+
+function parseTimeToMs(timeString: string): number {
+  const units: { [key: string]: number } = {
+    's': 1000,           
+    'm': 60 * 1000,      
+    'h': 60 * 60 * 1000, 
+    'd': 24 * 60 * 60 * 1000 
+  };
+
+  const match = timeString.match(/^(\d+)([smhd])$/);
+  if (!match) {
+    console.warn(`Formato de tempo inválido: ${timeString}, usando padrão de 1 hora`);
+    return 60 * 60 * 1000; 
+  }
+
+  const [, value, unit] = match;
+  return parseInt(value) * units[unit];
+}
+
+const ACCESS_TOKEN_EXPIRATION = process.env.JWT_ACCESS_TOKEN_EXPIRATION || "1h";
+const ACCESS_TOKEN_EXPIRATION_MS = parseTimeToMs(ACCESS_TOKEN_EXPIRATION);
+
+const REFRESH_BUFFER_MS = Math.max(2000, ACCESS_TOKEN_EXPIRATION_MS * 0.1);
+
+console.log(`[NextAuth Config] Token expira em: ${ACCESS_TOKEN_EXPIRATION} (${ACCESS_TOKEN_EXPIRATION_MS}ms)`);
+console.log(`[NextAuth Config] Buffer de renovação: ${REFRESH_BUFFER_MS}ms`);
 
 interface LoginResponse {
   error: boolean;
@@ -23,6 +49,72 @@ interface LoginResponse {
   errors: any[];
 }
 
+interface RefreshResponse {
+  error: boolean;
+  code: number;
+  message: string;
+  data: {
+    user: {
+      accesstoken: string;
+      refreshtoken: string;
+      _id: string;
+      nome: string;
+      email: string;
+      ativo: boolean;
+      permissoes: any[];
+      grupos: string[];
+      __v?: number;
+    };
+  };
+  errors: any[];
+}
+
+async function refreshAccessToken(token: JWT): Promise<JWT> {
+  try {
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+    
+    console.log("Tentando renovar token...");
+    
+    const response = await fetch(`${apiUrl}/refresh`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.refreshToken}`
+      },
+      body: JSON.stringify({ accesstoken: token.accessToken }),
+    });
+
+    if (!response.ok) {
+      console.error("Falha ao renovar token, status:", response.status);
+      throw new Error("Falha ao renovar token");
+    }
+
+    const json = await response.json() as RefreshResponse;
+    const userData = json.data.user;
+
+    console.log("Token renovado com sucesso");
+
+    return {
+      ...token,
+      accessToken: userData.accesstoken,
+      refreshToken: userData.refreshtoken ?? token.refreshToken,
+      accessTokenExpires: Date.now() + ACCESS_TOKEN_EXPIRATION_MS,
+
+      name: userData.nome ?? token.name,
+      email: userData.email ?? token.email,
+      ativo: userData.ativo ?? token.ativo,
+      permissoes: userData.permissoes ?? token.permissoes,
+      grupos: userData.grupos ?? token.grupos,
+    };
+  } catch (err) {
+    console.error("Erro ao renovar token:", err);
+    return { 
+      ...token, 
+      error: "RefreshAccessTokenError" as const 
+    };
+  }
+}
+
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -37,15 +129,23 @@ export const authOptions: AuthOptions = {
         }
 
         try {
-          const response = await axios.post<LoginResponse>(
-            `${process.env.NEXT_PUBLIC_API_URL}/login`,
-            {
+          const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+          const response = await fetch(`${apiUrl}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
               email: credentials.email,
               senha: credentials.senha
-            }
-          );
+            })
+          });
 
-          const { data } = response.data;
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData?.message || "Erro ao fazer login");
+          }
+
+          const json = await response.json() as LoginResponse;
+          const { data } = json;
 
           if (data?.user) {
             const user: User = {
@@ -63,11 +163,8 @@ export const authOptions: AuthOptions = {
 
           return null;
         } catch (error) {
-          if (axios.isAxiosError(error)) {
-            console.error("Erro no login:", error.response?.data);
-            throw new Error(error.response?.data?.message || "Erro ao fazer login");
-          }
-          throw new Error("Erro ao fazer login");
+          console.error("Erro no login:", error);
+          throw new Error(error instanceof Error ? error.message : "Erro ao fazer login");
         }
       }
     })
@@ -75,22 +172,32 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.accessToken = (user as any).accessToken;
-        token.refreshToken = (user as any).refreshToken;
-        token.ativo = (user as any).ativo;
-        token.permissoes = (user as any).permissoes;
-        token.grupos = (user as any).grupos;
+        return {
+          ...token,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          accessToken: (user as any).accessToken,
+          refreshToken: (user as any).refreshToken,
+          ativo: (user as any).ativo,
+          permissoes: (user as any).permissoes,
+          grupos: (user as any).grupos,
+          accessTokenExpires: Date.now() + ACCESS_TOKEN_EXPIRATION_MS,
+        };
       }
 
       if (trigger === "update" && session) {
-        token = { ...token, ...session };
+        return { ...token, ...session };
       }
 
-      return token;
+      if (Date.now() < Number(token.accessTokenExpires ?? 0) - REFRESH_BUFFER_MS) {
+        return token;
+      }
+
+      console.log("Token próximo de expirar ou expirado, iniciando renovação automática...");
+      return await refreshAccessToken(token);
     },
+
     async session({ session, token }) {
       if (token) {
         session.user = {
@@ -105,6 +212,11 @@ export const authOptions: AuthOptions = {
           grupos: token.grupos as string[],
         };
       }
+
+      if (token?.error === "RefreshAccessTokenError") {
+        session.error = "RefreshAccessTokenError";
+      }
+
       return session;
     }
   },
@@ -114,7 +226,35 @@ export const authOptions: AuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60,
+    maxAge: 7 * 24 * 60 * 60,
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+      options: {
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    },
+    csrfToken: {
+      name: `next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

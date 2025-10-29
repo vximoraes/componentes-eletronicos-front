@@ -8,10 +8,14 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import Cabecalho from "@/components/cabecalho"
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { get, patch } from '@/lib/fetchData'
 import { Fornecedor } from '@/types/fornecedores'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+
+interface FornecedorApiResponse {
+  data: Fornecedor;
+}
 
 export default function EditarFornecedorPage() {
   const router = useRouter()
@@ -24,11 +28,10 @@ export default function EditarFornecedorPage() {
   const [errors, setErrors] = useState<{ nome?: string; contato?: string; url?: string }>({})
   const queryClient = useQueryClient()
 
-  const { data: fornecedorData, isLoading: isLoadingFornecedor } = useQuery({
+  const { data: fornecedorData, isLoading: isLoadingFornecedor } = useQuery<FornecedorApiResponse>({
     queryKey: ['fornecedor', fornecedorId],
     queryFn: async () => {
-      const response = await api.get(`/fornecedores/${fornecedorId}`)
-      return response.data
+      return await get<FornecedorApiResponse>(`/fornecedores/${fornecedorId}`)
     },
     enabled: !!fornecedorId,
   })
@@ -45,8 +48,7 @@ export default function EditarFornecedorPage() {
 
   const updateFornecedorMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await api.put(`/fornecedores/${fornecedorId}`, data)
-      return response.data
+      return await patch(`/fornecedores/${fornecedorId}`, data)
     },
     onSuccess: () => {
       queryClient.resetQueries({ queryKey: ['fornecedores'] })
@@ -120,7 +122,7 @@ export default function EditarFornecedorPage() {
     return (
       <div className="w-full min-h-screen flex flex-col">
         <Cabecalho pagina="Fornecedores" acao="Editar" />
-        <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
+        <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
           <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
@@ -168,7 +170,7 @@ export default function EditarFornecedorPage() {
     <div className="w-full min-h-screen flex flex-col">
       <Cabecalho pagina="Fornecedores" acao="Editar" />
 
-      <div className="flex-1 p-3 sm:p-4 md:p-6 pt-0 flex flex-col overflow-hidden">
+      <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
@@ -176,14 +178,20 @@ export default function EditarFornecedorPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
                 <div>
-                  <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                    Nome <span className="text-red-500">*</span>
-                  </Label>
+                  <div className="flex justify-between items-center mb-2">
+                    <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900">
+                      Nome <span className="text-red-500">*</span>
+                    </Label>
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      {nome.length}/100
+                    </span>
+                  </div>
                   <Input
                     id="nome"
                     type="text"
                     placeholder="Nome do fornecedor"
                     value={nome}
+                    maxLength={100}
                     onChange={(e) => {
                       setNome(e.target.value)
                       if (errors.nome) {
@@ -223,14 +231,20 @@ export default function EditarFornecedorPage() {
 
               {/* Contato - largura total */}
               <div>
-                <Label htmlFor="contato" className="text-sm md:text-base font-medium text-gray-900 mb-2 block">
-                  Contato
-                </Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label htmlFor="contato" className="text-sm md:text-base font-medium text-gray-900">
+                    Contato
+                  </Label>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    {contato.length}/100
+                  </span>
+                </div>
                 <Input
                   id="contato"
                   type="text"
                   placeholder="email@exemplo.com ou telefone"
                   value={contato}
+                  maxLength={100}
                   onChange={(e) => {
                     setContato(e.target.value)
                     if (errors.contato) {

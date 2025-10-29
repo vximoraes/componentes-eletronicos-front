@@ -1,46 +1,50 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, ExternalLink, Copy, Check } from 'lucide-react'
+import { X, Copy, Check } from 'lucide-react'
 import { get } from '@/lib/fetchData'
-import { Fornecedor } from '@/types/fornecedores'
+import { Orcamento } from '@/types/orcamentos'
 
-interface FornecedorApiResponse {
-  data: Fornecedor;
+interface OrcamentoApiResponse {
+  data: Orcamento;
 }
 
-interface ModalDetalhesFornecedorProps {
+interface ModalDetalhesOrcamentoProps {
   isOpen: boolean
   onClose: () => void
-  fornecedorId: string
+  orcamentoId: string
+  orcamentoNome?: string
+  orcamentoDescricao?: string
 }
 
-export default function ModalDetalhesFornecedor({
+export default function ModalDetalhesOrcamento({
   isOpen,
   onClose,
-  fornecedorId
-}: ModalDetalhesFornecedorProps) {
-  const [fornecedor, setFornecedor] = useState<Fornecedor | null>(null)
+  orcamentoId,
+  orcamentoNome,
+  orcamentoDescricao
+}: ModalDetalhesOrcamentoProps) {
+  const [orcamento, setOrcamento] = useState<Orcamento | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
   useEffect(() => {
-    if (isOpen && fornecedorId) {
-      loadFornecedor()
+    if (isOpen && orcamentoId) {
+      loadOrcamento()
     }
-  }, [isOpen, fornecedorId])
+  }, [isOpen, orcamentoId])
 
-  const loadFornecedor = async () => {
+  const loadOrcamento = async () => {
     setIsLoading(true)
     setError(null)
 
     try {
-      const response = await get<FornecedorApiResponse>(`/fornecedores/${fornecedorId}`)
-      setFornecedor(response.data)
+      const response = await get<OrcamentoApiResponse>(`/orcamentos/${orcamentoId}`)
+      setOrcamento(response.data)
     } catch (err: any) {
-      console.error('Erro ao carregar fornecedor:', err)
-      setError(err?.response?.data?.message || 'Erro ao carregar dados do fornecedor')
+      console.error('Erro ao carregar orçamento:', err)
+      setError(err?.response?.data?.message || 'Erro ao carregar dados do orçamento')
     } finally {
       setIsLoading(false)
     }
@@ -75,7 +79,7 @@ export default function ModalDetalhesFornecedor({
   }, [isOpen, onClose])
 
   const handleClose = () => {
-    setFornecedor(null)
+    setOrcamento(null)
     setError(null)
     setCopiedField(null)
     onClose()
@@ -124,40 +128,26 @@ export default function ModalDetalhesFornecedor({
           <div className="text-center px-8">
             <div className="max-h-[100px] overflow-y-auto mb-2">
               <h2 className="text-xl font-semibold text-gray-900 break-words">
-                {fornecedor?.nome || 'Detalhes do Fornecedor'}
+                {orcamentoNome || orcamento?.nome || 'Detalhes do Orçamento'}
               </h2>
             </div>
-            {fornecedor?.descricao && (
+            {(orcamentoDescricao || orcamento?.descricao) && (
               <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full">
-                {fornecedor.descricao}
+                {orcamentoDescricao || orcamento?.descricao}
               </p>
             )}
-            {isLoading ? (
-              <p className="text-lg font-semibold text-blue-600">Carregando...</p>
-            ) : fornecedor?.url ? (
-              <a
-                href={fornecedor.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-lg font-semibold text-blue-600 hover:text-blue-800 hover:underline max-w-full"
-                title={fornecedor.url}
-              >
-                <span className="truncate">{fornecedor.url}</span>
-                <ExternalLink size={18} className="flex-shrink-0" />
-              </a>
-            ) : (
-              <p className="text-lg font-semibold text-gray-400">Sem URL cadastrada</p>
-            )}
+            <p className="text-xl font-semibold text-blue-600">
+              {isLoading ? 'Carregando...' : orcamento ? `R$ ${orcamento.total.toFixed(2)}` : '-'}
+            </p>
           </div>
         </div>
 
         {/* Conteúdo */}
         <div className="p-6 space-y-4 flex-1 overflow-y-auto">
 
-          {/* Mensagem de erro */}
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível carregar o fornecedor</div>
+              <div className="font-medium mb-1">Não foi possível carregar o orçamento</div>
               <div className="text-red-500">{error}</div>
             </div>
           )}
@@ -170,39 +160,59 @@ export default function ModalDetalhesFornecedor({
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
               </div>
             </div>
-          ) : fornecedor ? (
+          ) : orcamento ? (
             <div className="space-y-4 text-left">
-              {/* Contato */}
-              {fornecedor.contato && (
+              {/* Componentes */}
+              {orcamento.componentes && orcamento.componentes.length > 0 && (
                 <div>
                   <label className="text-lg font-semibold text-gray-900 block mb-2">
-                    Contato
+                    Componentes ({orcamento.componentes.length})
                   </label>
-                  <div className="flex items-center gap-2">
-                    <p className="text-base text-gray-900 truncate flex-1" title={fornecedor.contato}>
-                      {fornecedor.contato}
-                    </p>
-                    <button
-                      onClick={() => handleCopy(fornecedor.contato!, 'contato')}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
-                      title="Copiar contato"
-                    >
-                      {copiedField === 'contato' ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
+                  <div className="border rounded-lg overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 border-b">
+                        <tr>
+                          <th className="text-left px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[150px]">Nome</th>
+                          <th className="text-center px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[60px]">Qtd</th>
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">Valor Unit.</th>
+                          <th className="text-right px-3 sm:px-4 py-2 font-semibold text-gray-700 min-w-[100px]">Subtotal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {orcamento.componentes.map((comp, index) => (
+                          <tr key={index} className="border-b last:border-0 hover:bg-gray-50">
+                            <td className="px-3 sm:px-4 py-2 text-gray-900 min-w-[150px]">
+                              <div className="truncate max-w-[200px]" title={comp.nome || '-'}>
+                                {comp.nome || '-'}
+                              </div>
+                            </td>
+                            <td className="px-3 sm:px-4 py-2 text-center text-gray-900 min-w-[60px]">
+                              {comp.quantidade}
+                            </td>
+                            <td className="px-3 sm:px-4 py-2 text-right text-gray-900 min-w-[100px] whitespace-nowrap">
+                              R$ {comp.valor_unitario.toFixed(2)}
+                            </td>
+                            <td className="px-3 sm:px-4 py-2 text-right text-gray-900 font-medium min-w-[100px] whitespace-nowrap">
+                              R$ {(comp.quantidade * comp.valor_unitario).toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
 
               {/* Datas */}
-              {(fornecedor.createdAt || fornecedor.updatedAt) && (
+              {(orcamento.createdAt || orcamento.updatedAt) && (
                 <div className="pt-4 border-t grid grid-cols-2 gap-4">
-                  {fornecedor.createdAt && (
+                  {orcamento.createdAt && (
                     <div>
                       <label className="text-base font-medium text-gray-700 block mb-2">
                         Criado em
                       </label>
                       <p className="text-base text-gray-600">
-                        {new Date(fornecedor.createdAt).toLocaleDateString('pt-BR', {
+                        {new Date(orcamento.createdAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -212,13 +222,13 @@ export default function ModalDetalhesFornecedor({
                       </p>
                     </div>
                   )}
-                  {fornecedor.updatedAt && (
+                  {orcamento.updatedAt && (
                     <div>
                       <label className="text-base font-medium text-gray-700 block mb-2">
                         Atualizado em
                       </label>
                       <p className="text-base text-gray-600">
-                        {new Date(fornecedor.updatedAt).toLocaleDateString('pt-BR', {
+                        {new Date(orcamento.updatedAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',

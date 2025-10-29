@@ -10,16 +10,22 @@ import ModalExcluirComponente from "@/components/modal-excluir-componente";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { get } from '@/lib/fetchData';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useQueryState } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function ComponentesPage() {
+interface CategoriasApiResponse {
+  data: {
+    docs: any[];
+  };
+}
+
+function ComponentesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
@@ -74,8 +80,7 @@ export default function ComponentesPage() {
       const queryString = params.toString();
       const url = `/componentes${queryString ? `?${queryString}` : ''}`;
 
-      const response = await api.get<ApiResponse>(url);
-      return response.data;
+      return await get<ApiResponse>(url);
     },
     staleTime: 1000 * 60 * 5,
     refetchOnMount: 'always',
@@ -91,10 +96,9 @@ export default function ComponentesPage() {
   const { data: estoquesData, isLoading: isLoadingEstoques } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', selectedComponenteId],
     queryFn: async () => {
-      const response = await api.get<EstoqueApiResponse>(
+      return await get<EstoqueApiResponse>(
         `/estoques/componente/${selectedComponenteId}`
       );
-      return response.data;
     },
     enabled: !!selectedComponenteId,
     staleTime: 1000 * 60 * 5,
@@ -107,11 +111,10 @@ export default function ComponentesPage() {
   });
 
   // Query para buscar categorias para mostrar o nome nos filtros
-  const { data: categoriasData } = useQuery({
+  const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      const response = await api.get('/categorias');
-      return response.data;
+      return await get<CategoriasApiResponse>('/categorias');
     },
     staleTime: 1000 * 60 * 10,
     retry: (failureCount, error: any) => {
@@ -642,5 +645,21 @@ export default function ComponentesPage() {
         transition={Slide}
       />
     </div>
+  );
+}
+
+export default function ComponentesPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+        </div>
+        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
+      </div>
+    }>
+      <ComponentesPageContent />
+    </Suspense>
   );
 }

@@ -5,37 +5,37 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { patch } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 
-interface ModalExcluirFornecedorProps {
+interface ModalExcluirOrcamentoProps {
   isOpen: boolean;
   onClose: () => void;
-  fornecedorId: string;
-  fornecedorNome: string;
+  orcamentoId: string;
+  orcamentoNome: string;
   onSuccess?: () => void;
 }
 
-export default function ModalExcluirFornecedor({
+export default function ModalExcluirOrcamento({
   isOpen,
   onClose,
-  fornecedorId,
-  fornecedorNome,
+  orcamentoId,
+  orcamentoNome,
   onSuccess
-}: ModalExcluirFornecedorProps) {
+}: ModalExcluirOrcamentoProps) {
   const queryClient = useQueryClient();
 
   const excluirMutation = useMutation({
     mutationFn: async () => {
-      return await patch(`/fornecedores/${fornecedorId}/inativar`);
+      return await patch(`/orcamentos/${orcamentoId}/inativar`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['fornecedores']
+        queryKey: ['orcamentos']
       });
 
       onSuccess?.();
       onClose();
     },
     onError: (error: any) => {
-      console.error('Erro ao inativar fornecedor:', error);
+      console.error('Erro ao inativar orçamento:', error);
       if (error?.response?.data) {
         console.error('Resposta da API:', error.response.data);
       }
@@ -79,7 +79,7 @@ export default function ModalExcluirFornecedor({
   };
 
   const handleExcluir = () => {
-    if (!fornecedorId) {
+    if (!orcamentoId) {
       return;
     }
 
@@ -110,23 +110,22 @@ export default function ModalExcluirFornecedor({
           </button>
         </div>
 
-        {/* Conteúdo do Modal */}
+        {/* Conteúdo */}
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Excluir fornecedor
+              Excluir orçamento
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o fornecedor <span className="font-semibold">{fornecedorNome}</span>?
+                Tem certeza que deseja excluir o orçamento <span className="font-semibold">{orcamentoNome}</span>?
               </p>
             </div>
           </div>
 
-          {/* Mensagem de erro da API */}
           {excluirMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível excluir o fornecedor</div>
+              <div className="font-medium mb-1">Não foi possível excluir o orçamento</div>
               <div className="text-red-500">
                 {(excluirMutation.error as any)?.response?.data?.message ||
                   (excluirMutation.error as any)?.message ||

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { patch } from '@/lib/fetchData'
 import { toast } from 'react-toastify'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -64,8 +64,7 @@ export default function ModalEditarLocalizacao({
 
   const updateLocalizacaoMutation = useMutation({
     mutationFn: async (nomeLocalizacao: string) => {
-      const response = await api.patch(`/localizacoes/${localizacaoId}`, { nome: nomeLocalizacao })
-      return response.data
+      return await patch(`/localizacoes/${localizacaoId}`, { nome: nomeLocalizacao })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] })

@@ -12,16 +12,16 @@ import {
 import ModalExcluirFornecedor from "@/components/modal-excluir-fornecedor"
 import ModalDetalhesFornecedor from "@/components/modal-detalhes-fornecedor"
 import { useInfiniteQuery } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { get } from '@/lib/fetchData'
 import { FornecedorApiResponse } from '@/types/fornecedores'
 import { Search, Plus, Edit, Trash2, Eye } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { PulseLoader } from 'react-spinners'
 
-export default function PageFornecedores() {
+function PageFornecedoresContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
@@ -54,8 +54,7 @@ export default function PageFornecedores() {
       const queryString = params.toString()
       const url = `/fornecedores${queryString ? `?${queryString}` : ''}`
 
-      const response = await api.get<FornecedorApiResponse>(url)
-      return response.data
+      return await get<FornecedorApiResponse>(url)
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined
@@ -364,5 +363,21 @@ export default function PageFornecedores() {
         />
       )}
     </div>
+  )
+}
+
+export default function PageFornecedores() {
+  return (
+    <Suspense fallback={
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+        </div>
+        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
+      </div>
+    }>
+      <PageFornecedoresContent />
+    </Suspense>
   )
 }

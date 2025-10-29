@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown, Edit, Trash2 } from 'lucide-react';
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
@@ -97,8 +97,7 @@ export default function ModalSaidaComponente({
   } = useInfiniteQuery({
     queryKey: ['localizacoes-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
-      return response.data;
+      return await get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -111,10 +110,9 @@ export default function ModalSaidaComponente({
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', componenteId],
     queryFn: async () => {
-      const response = await api.get<EstoqueApiResponse>(
+      return await get<EstoqueApiResponse>(
         `/estoques/componente/${componenteId}`
       );
-      return response.data;
     },
     enabled: isOpen && !!componenteId,
     staleTime: 1000 * 60 * 5,
@@ -128,8 +126,7 @@ export default function ModalSaidaComponente({
 
   const saidaMutation = useMutation({
     mutationFn: async (data: MovimentacaoRequest) => {
-      const response = await api.post('/movimentacoes', data);
-      return response.data;
+      return await post('/movimentacoes', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -432,7 +429,7 @@ export default function ModalSaidaComponente({
                     }
                   </span>
                   {localizacaoSelecionada && (
-                    <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
+                    <span className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
                         ? 'bg-green-100 text-green-700'
                         : 'bg-gray-100 text-gray-500'
                       }`}>
@@ -474,18 +471,18 @@ export default function ModalSaidaComponente({
                               <button
                                 type="button"
                                 onClick={() => handleLocalizacaoSelect(localizacao)}
-                                className={`flex-1 text-left cursor-pointer truncate min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                                className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
                                   }`}
                                 title={localizacao.nome}
                               >
-                                {localizacao.nome}
-                              </button>
-                              <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ml-2 ${qtdDisponivel > 0
+                                <span className="truncate">{localizacao.nome}</span>
+                                <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${qtdDisponivel > 0
                                   ? 'bg-green-100 text-green-700'
                                   : 'bg-gray-100 text-gray-500'
-                                }`}>
-                                {qtdDisponivel} disponível
-                              </span>
+                                  }`}>
+                                  {qtdDisponivel} disponível
+                                </span>
+                              </button>
                               <div className="flex items-center gap-1 flex-shrink-0 ml-1">
                                 <button
                                   type="button"

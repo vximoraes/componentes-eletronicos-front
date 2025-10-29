@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown, Plus, Edit, Trash2 } from 'lucide-react';
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 import ModalEditarLocalizacao from './modal-editar-localizacao';
@@ -43,6 +43,12 @@ interface MovimentacaoRequest {
   localizacao: string;
 }
 
+interface EstoqueApiResponse {
+  data: {
+    docs: any[];
+  };
+}
+
 interface ModalEntradaComponenteProps {
   isOpen: boolean;
   onClose: () => void;
@@ -80,8 +86,7 @@ export default function ModalEntradaComponente({
   } = useInfiniteQuery({
     queryKey: ['localizacoes-infinite'],
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await api.get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
-      return response.data;
+      return await get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
     },
     getNextPageParam: (lastPage) => {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
@@ -91,11 +96,10 @@ export default function ModalEntradaComponente({
     staleTime: 1000 * 60 * 5
   });
 
-  const { data: estoquesData } = useQuery({
+  const { data: estoquesData } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', componenteId],
     queryFn: async () => {
-      const response = await api.get(`/estoques/componente/${componenteId}`);
-      return response.data;
+      return await get<EstoqueApiResponse>(`/estoques/componente/${componenteId}`);
     },
     enabled: isOpen && !!componenteId,
     staleTime: 1000 * 60 * 5,
@@ -109,10 +113,9 @@ export default function ModalEntradaComponente({
 
   const createLocalizacaoMutation = useMutation({
     mutationFn: async (nomeLocalizacao: string) => {
-      const response = await api.post('/localizacoes', { nome: nomeLocalizacao });
-      return response.data;
+      return await post('/localizacoes', { nome: nomeLocalizacao });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] });
       queryClient.invalidateQueries({ queryKey: ['localizacoes-infinite'] });
       setLocalizacaoSelecionada(data.data._id);
@@ -132,8 +135,7 @@ export default function ModalEntradaComponente({
 
   const entradaMutation = useMutation({
     mutationFn: async (data: MovimentacaoRequest) => {
-      const response = await api.post('/movimentacoes', data);
-      return response.data;
+      return await post('/movimentacoes', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -443,7 +445,7 @@ export default function ModalEntradaComponente({
                       }
                     </span>
                     {localizacaoSelecionada && (
-                      <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
+                      <span className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
                         ? 'bg-green-100 text-green-700'
                         : 'bg-gray-100 text-gray-500'
                         }`}>
@@ -474,58 +476,58 @@ export default function ModalEntradaComponente({
                     <div className="overflow-y-auto">
                       {localizacoesFiltradas.length > 0 ? (
                         <>
-                          {localizacoesFiltradas.map((localizacao) => {
-                            const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
-                            return (
-                              <div
-                                key={localizacao._id}
-                                className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
+                        {localizacoesFiltradas.map((localizacao) => {
+                          const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
+                          return (
+                            <div
+                              key={localizacao._id}
+                              className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
+                                }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleLocalizacaoSelect(localizacao)}
+                                className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
                                   }`}
+                                title={localizacao.nome}
                               >
-                                <button
-                                  type="button"
-                                  onClick={() => handleLocalizacaoSelect(localizacao)}
-                                  className={`flex-1 text-left cursor-pointer truncate min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
-                                    }`}
-                                  title={localizacao.nome}
-                                >
-                                  {localizacao.nome}
-                                </button>
-                                <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ml-2 ${qtdDisponivel > 0
+                                <span className="truncate">{localizacao.nome}</span>
+                                <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${qtdDisponivel > 0
                                   ? 'bg-green-100 text-green-700'
                                   : 'bg-gray-100 text-gray-500'
                                   }`}>
                                   {qtdDisponivel} disponível
                                 </span>
-                                <div className="flex items-center gap-1 flex-shrink-0 ml-1">
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setLocalizacaoToEdit(localizacao)
-                                      setIsEditarLocalizacaoModalOpen(true)
-                                    }}
-                                    className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                    title="Editar localização"
-                                  >
-                                    <Edit size={20} />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setLocalizacaoToEdit(localizacao)
-                                      setIsExcluirLocalizacaoModalOpen(true)
-                                    }}
-                                    className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
-                                    title="Excluir localização"
-                                  >
-                                    <Trash2 size={20} />
-                                  </button>
-                                </div>
+                              </button>
+                              <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setLocalizacaoToEdit(localizacao)
+                                    setIsEditarLocalizacaoModalOpen(true)
+                                  }}
+                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  title="Editar localização"
+                                >
+                                  <Edit size={20} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setLocalizacaoToEdit(localizacao)
+                                    setIsExcluirLocalizacaoModalOpen(true)
+                                  }}
+                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  title="Excluir localização"
+                                >
+                                  <Trash2 size={20} />
+                                </button>
                               </div>
-                            );
-                          })}
+                            </div>
+                          );
+                        })}
                           {/* Infinite scroll trigger */}
                           <div ref={observerTarget} className="h-1" />
                           {/* Loading indicator */}
