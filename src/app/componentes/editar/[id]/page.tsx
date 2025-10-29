@@ -194,7 +194,7 @@ export default function EditarComponentePage() {
     },
     onError:(error:any) =>{
       console.log("Erro ao enviar imagem:", error)
-      toast.error('Erro ao atualizar a imagem do componente', {
+      toast.error('Erro ao atualizar a imagem do componente.', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,

@@ -128,7 +128,7 @@ export default function AdicionarOrcamentoPage() {
 
     const componentesInvalidos = componentes.filter(c => !c.componente || !c.fornecedor)
     if (componentesInvalidos.length > 0) {
-      toast.error('Preencha todos os campos do(s) componente(s)', {
+      toast.error('Preencha todos os campos do(s) componente(s).', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,

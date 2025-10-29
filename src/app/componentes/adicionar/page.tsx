@@ -143,7 +143,7 @@ export default function AdicionarComponentePage() {
     },
     onError: (error: any) => {
       console.log("Erro ao enviar imagem:", error)
-      toast.error('Erro ao fazer upload da imagem', {
+      toast.error('Erro ao fazer upload da imagem.', {
         position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,

@@ -186,7 +186,7 @@ export default function ModalEntradaComponente({
           draggable: true,
         });
       } else {
-        toast.error('Não foi possível registrar a entrada', {
+        toast.error('Não foi possível registrar a entrada.', {
           position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,

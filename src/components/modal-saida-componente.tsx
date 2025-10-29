@@ -177,7 +177,7 @@ export default function ModalSaidaComponente({
           draggable: true,
         });
       } else {
-        toast.error('Não foi possível registrar a saída', {
+        toast.error('Não foi possível registrar a saída.', {
           position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,
