@@ -24,16 +24,16 @@ export default function Card({ title, descricao, imagem, bg_imagem, url }: ICard
   }, [])
 
   return (
-    <div className="bg-[#FFFFFF] rounded-[10px] max-w-[400px] hover drop-shadow-[2px_2px_4px_rgba(0,0,0,0.20)] overflow-hidden transition-transform duration-300 hover:scale-105">
-      <div ref={cardRef} className={isCompact ? "flex flex-col gap-[30px] p-[35px] items-center text-center" : "flex flex-row gap-[30px] p-[35px] "}>
+    <div className="bg-[#FFFFFF] rounded-[10px] max-w-[475px] hover drop-shadow-[2px_2px_4px_rgba(0,0,0,0.20)] overflow-hidden transition-transform duration-300 hover:scale-105">
+      <div ref={cardRef} className={isCompact ? "flex flex-col gap-[30px] p-[35px] items-center text-center" : "flex flex-row gap-[30px] p-[35px] min-h-[190px]"}>
         <div className={isCompact ? "" : "pt-[10px] flex-shrink-0"}>
-          <div className={"flex items-center justify-center w-[60px] h-[60px] rounded-[50%] " + bg_imagem}>
-            <img src={imagem} className="w-[40px]" alt="" />
+          <div className={"flex items-center justify-center w-[100px] h-[100px] rounded-[50%] " + bg_imagem}>
+            <img src={imagem} alt="" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-[20px] mb-[5px] overflow-hidden text-ellipsis whitespace-nowrap">{title}</h2>
-          <span className="text-[#6B7280] font-semibold text-[12px] block overflow-hidden text-ellipsis line-clamp-2">{descricao}</span>
+          <h2 className="font-semibold text-[26px] mb-[5px] overflow-hidden text-ellipsis whitespace-nowrap">{title}</h2>
+          <span className="text-[#6B7280] font-semibold text-[16px] block overflow-hidden text-ellipsis line-clamp-2">{descricao}</span>
         </div>
       </div>
       <hr className=" border-[#4f668c71]" />
