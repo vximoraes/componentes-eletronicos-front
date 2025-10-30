@@ -11,12 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { PulseLoader } from 'react-spinners';
 
 interface CategoriasApiResponse {
   data: {
@@ -30,19 +31,33 @@ function RelatorioComponentesPageContent() {
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-  // Buscar estoques ao invés de componentes diretamente
-  const { data, isLoading, error } = useQuery<EstoqueApiResponse>({
-    queryKey: ['estoques-relatorio'],
-    queryFn: async () => {
+  // Buscar estoques com infinite scroll
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery<EstoqueApiResponse>({
+    queryKey: ['estoques-relatorio', searchTerm, categoriaFilter, statusFilter],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('limit', '1000'); // Buscar todos para relatório
+      params.append('limit', '20'); // 20 itens por página
+      params.append('page', page.toString());
 
       const queryString = params.toString();
       const url = `/estoques${queryString ? `?${queryString}` : ''}`;
 
       return await get<EstoqueApiResponse>(url);
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
     staleTime: 1000 * 60 * 5,
     refetchOnMount: 'always',
     retry: (failureCount, error: any) => {
@@ -53,14 +68,41 @@ function RelatorioComponentesPageContent() {
     },
   });
 
-  const todosEstoques = data?.data?.docs || [];
+  // Intersection Observer para infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const todosEstoques = data?.pages.flatMap((page) => page.data.docs) || [];
 
   // Filtrar estoques localmente baseado no searchTerm, categoriaFilter e statusFilter
   const estoquesFiltrados = todosEstoques.filter((estoque) => {
+    // Validar se o estoque tem componente e localização
+    if (!estoque?.componente || !estoque?.localizacao) {
+      return false;
+    }
+
     const matchSearch = !searchTerm || 
-      estoque.componente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      estoque.componente._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      estoque.localizacao.nome.toLowerCase().includes(searchTerm.toLowerCase());
+      estoque.componente.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      estoque.componente._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      estoque.localizacao.nome?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchCategoria = !categoriaFilter || 
       estoque.componente.categoria === categoriaFilter;
@@ -71,11 +113,15 @@ function RelatorioComponentesPageContent() {
     return matchSearch && matchCategoria && matchStatus;
   });
 
-  // Calcular estatísticas baseadas nos estoques filtrados
-  const totalComponentes = new Set(estoquesFiltrados.map(e => e.componente._id)).size;
-  const emEstoque = estoquesFiltrados.filter(e => e.componente.status === 'Em Estoque').length;
-  const baixoEstoque = estoquesFiltrados.filter(e => e.componente.status === 'Baixo Estoque').length;
-  const indisponiveis = estoquesFiltrados.filter(e => e.componente.status === 'Indisponível').length;
+  // Calcular estatísticas baseadas nos estoques filtrados (com validação extra)
+  const totalComponentes = new Set(
+    estoquesFiltrados
+      .filter(e => e?.componente?._id)
+      .map(e => e.componente._id)
+  ).size;
+  const emEstoque = estoquesFiltrados.filter(e => e?.componente?.status === 'Em Estoque').length;
+  const baixoEstoque = estoquesFiltrados.filter(e => e?.componente?.status === 'Baixo Estoque').length;
+  const indisponiveis = estoquesFiltrados.filter(e => e?.componente?.status === 'Indisponível').length;
 
   // Query para buscar categorias para mostrar o nome nos filtros
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
@@ -289,6 +335,13 @@ function RelatorioComponentesPageContent() {
                     ))}
                   </TableBody>
                 </table>
+
+                {/* Observer target for infinite scroll */}
+                <div ref={observerTarget} className="h-10 flex items-center justify-center">
+                  {isFetchingNextPage && (
+                    <PulseLoader color="#3b82f6" size={5} speedMultiplier={0.8} />
+                  )}
+                </div>
               </div>
             </div>
           ) : (
