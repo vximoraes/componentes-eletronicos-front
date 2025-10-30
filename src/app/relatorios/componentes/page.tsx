@@ -2,6 +2,7 @@
 import StatCard from "@/components/stat-card";
 import Cabecalho from "@/components/cabecalho";
 import ModalFiltros from "@/components/modal-filtros";
+import ModalExportarRelatorio from "@/components/modal-exportar-relatorio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,6 +32,7 @@ function RelatorioComponentesPageContent() {
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -152,6 +154,19 @@ function RelatorioComponentesPageContent() {
     setStatusFilter(status);
   };
 
+  const handleOpenExportarModal = () => {
+    setIsExportarModalOpen(true);
+  };
+
+  const handleCloseExportarModal = () => {
+    setIsExportarModalOpen(false);
+  };
+
+  const handleExport = (fileName: string, format: string) => {
+    // TODO: Implementar lógica de exportação
+    console.log('Exportando:', { fileName, format, selectedItems: Array.from(selectedItems) });
+  };
+
   // Funções para gerenciar seleção de itens
   const handleSelectAll = () => {
     if (selectedItems.size === estoquesFiltrados.length) {
@@ -250,11 +265,11 @@ function RelatorioComponentesPageContent() {
             <Button
               className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
-              data-test="adicionar-button"
-              onClick={() => {/* TODO: Implementar ação */}}
+              data-test="exportar-button"
+              onClick={handleOpenExportarModal}
             >
               <img src="../gerar-pdf.svg" alt="" className="w-[20px]" />
-              Exportar...
+              Exportar
             </Button>
           </div>
 
@@ -410,6 +425,13 @@ function RelatorioComponentesPageContent() {
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
+      />
+
+      {/* Modal de Exportar */}
+      <ModalExportarRelatorio
+        isOpen={isExportarModalOpen}
+        onClose={handleCloseExportarModal}
+        onExport={handleExport}
       />
     </div>
   );
