@@ -32,6 +32,7 @@ function RelatorioComponentesPageContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   // Buscar estoques com infinite scroll
   const {
@@ -151,6 +152,31 @@ function RelatorioComponentesPageContent() {
     setStatusFilter(status);
   };
 
+  // Funções para gerenciar seleção de itens
+  const handleSelectAll = () => {
+    if (selectedItems.size === estoquesFiltrados.length) {
+      // Se todos estão selecionados, desmarcar todos
+      setSelectedItems(new Set());
+    } else {
+      // Selecionar todos os itens filtrados
+      const allIds = new Set(estoquesFiltrados.map(e => e._id));
+      setSelectedItems(allIds);
+    }
+  };
+
+  const handleSelectItem = (id: string) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const isAllSelected = estoquesFiltrados.length > 0 && selectedItems.size === estoquesFiltrados.length;
+  const isSomeSelected = selectedItems.size > 0 && selectedItems.size < estoquesFiltrados.length;
+
   return (
     <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-componentes-page">
       <Cabecalho pagina="Relatórios" acao="Componentes" />
@@ -228,7 +254,7 @@ function RelatorioComponentesPageContent() {
               onClick={() => {/* TODO: Implementar ação */}}
             >
               <img src="../gerar-pdf.svg" alt="" className="w-[20px]" />
-              Gerar PDF
+              Exportar...
             </Button>
           </div>
 
@@ -290,8 +316,22 @@ function RelatorioComponentesPageContent() {
                 <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px]">
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
+                          ref={(input) => {
+                            if (input) {
+                              input.indeterminate = isSomeSelected;
+                            }
+                          }}
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 cursor-pointer"
+                          title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
+                        />
+                      </TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">COMPONENTE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">PRODUTO</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">QUANTIDADE</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">STATUS</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">LOCALIZAÇÃO</TableHead>
@@ -300,6 +340,14 @@ function RelatorioComponentesPageContent() {
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
                       <TableRow key={estoque._id} className="hover:bg-gray-50 border-b">
+                        <TableCell className="text-center px-2 sm:px-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.has(estoque._id)}
+                            onChange={() => handleSelectItem(estoque._id)}
+                            className="w-4 h-4 cursor-pointer"
+                          />
+                        </TableCell>
                         <TableCell className="font-medium text-center px-2 sm:px-4">
                           <div className="truncate" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
