@@ -46,7 +46,7 @@ export default function LoginPage() {
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-6 md:mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">Bem-vindo ao Estoque Inteligente!</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold mb-2">Bem-vindo ao Estoque Inteligente!</h2>
           </div>
           <form onSubmit={handleSubmit}>
             <div>
