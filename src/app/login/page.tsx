@@ -103,15 +103,6 @@ export default function LoginPage() {
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
             </div>
-            <p className="mt-4 md:mt-6 text-center text-sm md:text-base">
-              Não tem uma conta?{" "} 
-              <span 
-                className="text-[#306FCC] hover:text-[#2557a7] underline cursor-pointer" 
-                onClick={() => !loading && (window.location.href = "/cadastro")}
-              >
-                Cadastrar-se
-              </span>
-            </p>
           </form>
         </div>
       </div>
