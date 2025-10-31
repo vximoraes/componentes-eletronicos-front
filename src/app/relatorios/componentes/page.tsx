@@ -22,6 +22,7 @@ import { PulseLoader } from 'react-spinners';
 import { generateComponentesPDF } from '@/utils/pdfGenerator';
 import { generateComponentesCSV } from '@/utils/csvGenerator';
 import { toast, Slide } from 'react-toastify';
+import { useSession } from "@/hooks/use-session";
 
 interface CategoriasApiResponse {
   data: {
@@ -31,6 +32,7 @@ interface CategoriasApiResponse {
 
 function RelatorioComponentesPageContent() {
   const router = useRouter();
+  const {user} = useSession()
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -99,25 +101,32 @@ function RelatorioComponentesPageContent() {
   const todosEstoques = data?.pages.flatMap((page) => page.data.docs) || [];
 
   // Filtrar estoques localmente baseado no searchTerm, categoriaFilter e statusFilter
-  const estoquesFiltrados = todosEstoques.filter((estoque) => {
-    // Validar se o estoque tem componente e localização
-    if (!estoque?.componente || !estoque?.localizacao) {
-      return false;
-    }
+  const estoquesFiltrados = todosEstoques
+    .filter((estoque) => {
+      // Validar se o estoque tem componente e localização
+      if (!estoque?.componente || !estoque?.localizacao) {
+        return false;
+      }
 
-    const matchSearch = !searchTerm || 
-      estoque.componente.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      estoque.componente._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      estoque.localizacao.nome?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchCategoria = !categoriaFilter || 
-      estoque.componente.categoria === categoriaFilter;
-    
-    const matchStatus = !statusFilter || 
-      estoque.componente.status === statusFilter;
-    
-    return matchSearch && matchCategoria && matchStatus;
-  });
+      const matchSearch = !searchTerm || 
+        estoque.componente.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        estoque.componente._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        estoque.localizacao.nome?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchCategoria = !categoriaFilter || 
+        estoque.componente.categoria === categoriaFilter;
+      
+      const matchStatus = !statusFilter || 
+        estoque.componente.status === statusFilter;
+      
+      return matchSearch && matchCategoria && matchStatus;
+    })
+    .sort((a, b) => {
+      // Ordenar alfabeticamente pelo nome do componente
+      const nomeA = a.componente?.nome?.toLowerCase() || '';
+      const nomeB = b.componente?.nome?.toLowerCase() || '';
+      return nomeA.localeCompare(nomeB, 'pt-BR');
+    });
 
   // Calcular estatísticas baseadas nos estoques filtrados (com validação extra)
   const totalComponentes = new Set(
@@ -179,6 +188,7 @@ function RelatorioComponentesPageContent() {
           fileName: fileName.trim(),
           title: 'RELATÓRIO DE COMPONENTES',
           includeStats: true,
+          userName: user?.name
         });
 
         toast.success(`PDF gerado com sucesso! ${estoquesSelecionados.length} componente(s) exportado(s).`, {
@@ -346,7 +356,7 @@ function RelatorioComponentesPageContent() {
               onClick={handleOpenExportarModal}
               title={selectedItems.size === 0 ? 'Selecione componentes para exportar' : `Exportar ${selectedItems.size} componente(s)`}
             >
-              <img src="../gerar-pdf.svg" alt="" className="w-[20px]" />
+              <img src="../gerar-pdf.svg" alt="" className="w-5" />
               Exportar
             </Button>
           </div>

@@ -6,6 +6,7 @@ interface PDFGeneratorOptions {
   fileName?: string;
   title?: string;
   includeStats?: boolean;
+  userName?:string;
 }
 
 export const generateComponentesPDF = async ({
@@ -13,6 +14,7 @@ export const generateComponentesPDF = async ({
   fileName = 'relatorio-componentes',
   title = 'RELATÓRIO DE COMPONENTES',
   includeStats = true,
+  userName = "Javascript"
 }: PDFGeneratorOptions) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -44,6 +46,12 @@ export const generateComponentesPDF = async ({
     `Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`,
     pageWidth / 2,
     yPosition,
+    { align: 'center' }
+  );
+    doc.text(
+    `Gerado por: ${userName}`,
+    pageWidth / 2,
+    yPosition + 6,
     { align: 'center' }
   );
   doc.setTextColor(0, 0, 0);
