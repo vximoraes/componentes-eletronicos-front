@@ -13,11 +13,13 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { get, post } from '@/lib/fetchData'
 import { Search, Plus, Trash2, Mail } from 'lucide-react'
 import { useState, useEffect, useRef, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { PulseLoader } from 'react-spinners'
 import ModalConvidarUsuario from '@/components/modal-convidar-usuario'
 import ModalExcluirUsuario from '@/components/modal-excluir-usuario'
+import { useSession } from '@/hooks/use-session'
 
 interface Usuario {
   _id: string
@@ -43,6 +45,8 @@ interface UsuarioApiResponse {
 }
 
 function PageUsuariosContent() {
+  const router = useRouter()
+  const { hasPermission } = useSession()
   const [searchTerm, setSearchTerm] = useState('')
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false)
   const [excluirUsuarioId, setExcluirUsuarioId] = useState<string | null>(null)
@@ -50,6 +54,21 @@ function PageUsuariosContent() {
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false)
   const [isConvidarModalOpen, setIsConvidarModalOpen] = useState(false)
   const observerTarget = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!hasPermission('usuarios', 'buscar')) {
+      toast.error('Você não tem permissão para acessar esta página.', {
+        position: 'bottom-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+      router.push('/componentes')
+    }
+  }, [hasPermission, router])
 
   const {
     data,
