@@ -45,14 +45,16 @@ export default function LoginPage() {
       <LogoEi></LogoEi>
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          <h2 className="mb-6 md:mb-10 text-center text-2xl md:text-3xl font-bold">Bem-vindo!</h2>
+          <div className="text-center mb-6 md:mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">Bem-vindo ao Estoque Inteligente!</h2>
+          </div>
           <form onSubmit={handleSubmit}>
             <div>
               <Label className="pb-2 text-sm md:text-base" htmlFor="email">E-mail</Label>
-              <Input 
-                className="p-3 md:p-5 w-full text-sm md:text-base" 
-                type="email" 
-                id="email" 
+              <Input
+                className="p-3 md:p-5 w-full text-sm md:text-base"
+                type="email"
+                id="email"
                 placeholder="Insira seu endereço de e-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -63,20 +65,20 @@ export default function LoginPage() {
             <div className="pt-3 md:pt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="senha">Senha</Label>
               <div className="relative">
-                <Input 
-                  className="p-3 md:p-5 w-full pr-12 text-sm md:text-base" 
-                  type={showPassword ? "text" : "password"} 
-                  id="senha" 
+                <Input
+                  className="p-3 md:p-5 w-full pr-12 text-sm md:text-base"
+                  type={showPassword ? "text" : "password"}
+                  id="senha"
                   placeholder="Insira sua senha"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   required
                   disabled={loading}
                 />
-                <button 
-                  type="button" 
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} 
-                  onClick={() => setShowPassword(v => !v)} 
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  onClick={() => setShowPassword(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
                   disabled={loading}
                 >
@@ -95,8 +97,8 @@ export default function LoginPage() {
               </div>
             )}
             <div className="mt-4 md:mt-6">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
                 disabled={loading}
               >
