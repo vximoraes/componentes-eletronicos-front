@@ -12,7 +12,9 @@ declare module "next-auth" {
       ativo: boolean;
       permissoes: string[];
       grupos: string[];
+      fotoPerfil?: string;
     } & DefaultSession["user"];
+    error?: "RefreshAccessTokenError";
   }
 
   interface User {
@@ -24,6 +26,7 @@ declare module "next-auth" {
     ativo?: boolean;
     permissoes?: string[];
     grupos?: string[];
+    fotoPerfil?: string;
   }
 }
 
@@ -37,5 +40,8 @@ declare module "next-auth/jwt" {
     ativo: boolean;
     permissoes: string[];
     grupos: string[];
+    fotoPerfil?: string;
+    accessTokenExpires?: number;
+    error?: "RefreshAccessTokenError";
   }
 }

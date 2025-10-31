@@ -1,5 +1,6 @@
+"use client"
 import React from 'react';
-import { Edit, Trash2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { Edit, Trash2, ArrowUpCircle, ArrowDownCircle, Package } from 'lucide-react';
 
 interface ComponenteEletronicoProps {
   id?: string;
@@ -70,9 +71,16 @@ export default function ComponenteEletronico({
 
   const componentTitle = `${nome} - ${categoria} - Qtd: ${quantidade} - Status: ${status}`;
 
+  // Adiciona timestamp na URL da imagem para evitar cache do navegador
+  const imagemComTimestamp = React.useMemo(() => {
+    if (!imagem) return undefined;
+    const separator = imagem.includes('?') ? '&' : '?';
+    return `${imagem}${separator}t=${Date.now()}`;
+  }, [imagem]);
+
   return (
     <div 
-      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] flex flex-col cursor-pointer relative"
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 w-full h-full min-h-[180px] min-w-0 flex flex-col cursor-pointer relative overflow-hidden"
       data-test={dataTest || `componente-${id}`}
       title={componentTitle}
       onClick={handleClick}
@@ -90,47 +98,35 @@ export default function ComponenteEletronico({
         </div>
       )}
       {/* Header com imagem e ações */}
-      <div className="flex items-start justify-between mb-2 gap-2" data-test="header">
-        <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0" data-test="component-info">
+      <div className="flex items-start justify-between mb-2 gap-2 overflow-hidden" data-test="header">
+        <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0 overflow-hidden" data-test="component-info">
           {/* Ícone/Imagem do componente */}
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" data-test="component-icon">
-            {imagem ? (
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" data-test="component-icon">
+            {imagemComTimestamp ? (
               <img 
-                src={imagem} 
+                src={imagemComTimestamp} 
                 alt={nome}
                 className="w-full h-full object-cover"
                 title={`Imagem do componente: ${nome}`}
               />
             ) : (
-              <div className="w-4 h-4 md:w-6 md:h-6 bg-blue-500 rounded" title="Ícone padrão do componente"></div>
+              <Package className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
             )}
           </div>
           
           {/* Nome e categoria */}
           <div className="flex-1 min-w-0 overflow-hidden" data-test="text-info">
             <h3 
-              className="text-sm md:text-base font-semibold text-gray-900 leading-tight truncate max-w-full" 
+              className="text-sm md:text-base font-semibold text-gray-900 leading-tight truncate" 
               title={`${nome}`}
               data-test="component-name"
-              style={{ 
-                maxWidth: 'calc(100% - 0px)',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
             >
               {nome}
             </h3>
             <p 
-              className="text-xs md:text-sm text-gray-500 truncate max-w-full" 
+              className="text-xs md:text-sm text-gray-500 truncate" 
               title={`${categoria}`}
               data-test="component-category"
-              style={{ 
-                maxWidth: 'calc(100% - 0px)',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
-              }}
             >
               {categoria}
             </p>
@@ -164,23 +160,23 @@ export default function ComponenteEletronico({
       </div>
 
       {/* Informações de quantidade e localização */}
-      <div className="flex items-center justify-between gap-2" data-test="footer">
+      <div className="flex items-center justify-between gap-2 overflow-hidden" data-test="footer">
         {/* Quantidade à esquerda */}
-        <div className="flex flex-col text-xs md:text-sm text-gray-600 flex-shrink-0" data-test="quantity">
-          <span title={`Quantidade em estoque: ${quantidade} unidades`}>
+        <div className="flex flex-col text-xs md:text-sm text-gray-600 min-w-0 max-w-[60px]" data-test="quantity">
+          <span title={`Quantidade em estoque: ${quantidade} unidades`} className="truncate">
             <span className="font-semibold">Qtd:</span> {quantidade}
           </span>
           {estoqueMinimo !== undefined && (
-            <span className="mt-0.5" title={`Estoque mínimo: ${estoqueMinimo} unidades`}>
+            <span className="mt-0.5 truncate" title={`Estoque mínimo: ${estoqueMinimo} unidades`}>
               <span className="font-semibold">Mín:</span> {estoqueMinimo}
             </span>
           )}
         </div>
 
         {/* Status ao meio */}
-        <div className="flex justify-center flex-1 min-w-0" data-test="status-container">
+        <div className="flex justify-center flex-1 min-w-0 overflow-hidden" data-test="status-container">
           <span
-            className={`inline-flex items-center justify-center px-2 md:px-4 py-1 md:py-2 rounded-[5px] text-xs md:text-sm font-medium min-w-[80px] md:min-w-[110px] text-center truncate ${
+            className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${
             status === 'Em Estoque'
               ? 'bg-green-100 text-green-800'
               : status === 'Baixo Estoque'

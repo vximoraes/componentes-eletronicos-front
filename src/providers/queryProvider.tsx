@@ -10,7 +10,12 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             queries: {
                 staleTime: 1000 * 60 * 5,
                 retry: (failureCount, error: any) => {
-                    if (error?.response?.status === 401) {
+                    if (error?.status === 401 || error?.status === 498) {
+                        return false;
+                    }
+
+                    if (error?.message?.toLowerCase().includes('autenticação') || 
+                        error?.message?.toLowerCase().includes('sessão expirada')) {
                         return false;
                     }
                     return failureCount < 3;

@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ChevronDown } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authenticatedRequest } from '@/utils/auth';
+import { X, ChevronDown, Edit, Trash2 } from 'lucide-react';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { get, post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
+import { toast } from 'react-toastify';
+import ModalEditarLocalizacao from './modal-editar-localizacao';
+import ModalExcluirLocalizacao from './modal-excluir-localizacao';
+import { PulseLoader } from 'react-spinners';
 
 interface Localizacao {
   _id: string;
@@ -77,34 +81,39 @@ export default function ModalSaidaComponente({
   const [quantidade, setQuantidade] = useState('');
   const [localizacaoSelecionada, setLocalizacaoSelecionada] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [localizacaoPesquisa, setLocalizacaoPesquisa] = useState('');
   const [errors, setErrors] = useState<{ quantidade?: string; localizacao?: string }>({});
+  const [isEditarLocalizacaoModalOpen, setIsEditarLocalizacaoModalOpen] = useState(false);
+  const [isExcluirLocalizacaoModalOpen, setIsExcluirLocalizacaoModalOpen] = useState(false);
+  const [localizacaoToEdit, setLocalizacaoToEdit] = useState<Localizacao | null>(null);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
-
-
-  // Query para buscar localizações
-  const { data: localizacoesData, isLoading: isLoadingLocalizacoes } = useQuery<LocalizacoesApiResponse>({
-    queryKey: ['localizacoes'],
-    queryFn: () => authenticatedRequest<LocalizacoesApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/localizacoes`,
-      { method: 'GET' }
-    ),
-    enabled: isOpen,
-    staleTime: 1000 * 60 * 5,
-    retry: (failureCount, error: any) => {
-      if (error?.message?.includes('Falha na autenticação')) {
-        return false;
-      }
-      return failureCount < 3;
+  const {
+    data: localizacoesData,
+    isLoading: isLoadingLocalizacoes,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useInfiniteQuery({
+    queryKey: ['localizacoes-infinite'],
+    queryFn: async ({ pageParam = 1 }) => {
+      return await get<LocalizacoesApiResponse>(`/localizacoes?limit=20&page=${pageParam}`);
     },
+    getNextPageParam: (lastPage) => {
+      return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
+    },
+    initialPageParam: 1,
+    enabled: isOpen,
+    staleTime: 1000 * 60 * 5
   });
 
-  // Query para buscar estoques do componente
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
     queryKey: ['estoques', componenteId],
-    queryFn: () => authenticatedRequest<EstoqueApiResponse>(
-      `${process.env.NEXT_PUBLIC_API_URL}/estoques/componente/${componenteId}`,
-      { method: 'GET' }
-    ),
+    queryFn: async () => {
+      return await get<EstoqueApiResponse>(
+        `/estoques/componente/${componenteId}`
+      );
+    },
     enabled: isOpen && !!componenteId,
     staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
@@ -116,26 +125,18 @@ export default function ModalSaidaComponente({
   });
 
   const saidaMutation = useMutation({
-    mutationFn: (data: MovimentacaoRequest) =>
-      authenticatedRequest(
-        `${process.env.NEXT_PUBLIC_API_URL}/movimentacoes`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: data,
-        }
-      ),
+    mutationFn: async (data: MovimentacaoRequest) => {
+      return await post('/movimentacoes', data);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: ['componentes']
       });
-      
-      queryClient.removeQueries({ 
+
+      queryClient.removeQueries({
         queryKey: ['estoques', componenteId]
       });
-      
+
       setQuantidade('');
       setLocalizacaoSelecionada('');
       setErrors({});
@@ -146,6 +147,44 @@ export default function ModalSaidaComponente({
       console.error('Erro ao registrar saída:', error);
       if (error?.response?.data) {
         console.error('Resposta da API:', error.response.data);
+        
+        const errorData = error.response.data;
+        let errorMessage = 'Não foi possível registrar a saída';
+        
+        console.log('errorData completo:', JSON.stringify(errorData));
+        console.log('errorData.errors:', errorData.errors);
+
+        if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          const messages = errorData.errors.map((err: any) => err.message).filter(Boolean);
+          console.log('mensagens extraídas:', messages);
+          if (messages.length > 0) {
+            errorMessage = messages.join(', ');
+          } else if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        console.log('mensagem final do toast:', errorMessage);
+        
+        toast.error(errorMessage, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } else {
+        toast.error('Não foi possível registrar a saída.', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     },
   });
@@ -204,13 +243,34 @@ export default function ModalSaidaComponente({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!observerTarget.current || !isDropdownOpen) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    observer.observe(observerTarget.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isDropdownOpen, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   if (!isOpen) return null;
 
-  const localizacoes = localizacoesData?.data?.docs || [];
+  const localizacoes = localizacoesData?.pages ? localizacoesData.pages.flatMap(page => page.data.docs) : [];
   const estoques = estoquesData?.data?.docs || [];
+  const localizacoesFiltradas = localizacoes.filter((loc: Localizacao) =>
+    loc.nome.toLowerCase().includes(localizacaoPesquisa.toLowerCase())
+  );
   const localizacaoSelecionadaObj = localizacoes.find(loc => loc._id === localizacaoSelecionada);
-  
-  // Função para obter a quantidade disponível em uma localização
+
   const getQuantidadeDisponivel = (localizacaoId: string): number => {
     const estoque = estoques.find(e => e.localizacao._id === localizacaoId);
     return estoque?.quantidade || 0;
@@ -237,6 +297,7 @@ export default function ModalSaidaComponente({
   const handleLocalizacaoSelect = (localizacao: Localizacao) => {
     setLocalizacaoSelecionada(localizacao._id);
     setIsDropdownOpen(false);
+    setLocalizacaoPesquisa('');
     if (errors.localizacao) {
       setErrors(prev => ({ ...prev, localizacao: undefined }));
     }
@@ -262,7 +323,6 @@ export default function ModalSaidaComponente({
       return;
     }
 
-    // Verificar se todos os dados estão presentes antes de enviar
     if (!componenteId) {
       setErrors({ ...errors, quantidade: 'ID do componente não encontrado' });
       return;
@@ -314,23 +374,31 @@ export default function ModalSaidaComponente({
 
         {/* Conteúdo do Modal */}
         <div className="px-6 pb-6 space-y-6">
-          <div className="text-center pt-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-1">
-              Registrar saída de {componenteNome}
-            </h2>
+          <div className="text-center pt-4 px-8">
+            <div className="max-h-[100px] overflow-y-auto">
+              <h2 className="text-xl font-semibold text-gray-900 mb-1 break-words">
+                Registrar saída de {componenteNome}
+              </h2>
+            </div>
           </div>
 
           {/* Campo Quantidade */}
           <div className="space-y-2">
-            <label htmlFor="quantidade" className="block text-base font-medium text-gray-700">
-              Quantidade
-            </label>
+            <div className="flex justify-between items-center">
+              <label htmlFor="quantidade" className="block text-base font-medium text-gray-700">
+                Quantidade <span className="text-red-500">*</span>
+              </label>
+              <span className="text-sm text-gray-500">
+                {quantidade.length}/9
+              </span>
+            </div>
             <input
               id="quantidade"
               type="text"
               placeholder="Digite a quantidade"
               value={quantidade}
               onChange={handleQuantidadeChange}
+              maxLength={9}
               className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.quantidade ? 'border-red-500' : 'border-gray-300'
                 }`}
               disabled={saidaMutation.isPending}
@@ -343,7 +411,7 @@ export default function ModalSaidaComponente({
           {/* Campo Localização */}
           <div className="space-y-2">
             <label className="block text-base font-medium text-gray-700">
-              Localização
+              Localização <span className="text-red-500">*</span>
             </label>
             <div className="relative" data-dropdown>
               <button
@@ -353,62 +421,112 @@ export default function ModalSaidaComponente({
                   }`}
                 disabled={isLoadingLocalizacoes || saidaMutation.isPending}
               >
-                <div className="flex items-center gap-2 flex-1">
-                  <span className={localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}>
+                <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 overflow-hidden">
+                  <span className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}>
                     {isLoadingLocalizacoes
                       ? 'Carregando...'
                       : localizacaoSelecionadaObj?.nome || 'Selecione uma localização'
                     }
                   </span>
                   {localizacaoSelecionada && (
-                    <span className={`text-xs px-2 py-0.5 rounded ${
-                      getQuantidadeDisponivel(localizacaoSelecionada) > 0 
-                        ? 'bg-green-100 text-green-700' 
+                    <span className={`text-sm px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0 whitespace-nowrap ${getQuantidadeDisponivel(localizacaoSelecionada) > 0
+                        ? 'bg-green-100 text-green-700'
                         : 'bg-gray-100 text-gray-500'
-                    }`}>
+                      }`}>
                       {getQuantidadeDisponivel(localizacaoSelecionada)} disponível
                     </span>
                   )}
                 </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''
+                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ml-2 ${isDropdownOpen ? 'rotate-180' : ''
                   }`} />
               </button>
 
               {/* Dropdown */}
               {isDropdownOpen && !isLoadingLocalizacoes && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-                  {localizacoes.length > 0 ? (
-                    localizacoes.map((localizacao) => {
-                      const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
-                      return (
-                        <button
-                          key={localizacao._id}
-                          type="button"
-                          onClick={() => handleLocalizacaoSelect(localizacao)}
-                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors cursor-pointer ${
-                            localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className={localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'}>
-                              {localizacao.nome}
-                            </span>
-                            <span className={`text-sm px-2 py-0.5 rounded ${
-                              qtdDisponivel > 0 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-gray-100 text-gray-500'
-                            }`}>
-                              {qtdDisponivel} disponível
-                            </span>
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-hidden flex flex-col">
+                  {/* Input de pesquisa */}
+                  <div className="p-3 border-b border-gray-200 bg-gray-50">
+                    <input
+                      type="text"
+                      placeholder="Pesquisar..."
+                      value={localizacaoPesquisa}
+                      onChange={(e) => setLocalizacaoPesquisa(e.target.value)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* Lista de localizações */}
+                  <div className="overflow-y-auto">
+                    {localizacoesFiltradas.length > 0 ? (
+                      <>
+                        {localizacoesFiltradas.map((localizacao) => {
+                          const qtdDisponivel = getQuantidadeDisponivel(localizacao._id);
+                          return (
+                            <div
+                              key={localizacao._id}
+                              className={`flex items-center justify-between px-4 py-2 hover:bg-gray-50 transition-colors group ${localizacaoSelecionada === localizacao._id ? 'bg-blue-50' : ''
+                                }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleLocalizacaoSelect(localizacao)}
+                                className={`flex-1 flex items-center gap-2 text-left cursor-pointer min-w-0 ${localizacaoSelecionada === localizacao._id ? 'text-blue-600 font-medium' : 'text-gray-900'
+                                  }`}
+                                title={localizacao.nome}
+                              >
+                                <span className="truncate">{localizacao.nome}</span>
+                                <span className={`text-sm px-2 py-0.5 rounded flex-shrink-0 ${qtdDisponivel > 0
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-gray-100 text-gray-500'
+                                  }`}>
+                                  {qtdDisponivel} disponível
+                                </span>
+                              </button>
+                              <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setLocalizacaoToEdit(localizacao)
+                                    setIsEditarLocalizacaoModalOpen(true)
+                                  }}
+                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  title="Editar localização"
+                                >
+                                  <Edit size={20} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setLocalizacaoToEdit(localizacao)
+                                    setIsExcluirLocalizacaoModalOpen(true)
+                                  }}
+                                  className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
+                                  title="Excluir localização"
+                                >
+                                  <Trash2 size={20} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {/* Infinite scroll trigger */}
+                        <div ref={observerTarget} className="h-1" />
+                        {/* Loading indicator */}
+                        {isFetchingNextPage && (
+                          <div className="flex justify-center py-4">
+                            <PulseLoader color="#306FCC" size={8} />
                           </div>
-                        </button>
-                      );
-                    })
-                  ) : (
-                    <div className="px-4 py-8 text-center text-gray-500 text-sm">
-                      Nenhuma localização encontrada
-                    </div>
-                  )}
+                        )}
+                      </>
+                    ) : (
+                      <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                        Nenhuma localização encontrada
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -422,8 +540,8 @@ export default function ModalSaidaComponente({
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
               <div className="font-medium mb-1">Não foi possível registrar a saída</div>
               <div className="text-red-500">
-                {(saidaMutation.error as any)?.response?.data?.message || 
-                  (saidaMutation.error as any)?.message || 
+                {(saidaMutation.error as any)?.response?.data?.message ||
+                  (saidaMutation.error as any)?.message ||
                   'Erro desconhecido'}
               </div>
             </div>
@@ -455,7 +573,33 @@ export default function ModalSaidaComponente({
     </div>
   );
 
-  return typeof window !== 'undefined'
-    ? createPortal(modalContent, document.body)
-    : null;
+  return (
+    <>
+      {typeof window !== 'undefined' && createPortal(modalContent, document.body)}
+      {localizacaoToEdit && (
+        <>
+          <ModalEditarLocalizacao
+            isOpen={isEditarLocalizacaoModalOpen}
+            onClose={() => {
+              setIsEditarLocalizacaoModalOpen(false)
+              setLocalizacaoToEdit(null)
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            onSuccess={onClose}
+          />
+          <ModalExcluirLocalizacao
+            isOpen={isExcluirLocalizacaoModalOpen}
+            onClose={() => {
+              setIsExcluirLocalizacaoModalOpen(false)
+              setLocalizacaoToEdit(null)
+            }}
+            localizacaoId={localizacaoToEdit._id}
+            localizacaoNome={localizacaoToEdit.nome}
+            onSuccess={onClose}
+          />
+        </>
+      )}
+    </>
+  );
 }
