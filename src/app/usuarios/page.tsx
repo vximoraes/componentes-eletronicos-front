@@ -235,29 +235,25 @@ function PageUsuariosContent() {
           ) : usuarios.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm md:table-fixed">
+                <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-full md:w-1/4">NOME</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/4">E-MAIL</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/4">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-full md:w-1/4">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
+                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">E-MAIL</TableHead>
+                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {usuarios.map((usuario) => (
                       <TableRow key={usuario._id} className="hover:bg-gray-50 border-b relative">
-                        <TableCell className="font-medium text-left px-2 sm:px-4">
-                          <div className="truncate max-w-[150px] md:max-w-none" title={usuario.nome}>
-                            {usuario.nome}
-                          </div>
+                        <TableCell className="font-medium text-left px-8">
+                          {usuario.nome}
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-4">
-                          <div className="truncate" title={usuario.email}>
-                            {usuario.email}
-                          </div>
+                        <TableCell className="hidden md:table-cell text-left px-8">
+                          {usuario.email}
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-center px-4">
+                        <TableCell className="hidden md:table-cell text-center px-8 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
                               className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${usuario.ativo
@@ -270,7 +266,7 @@ function PageUsuariosContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center px-8 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             {!usuario.ativo && (
                               <button
