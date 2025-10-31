@@ -73,7 +73,7 @@ export default function HomePage() {
                   <Mail className="w-5 h-5 text-gray-500" />
                   <div>
                     <div className="text-sm text-gray-500">E-mail</div>
-                    <div className="font-medium">usuario@email.com</div>
+                    <div className="font-medium">admin@admin.com</div>
                   </div>
                 </div>
 
@@ -83,7 +83,7 @@ export default function HomePage() {
                   <div>
                     <div className="text-sm text-gray-500">Senha</div>
                     <div className="font-medium">
-                      {showPassword ? "minhaSenha123" : "*********"}
+                      {showPassword ? "Senha@123" : "*********"}
                     </div>
                     <button
                       onClick={() => setShowPassword(!showPassword)}
