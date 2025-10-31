@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-800">
       <main className="flex-1">
-        <Cabecalho pagina="Perfil"/><span className="text-sm text-gray-500">Informações do usuário</span>
+        <Cabecalho pagina="Perfil" descricao="Informações do usuário" />
          
 
         <div className="container mx-auto px-6 pb-6">

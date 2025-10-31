@@ -7,11 +7,10 @@ import { Bell, Menu } from "lucide-react"
 
 export interface CabecalhoProps {
   pagina: string,
-  acao?: string,
-  fotoPerfil?: string
+  descricao?: string
 }
 
-export default function Cabecalho({ pagina, acao, fotoPerfil }: CabecalhoProps) {
+export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
   const router = useRouter()
   const { user } = useSession()
   const { toggleSidebar } = useSidebarContext()
@@ -42,8 +41,8 @@ export default function Cabecalho({ pagina, acao, fotoPerfil }: CabecalhoProps) 
           <Menu className="w-[24px] h-[24px] text-gray-700" strokeWidth={2} />
         </button>
         <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">{pagina}</h1>
-        {acao && (
-          <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">{acao}</span>
+        {descricao && (
+          <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">{descricao}</span>
         )}
       </div>
       
@@ -64,7 +63,7 @@ export default function Cabecalho({ pagina, acao, fotoPerfil }: CabecalhoProps) 
           aria-label="Perfil do usuário"
         >
           <img 
-            src={fotoPerfil || "/foto-default.svg"} 
+            src={user?.image || "/foto-default.svg"} 
             alt="Foto de perfil" 
             className="w-full h-full object-cover"
           />
