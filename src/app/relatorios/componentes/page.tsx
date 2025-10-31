@@ -19,6 +19,9 @@ import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X }
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PulseLoader } from 'react-spinners';
+import { generateComponentesPDF } from '@/utils/pdfGenerator';
+import { generateComponentesCSV } from '@/utils/csvGenerator';
+import { toast, Slide } from 'react-toastify';
 
 interface CategoriasApiResponse {
   data: {
@@ -162,9 +165,78 @@ function RelatorioComponentesPageContent() {
     setIsExportarModalOpen(false);
   };
 
-  const handleExport = (fileName: string, format: string) => {
-    // TODO: Implementar lógica de exportação
-    console.log('Exportando:', { fileName, format, selectedItems: Array.from(selectedItems) });
+  const handleExport = async (fileName: string, format: string) => {
+    try {
+      // Filtrar apenas os estoques selecionados
+      const estoquesSelecionados = estoquesFiltrados.filter(estoque => 
+        selectedItems.has(estoque._id)
+      );
+
+      if (format === 'PDF') {
+        // Gerar PDF
+        await generateComponentesPDF({
+          estoques: estoquesSelecionados,
+          fileName: fileName.trim(),
+          title: 'RELATÓRIO DE COMPONENTES',
+          includeStats: true,
+        });
+
+        toast.success(`PDF gerado com sucesso! ${estoquesSelecionados.length} componente(s) exportado(s).`, {
+          position: 'bottom-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          transition: Slide,
+        });
+
+        // Fechar modal após exportação
+        handleCloseExportarModal();
+      } else if (format === 'CSV') {
+        // Gerar CSV
+        generateComponentesCSV({
+          estoques: estoquesSelecionados,
+          fileName: fileName.trim(),
+          includeStats: true,
+        });
+
+        toast.success(`CSV gerado com sucesso! ${estoquesSelecionados.length} componente(s) exportado(s).`, {
+          position: 'bottom-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          transition: Slide,
+        });
+
+        // Fechar modal após exportação
+        handleCloseExportarModal();
+      } else {
+        // Formato não implementado ainda
+        toast.info('Formato de exportação ainda não implementado', {
+          position: 'bottom-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          transition: Slide,
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao exportar:', error);
+      toast.error('Erro ao gerar o relatório. Tente novamente.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      });
+    }
   };
 
   // Funções para gerenciar seleção de itens
@@ -263,10 +335,16 @@ function RelatorioComponentesPageContent() {
               Filtros
             </Button>
             <Button
-              className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
-              style={{ backgroundColor: '#306FCC' }}
+              disabled={selectedItems.size === 0}
+              className={`flex items-center gap-2 text-white transition-all ${
+                selectedItems.size > 0
+                  ? 'hover:opacity-90 cursor-pointer'
+                  : 'opacity-50 cursor-not-allowed bg-gray-400'
+              }`}
+              style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
               data-test="exportar-button"
               onClick={handleOpenExportarModal}
+              title={selectedItems.size === 0 ? 'Selecione componentes para exportar' : `Exportar ${selectedItems.size} componente(s)`}
             >
               <img src="../gerar-pdf.svg" alt="" className="w-[20px]" />
               Exportar

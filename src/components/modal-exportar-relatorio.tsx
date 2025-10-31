@@ -22,11 +22,9 @@ export default function ModalExportarRelatorio({
 
   const handleExport = () => {
     if (!fileName.trim()) {
-      alert('Por favor, insira um nome para o arquivo');
       return;
     }
-    onExport(fileName, format);
-    onClose();
+    onExport(fileName.trim(), format.toUpperCase());
   };
 
   return (
@@ -104,8 +102,13 @@ export default function ModalExportarRelatorio({
           </Button>
           <Button
             onClick={handleExport}
-            className="text-white hover:opacity-90 cursor-pointer"
-            style={{ backgroundColor: '#306FCC' }}
+            disabled={!fileName.trim()}
+            className={`text-white transition-all ${
+              fileName.trim()
+                ? 'hover:opacity-90 cursor-pointer' 
+                : 'opacity-50 cursor-not-allowed bg-gray-400'
+            }`}
+            style={fileName.trim() ? { backgroundColor: '#306FCC' } : {}}
           >
             Exportar
           </Button>
