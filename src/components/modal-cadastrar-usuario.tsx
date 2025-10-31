@@ -6,29 +6,29 @@ import { post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
 
-interface ModalConvidarUsuarioProps {
+interface ModalCadastrarUsuarioProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-interface ConvidarUsuarioRequest {
+interface CadastrarUsuarioRequest {
   nome: string;
   email: string;
 }
 
-export default function ModalConvidarUsuario({
+export default function ModalCadastrarUsuario({
   isOpen,
   onClose,
   onSuccess
-}: ModalConvidarUsuarioProps) {
+}: ModalCadastrarUsuarioProps) {
   const queryClient = useQueryClient();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [errors, setErrors] = useState<{ nome?: string; email?: string }>({});
 
-  const convidarMutation = useMutation({
-    mutationFn: async (data: ConvidarUsuarioRequest) => {
+  const cadastrarMutation = useMutation({
+    mutationFn: async (data: CadastrarUsuarioRequest) => {
       return await post('/usuarios/convidar', data);
     },
     onSuccess: () => {
@@ -36,7 +36,7 @@ export default function ModalConvidarUsuario({
         queryKey: ['usuarios']
       });
 
-      toast.success('Convite enviado com sucesso!', {
+      toast.success('Usuário cadastrado com sucesso!', {
         position: 'bottom-right',
         autoClose: 3000,
       });
@@ -48,7 +48,7 @@ export default function ModalConvidarUsuario({
       onClose();
     },
     onError: (error: any) => {
-      console.error('Erro ao enviar convite:', error);
+      console.error('Erro ao cadastrar usuário:', error);
 
       if (error?.response?.data) {
         const errorData = error.response.data;
@@ -136,7 +136,7 @@ export default function ModalConvidarUsuario({
       return;
     }
 
-    convidarMutation.mutate({
+    cadastrarMutation.mutate({
       nome: nome.trim(),
       email: email.trim()
     });
@@ -170,18 +170,15 @@ export default function ModalConvidarUsuario({
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Convidar Usuário
+              Cadastrar Usuário
             </h2>
-            <p className="text-gray-600 text-sm">
-              Preencha os dados para enviar um convite por e-mail
-            </p>
           </div>
 
           {/* Campo Nome */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label htmlFor="nome" className="block text-base font-medium text-gray-700">
-                Nome Completo <span className="text-red-500">*</span>
+                Nome <span className="text-red-500">*</span>
               </label>
               <span className="text-sm text-gray-500">
                 {nome.length}/100
@@ -190,7 +187,7 @@ export default function ModalConvidarUsuario({
             <input
               id="nome"
               type="text"
-              placeholder="Digite o nome completo"
+              placeholder="Nome do usuário"
               value={nome}
               onChange={(e) => {
                 setNome(e.target.value);
@@ -201,7 +198,7 @@ export default function ModalConvidarUsuario({
               maxLength={100}
               className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.nome ? 'border-red-500' : 'border-gray-300'
                 }`}
-              disabled={convidarMutation.isPending}
+              disabled={cadastrarMutation.isPending}
             />
             {errors.nome && (
               <p className="text-red-500 text-sm mt-1">{errors.nome}</p>
@@ -210,18 +207,13 @@ export default function ModalConvidarUsuario({
 
           {/* Campo E-mail */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label htmlFor="email" className="block text-base font-medium text-gray-700">
-                E-mail <span className="text-red-500">*</span>
-              </label>
-              <span className="text-sm text-gray-500">
-                {email.length}/100
-              </span>
-            </div>
+            <label htmlFor="email" className="block text-base font-medium text-gray-700">
+              E-mail <span className="text-red-500">*</span>
+            </label>
             <input
               id="email"
               type="email"
-              placeholder="Digite o e-mail"
+              placeholder="E-mail do usuário"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -229,10 +221,9 @@ export default function ModalConvidarUsuario({
                   setErrors(prev => ({ ...prev, email: undefined }));
                 }
               }}
-              maxLength={100}
               className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
-              disabled={convidarMutation.isPending}
+              disabled={cadastrarMutation.isPending}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -240,12 +231,12 @@ export default function ModalConvidarUsuario({
           </div>
 
           {/* Mensagem de erro da API */}
-          {convidarMutation.error && (
+          {cadastrarMutation.error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
-              <div className="font-medium mb-1">Não foi possível enviar o convite</div>
+              <div className="font-medium mb-1">Não foi possível cadastrar o usuário</div>
               <div className="text-red-500">
-                {(convidarMutation.error as any)?.response?.data?.message ||
-                  (convidarMutation.error as any)?.message ||
+                {(cadastrarMutation.error as any)?.response?.data?.message ||
+                  (cadastrarMutation.error as any)?.message ||
                   'Erro desconhecido'}
               </div>
             </div>
@@ -258,18 +249,18 @@ export default function ModalConvidarUsuario({
             <Button
               variant="outline"
               onClick={onClose}
-              disabled={convidarMutation.isPending}
+              disabled={cadastrarMutation.isPending}
               className="flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={convidarMutation.isPending}
+              disabled={cadastrarMutation.isPending}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
-              {convidarMutation.isPending ? 'Enviando...' : 'Enviar Convite'}
+              {cadastrarMutation.isPending ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </div>
         </div>

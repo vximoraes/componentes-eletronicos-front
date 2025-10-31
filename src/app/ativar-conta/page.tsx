@@ -198,13 +198,9 @@ function AtivarContaContent() {
       <LogoEi />
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          <h2 className="mb-6 md:mb-10 text-center text-2xl md:text-3xl font-bold">
+          <h2 className="mb-6 md:mb-10 text-center text-2xl md:text-3xl font-semibold">
             Ative sua conta!
           </h2>
-          <p className="text-center text-gray-600 mb-6">
-            Defina sua senha para completar o cadastro e acessar o sistema.
-          </p>
-          
           <form onSubmit={handleSubmit}>
             <div className="pt-3 md:pt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
@@ -316,7 +312,7 @@ function AtivarContaContent() {
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
                 disabled={isLoading}
               >
-                {isLoading ? "Ativando conta..." : "Ativar Conta"}
+                {isLoading ? "Ativando conta..." : "Ativar conta"}
               </Button>
             </div>
           </form>

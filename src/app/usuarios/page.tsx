@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/table"
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { get, post } from '@/lib/fetchData'
-import { Search, Plus, Trash2, Mail } from 'lucide-react'
+import { Search, Plus, Trash2, Mail, Loader2 } from 'lucide-react'
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { PulseLoader } from 'react-spinners'
-import ModalConvidarUsuario from '@/components/modal-convidar-usuario'
+import ModalCadastrarUsuario from '@/components/modal-cadastrar-usuario'
 import ModalExcluirUsuario from '@/components/modal-excluir-usuario'
 import { useSession } from '@/hooks/use-session'
 
@@ -52,7 +52,8 @@ function PageUsuariosContent() {
   const [excluirUsuarioId, setExcluirUsuarioId] = useState<string | null>(null)
   const [excluirUsuarioNome, setExcluirUsuarioNome] = useState<string>('')
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false)
-  const [isConvidarModalOpen, setIsConvidarModalOpen] = useState(false)
+  const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false)
+  const [reenviarConviteId, setReenviarConviteId] = useState<string | null>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -129,7 +130,7 @@ function PageUsuariosContent() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  const handleConvidarSuccess = async () => {
+  const handleCadastrarSuccess = async () => {
     setIsRefetchingAfterDelete(true)
     await refetch()
     setIsRefetchingAfterDelete(false)
@@ -159,6 +160,7 @@ function PageUsuariosContent() {
   }
 
   const handleReenviarConvite = async (id: string, nome: string) => {
+    setReenviarConviteId(id)
     try {
       await post(`/usuarios/${id}/reenviar-convite`, {})
 
@@ -183,6 +185,8 @@ function PageUsuariosContent() {
         draggable: false,
         transition: Slide,
       })
+    } finally {
+      setReenviarConviteId(null)
     }
   }
 
@@ -210,10 +214,10 @@ function PageUsuariosContent() {
           <Button
             className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#306FCC' }}
-            onClick={() => setIsConvidarModalOpen(true)}
+            onClick={() => setIsCadastrarModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            Convidar Usuário
+            Cadastrar Usuário
           </Button>
         </div>
 
@@ -273,10 +277,15 @@ function PageUsuariosContent() {
                             {!usuario.ativo && (
                               <button
                                 onClick={() => handleReenviarConvite(usuario._id, usuario.nome)}
-                                className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
+                                disabled={reenviarConviteId === usuario._id}
+                                className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Reenviar convite"
                               >
-                                <Mail size={16} className="sm:w-5 sm:h-5" />
+                                {reenviarConviteId === usuario._id ? (
+                                  <Loader2 size={16} className="sm:w-5 sm:h-5 animate-spin" />
+                                ) : (
+                                  <Mail size={16} className="sm:w-5 sm:h-5" />
+                                )}
                               </button>
                             )}
                             <button
@@ -314,11 +323,11 @@ function PageUsuariosContent() {
         </div>
       </div>
 
-      {/* Modal Convidar Usuário */}
-      <ModalConvidarUsuario
-        isOpen={isConvidarModalOpen}
-        onClose={() => setIsConvidarModalOpen(false)}
-        onSuccess={handleConvidarSuccess}
+      {/* Modal Cadastrar Usuário */}
+      <ModalCadastrarUsuario
+        isOpen={isCadastrarModalOpen}
+        onClose={() => setIsCadastrarModalOpen(false)}
+        onSuccess={handleCadastrarSuccess}
       />
 
       {/* Modal Excluir Usuário */}

@@ -50,7 +50,9 @@ export default function LoginPage() {
           </div>
           <form onSubmit={handleSubmit}>
             <div>
-              <Label className="pb-2 text-sm md:text-base" htmlFor="email">E-mail</Label>
+              <Label className="pb-2 text-sm md:text-base" htmlFor="email">
+                E-mail<span className="text-red-500">*</span>
+              </Label>
               <Input
                 className="p-3 md:p-5 w-full text-sm md:text-base"
                 type="email"
@@ -63,7 +65,9 @@ export default function LoginPage() {
               />
             </div>
             <div className="pt-3 md:pt-4">
-              <Label className="pb-2 text-sm md:text-base" htmlFor="senha">Senha</Label>
+              <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
+                Senha<span className="text-red-500">*</span>
+              </Label>
               <div className="relative">
                 <Input
                   className="p-3 md:p-5 w-full pr-12 text-sm md:text-base"
