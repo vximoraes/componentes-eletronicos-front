@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { getSession, signOut } from "next-auth/react";
 import { refreshAccessToken } from "./refresh-token";
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
 });
 
