@@ -46,7 +46,7 @@ interface UsuarioApiResponse {
 
 function PageUsuariosContent() {
   const router = useRouter()
-  const { hasPermission } = useSession()
+  const { hasPermission, user } = useSession()
   const [searchTerm, setSearchTerm] = useState('')
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false)
   const [excluirUsuarioId, setExcluirUsuarioId] = useState<string | null>(null)
@@ -186,7 +186,9 @@ function PageUsuariosContent() {
     }
   }
 
-  const usuarios = data?.pages.flatMap((page) => page.data.docs) || []
+  const usuarios = (data?.pages.flatMap((page) => page.data.docs) || []).filter(
+    (usuario) => usuario._id !== user?.id
+  )
 
   return (
     <div className="w-full h-screen flex flex-col">
