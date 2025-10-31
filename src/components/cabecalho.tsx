@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "@/hooks/use-session"
 import { useSidebarContext } from "@/contexts/SidebarContext"
 import { Bell, Menu } from "lucide-react"
+
 type NotificationItem = {
   id: string
   title: string
@@ -13,7 +14,7 @@ type NotificationItem = {
 }
 
 export interface CabecalhoProps {
-  pagina: string,
+  pagina: string
   descricao?: string
 }
 
@@ -23,23 +24,14 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
   const { toggleSidebar } = useSidebarContext()
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
-  const [loadingNotifs, setLoadingNotifs] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
 
-  const handleNotificationsClick = () => {
-    setShowNotifications(prev => !prev)
-  }
+  const handleNotificationsClick = () => setShowNotifications(prev => !prev)
+  const handleProfileClick = () => router.push("/perfil")
+  const handleMenuClick = () => toggleSidebar()
 
-  const handleProfileClick = () => {
-    router.push("/perfil")
-  }
-
-  const handleMenuClick = () => {
-    toggleSidebar()
-  }
-
+  // Fechar menu ao clicar fora
   useEffect(() => {
-    // fechar dropdown ao clicar fora
     const handleDocClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowNotifications(false)
@@ -49,60 +41,39 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
     return () => document.removeEventListener("click", handleDocClick)
   }, [])
 
-  async function fetchNotifications() {
-    if (!user) return;
-    setLoadingNotifs(true);
-    try {
-      const res = await fetch('/api/notifications');
-      if (!res.ok) throw new Error('Erro ao buscar notificações');
-      const data = await res.json();
-      setNotifications(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('fetchNotifications:', err);
-      setNotifications([]);
-    } finally {
-      setLoadingNotifs(false);
+  // 🔔 Simulação de notificações (para teste visual)
+  useEffect(() => {
+    setNotifications([
+      {
+        id: "1",
+        title: "Atualização disponível",
+        body: "Versão 2.0 já está no ar!",
+        createdAt: "2025-10-31",
+        read: false,
+      },
+      {
+        id: "2",
+        title: "Senha expira em breve",
+        body: "Sua senha expira em 7 dias.",
+        createdAt: "2025-10-30",
+        read: true,
+      },
+    ])
+  }, [])
+
+  // Marcar notificações como lidas
+  function markAsRead(id?: string) {
+    if (id) {
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    } else {
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     }
   }
-
-  async function markAsRead(id?: string) {
-    try {
-      const base = process.env.NEXT_PUBLIC_API_URL || ""
-      await fetch(`${base}/notifications/mark-read`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, userId: user?.id }),
-      })
-      // atualizar local
-      if (id) setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
-      else setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    } catch (err) {
-      console.error("markAsRead:", err)
-    }
-  }
-
-  // Carregar notificações quando o componente montar
-  useEffect(() => {
-    if (user) {
-      fetchNotifications()
-    }
-  }, [user]) // Dependência do user para recarregar se o usuário mudar
-
-  // Opcional: Recarregar a cada X minutos
-  useEffect(() => {
-    if (!user) return
-
-    const interval = setInterval(() => {
-      fetchNotifications()
-    }, 5 * 60 * 1000) // Recarrega a cada 5 minutos
-
-    return () => clearInterval(interval)
-  }, [user])
 
   return (
     <div className="flex justify-between w-full px-6 md:px-6 py-[20px] md:py-[40px] pt-[30px] md:pt-[50px]">
       <div className="flex items-center gap-[12px] md:gap-[20px]">
-        {/* Botão de menu hambúrguer para mobile */}
+        {/* Botão de menu (mobile) */}
         <button
           onClick={handleMenuClick}
           className="md:hidden w-[40px] h-[40px] flex items-center justify-center rounded-md hover:bg-gray-100 transition-all duration-200"
@@ -110,21 +81,24 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
         >
           <Menu className="w-[24px] h-[24px] text-gray-700" strokeWidth={2} />
         </button>
+
         <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">{pagina}</h1>
         {descricao && (
-          <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">{descricao}</span>
+          <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">
+            {descricao}
+          </span>
         )}
       </div>
-      
-      <div className="flex items-center gap-[8px] md:gap-[12px]">
-        {/* Ícone de Notificações */}
+
+      <div className="flex items-center gap-[10px] md:gap-[14px]">
+        {/* 🔔 Ícone de Notificações */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationsClick}
-            className="relative w-[36px] h-[36px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300 cursor-pointer"
+            className="relative w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300 cursor-pointer"
             aria-label="Notificações"
           >
-            <Bell className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-gray-700" strokeWidth={2.3} />
+            <Bell className="w-[22px] h-[22px] text-gray-700" strokeWidth={2.3} />
             {notifications.some(n => !n.read) && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">
                 {notifications.filter(n => !n.read).length}
@@ -137,21 +111,35 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
             <div className="absolute right-0 mt-2 w-[320px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
               <div className="p-3 flex items-center justify-between border-b border-gray-100">
                 <span className="font-medium">Notificações</span>
-                <button className="text-sm text-blue-600" onClick={() => markAsRead(undefined)}>Marcar todas</button>
+                <button
+                  className="text-sm text-blue-600 hover:underline"
+                  onClick={() => markAsRead(undefined)}
+                >
+                  Marcar todas
+                </button>
               </div>
+
               <div className="max-h-64 overflow-auto">
-                {loadingNotifs ? (
-                  <div className="p-4 text-center text-sm text-gray-500">Carregando...</div>
-                ) : notifications.length === 0 ? (
+                {notifications.length === 0 ? (
                   <div className="p-4 text-center text-sm text-gray-500">Sem notificações</div>
                 ) : (
                   notifications.map(n => (
-                    <div key={n.id} className={`p-3 cursor-pointer hover:bg-gray-50 flex justify-between items-start ${n.read ? "" : "bg-gray-50"}`} onClick={() => { markAsRead(n.id); /* navegar ou abrir detalhe se quiser */ }}>
+                    <div
+                      key={n.id}
+                      className={`p-3 cursor-pointer hover:bg-gray-50 flex justify-between items-start ${
+                        n.read ? "" : "bg-gray-50"
+                      }`}
+                      onClick={() => markAsRead(n.id)}
+                    >
                       <div>
                         <div className="text-sm font-medium text-gray-800">{n.title}</div>
                         {n.body && <div className="text-xs text-gray-500 mt-1">{n.body}</div>}
                       </div>
-                      <div className="text-xs text-gray-400 ml-2">{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ""}</div>
+                      <div className="text-xs text-gray-400 ml-2">
+                        {n.createdAt
+                          ? new Date(n.createdAt).toLocaleDateString("pt-BR")
+                          : ""}
+                      </div>
                     </div>
                   ))
                 )}
@@ -160,15 +148,15 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
           )}
         </div>
 
-        {/* Ícone de Perfil */}
+        {/* 👤 Ícone de Perfil */}
         <button
           onClick={handleProfileClick}
-          className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] rounded-full transition-all duration-200 cursor-pointer overflow-hidden"
+          className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-full border-2 border-gray-200 hover:border-blue-500 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md"
           aria-label="Perfil do usuário"
         >
-          <img 
-            src={user?.image || "/foto-default.svg"} 
-            alt="Foto de perfil" 
+          <img
+            src={user?.image || "/foto-default.svg"}
+            alt="Foto de perfil"
             className="w-full h-full object-cover"
           />
         </button>
