@@ -41,7 +41,7 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
     return () => document.removeEventListener("click", handleDocClick)
   }, [])
 
-  // 🔔 Simulação de notificações (para teste visual)
+  //  notificações teste (puxar do banco)
   useEffect(() => {
     setNotifications([
       {
