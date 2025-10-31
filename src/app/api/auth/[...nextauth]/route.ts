@@ -172,6 +172,8 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
+        const expiresAt = Date.now() + ACCESS_TOKEN_EXPIRATION_MS;
+        console.log(`[JWT Callback] Novo login - Token expira em: ${new Date(expiresAt).toLocaleString()}`);
         return {
           ...token,
           id: user.id,
@@ -182,7 +184,7 @@ export const authOptions: AuthOptions = {
           ativo: (user as any).ativo,
           permissoes: (user as any).permissoes,
           grupos: (user as any).grupos,
-          accessTokenExpires: Date.now() + ACCESS_TOKEN_EXPIRATION_MS,
+          accessTokenExpires: expiresAt,
         };
       }
 
@@ -190,11 +192,18 @@ export const authOptions: AuthOptions = {
         return { ...token, ...session };
       }
 
-      if (Date.now() < Number(token.accessTokenExpires ?? 0) - REFRESH_BUFFER_MS) {
+      const now = Date.now();
+      const expiresAt = Number(token.accessTokenExpires ?? 0);
+      const timeUntilExpiry = expiresAt - now;
+      const shouldRefresh = timeUntilExpiry < REFRESH_BUFFER_MS;
+
+      console.log(`[JWT Callback] Verificando token - Tempo até expirar: ${Math.floor(timeUntilExpiry / 1000)}s, Deve renovar: ${shouldRefresh}`);
+
+      if (!shouldRefresh) {
         return token;
       }
 
-      console.log("Token próximo de expirar ou expirado, iniciando renovação automática...");
+      console.log("[JWT Callback] Token próximo de expirar ou expirado, iniciando renovação automática...");
       return await refreshAccessToken(token);
     },
 
