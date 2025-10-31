@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import LogoEi from "@/components/logo-ei";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,7 +95,9 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            <p className="mt-2 md:mt-3 text-zinc-600 text-sm md:text-base underline cursor-pointer">Esqueci minha senha</p>
+            <Link href="/esqueci-senha" className="mt-2 md:mt-3 text-zinc-600 text-sm md:text-base underline cursor-pointer inline-block hover:text-zinc-800 transition-colors">
+              Esqueci minha senha
+            </Link>
             {error && (
               <div className="mt-3 md:mt-4 p-2 md:p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm md:text-base">
                 {error}

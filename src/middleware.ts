@@ -1,7 +1,7 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/cadastro", "/ativar-conta"];
+const PUBLIC_ROUTES = ["/login", "/cadastro", "/ativar-conta", "/esqueci-senha", "/redefinir-senha"];
 
 export default withAuth(
   function middleware(req) {
