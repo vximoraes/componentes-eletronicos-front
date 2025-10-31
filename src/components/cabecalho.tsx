@@ -41,13 +41,13 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
     return () => document.removeEventListener("click", handleDocClick)
   }, [])
 
-  // 🔔 Simulação de notificações (para teste visual)
+  // notificações (implementar o banco)
   useEffect(() => {
     setNotifications([
       {
         id: "1",
-        title: "Atualização disponível",
-        body: "Versão 2.0 já está no ar!",
+        title: "Arduino 2.0",
+        body: "15",
         createdAt: "2025-10-31",
         read: false,
       },
@@ -73,7 +73,7 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
   return (
     <div className="flex justify-between w-full px-6 md:px-6 py-[20px] md:py-[40px] pt-[30px] md:pt-[50px]">
       <div className="flex items-center gap-[12px] md:gap-[20px]">
-        {/* Botão de menu (mobile) */}
+        {/* Botão de menu */}
         <button
           onClick={handleMenuClick}
           className="md:hidden w-[40px] h-[40px] flex items-center justify-center rounded-md hover:bg-gray-100 transition-all duration-200"
@@ -91,7 +91,7 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
       </div>
 
       <div className="flex items-center gap-[10px] md:gap-[14px]">
-        {/* 🔔 Ícone de Notificações */}
+        {/* Notificações */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={handleNotificationsClick}
@@ -105,8 +105,6 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
               </span>
             )}
           </button>
-
-          {/* Dropdown de notificações */}
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-[320px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
               <div className="p-3 flex items-center justify-between border-b border-gray-100">
@@ -148,7 +146,7 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
           )}
         </div>
 
-        {/* 👤 Ícone de Perfil */}
+        {/* Ícone de Perfil */}
         <button
           onClick={handleProfileClick}
           className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-full border-2 border-gray-200 hover:border-blue-500 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md"
