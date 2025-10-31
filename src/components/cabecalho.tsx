@@ -27,9 +27,7 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
   const dropdownRef = useRef<HTMLDivElement | null>(null)
 
   const handleNotificationsClick = () => {
-    // TODO: Implementar funcionalidade de notificações
     setShowNotifications(prev => !prev)
-    if (!showNotifications) fetchNotifications()
   }
 
   const handleProfileClick = () => {
@@ -52,19 +50,18 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
   }, [])
 
   async function fetchNotifications() {
-    if (!user) return
-    setLoadingNotifs(true)
+    if (!user) return;
+    setLoadingNotifs(true);
     try {
-      const base = process.env.NEXT_PUBLIC_API_URL || ""
-      const res = await fetch(`${base}/notifications?userId=${user.id}`, { cache: "no-store" })
-      if (!res.ok) throw new Error("Erro ao buscar notificações")
-      const data = await res.json()
-      setNotifications(Array.isArray(data) ? data : [])
+      const res = await fetch('/api/notifications');
+      if (!res.ok) throw new Error('Erro ao buscar notificações');
+      const data = await res.json();
+      setNotifications(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("fetchNotifications:", err)
-      setNotifications([])
+      console.error('fetchNotifications:', err);
+      setNotifications([]);
     } finally {
-      setLoadingNotifs(false)
+      setLoadingNotifs(false);
     }
   }
 
@@ -83,6 +80,24 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
       console.error("markAsRead:", err)
     }
   }
+
+  // Carregar notificações quando o componente montar
+  useEffect(() => {
+    if (user) {
+      fetchNotifications()
+    }
+  }, [user]) // Dependência do user para recarregar se o usuário mudar
+
+  // Opcional: Recarregar a cada X minutos
+  useEffect(() => {
+    if (!user) return
+
+    const interval = setInterval(() => {
+      fetchNotifications()
+    }, 5 * 60 * 1000) // Recarrega a cada 5 minutos
+
+    return () => clearInterval(interval)
+  }, [user])
 
   return (
     <div className="flex justify-between w-full px-6 md:px-6 py-[20px] md:py-[40px] pt-[30px] md:pt-[50px]">
