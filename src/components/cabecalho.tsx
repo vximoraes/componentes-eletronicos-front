@@ -1,90 +1,144 @@
-"use client";
+"use client"
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { useSession } from "@/hooks/use-session"
+import { useSidebarContext } from "@/contexts/SidebarContext"
+import { Bell, Menu } from "lucide-react"
 
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Image from "next/image";
-import { Bell } from "lucide-react";
-
-interface CabecalhoProps {
-  pagina: string;
-  descricao?: string;
-  usuarioId?: string; // ID do usuário logado (usado para buscar notificações)
+type NotificationItem = {
+  id: string
+  title: string
+  body?: string
+  createdAt?: string
+  read?: boolean
 }
 
-export default function Cabecalho({ pagina, descricao, usuarioId }: CabecalhoProps) {
-  const [notificacoes, setNotificacoes] = useState<any[]>([]);
-  const [menuAberto, setMenuAberto] = useState(false);
-  const [carregando, setCarregando] = useState(true);
+export interface CabecalhoProps {
+  pagina: string
+  descricao?: string
+}
 
-  // Função para buscar notificações da API
+export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
+  const router = useRouter()
+  const { user } = useSession()
+  const { toggleSidebar } = useSidebarContext()
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+  const handleNotificationsClick = () => setShowNotifications(prev => !prev)
+  const handleProfileClick = () => router.push("/perfil")
+  const handleMenuClick = () => toggleSidebar()
+
+  // Fechar menu ao clicar fora
   useEffect(() => {
-    if (!usuarioId) return;
-
-    async function carregarNotificacoes() {
-      try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notificacoes/${usuarioId}`);
-        setNotificacoes(res.data);
-      } catch (error) {
-        console.error("Erro ao carregar notificações:", error);
-      } finally {
-        setCarregando(false);
+    const handleDocClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowNotifications(false)
       }
     }
+    document.addEventListener("click", handleDocClick)
+    return () => document.removeEventListener("click", handleDocClick)
+  }, [])
 
-    carregarNotificacoes();
-  }, [usuarioId]);
+  // 🔔 Simulação de notificações (para teste visual)
+  useEffect(() => {
+    setNotifications([
+      {
+        id: "1",
+        title: "Atualização disponível",
+        body: "Versão 2.0 já está no ar!",
+        createdAt: "2025-10-31",
+        read: false,
+      },
+      {
+        id: "2",
+        title: "Senha expira em breve",
+        body: "Sua senha expira em 7 dias.",
+        createdAt: "2025-10-30",
+        read: true,
+      },
+    ])
+  }, [])
 
-  // Conta quantas não foram lidas
-  const naoLidas = notificacoes.filter((n) => !n.lida).length;
+  // Marcar notificações como lidas
+  function markAsRead(id?: string) {
+    if (id) {
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+    } else {
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    }
+  }
 
   return (
-    <header className="flex items-center justify-between bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-40 shadow-sm">
-      {/* Esquerda - título e descrição */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">{pagina}</h1>
-        {descricao && <p className="text-sm text-gray-500">{descricao}</p>}
+    <div className="flex justify-between w-full px-6 md:px-6 py-[20px] md:py-[40px] pt-[30px] md:pt-[50px]">
+      <div className="flex items-center gap-[12px] md:gap-[20px]">
+        {/*  menu */}
+        <button
+          onClick={handleMenuClick}
+          className="md:hidden w-[40px] h-[40px] flex items-center justify-center rounded-md hover:bg-gray-100 transition-all duration-200"
+          aria-label="Menu"
+        >
+          <Menu className="w-[24px] h-[24px] text-gray-700" strokeWidth={2} />
+        </button>
+
+        <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">{pagina}</h1>
+        {descricao && (
+          <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">
+            {descricao}
+          </span>
+        )}
       </div>
 
-      {/* Direita - notificações e avatar */}
-      <div className="flex items-center space-x-6 relative">
-        {/* 🔔 Sino de Notificações */}
-        <div className="relative">
+      <div className="flex items-center gap-[10px] md:gap-[14px]">
+        {/* Notificações */}
+        <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => setMenuAberto(!menuAberto)}
-            className="relative w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-gray-100"
+            onClick={handleNotificationsClick}
+            className="relative w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300 cursor-pointer"
+            aria-label="Notificações"
           >
-            <Bell className="w-[22px] h-[22px] text-gray-700" />
-            {naoLidas > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {naoLidas}
+            <Bell className="w-[22px] h-[22px] text-gray-700" strokeWidth={2.3} />
+            {notifications.some(n => !n.read) && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">
+                {notifications.filter(n => !n.read).length}
               </span>
             )}
           </button>
 
-          {/* Dropdown de notificações */}
-          {menuAberto && (
-            <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-50">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold text-gray-800">Notificações</h3>
-                {carregando && <span className="text-xs text-gray-500">Carregando...</span>}
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-[320px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
+              <div className="p-3 flex items-center justify-between border-b border-gray-100">
+                <span className="font-medium">Notificações</span>
+                <button
+                  className="text-sm text-blue-600 hover:underline"
+                  onClick={() => markAsRead(undefined)}
+                >
+                  Marcar todas
+                </button>
               </div>
 
-              <div className="max-h-72 overflow-y-auto">
-                {notificacoes.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-4">Nenhuma notificação</p>
+              <div className="max-h-64 overflow-auto">
+                {notifications.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-gray-500">Sem notificações</div>
                 ) : (
-                  notificacoes.map((n) => (
+                  notifications.map(n => (
                     <div
-                      key={n._id}
-                      className={`py-2 border-b last:border-none cursor-pointer hover:bg-gray-50 rounded px-2 ${
-                        n.lida ? "text-gray-600" : "text-gray-800 font-medium"
+                      key={n.id}
+                      className={`p-3 cursor-pointer hover:bg-gray-50 flex justify-between items-start ${
+                        n.read ? "" : "bg-gray-50"
                       }`}
+                      onClick={() => markAsRead(n.id)}
                     >
-                      <p>{n.titulo}</p>
-                      <p className="text-sm text-gray-500">{n.mensagem}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(n.dataCriacao).toLocaleString("pt-BR")}
-                      </p>
+                      <div>
+                        <div className="text-sm font-medium text-gray-800">{n.title}</div>
+                        {n.body && <div className="text-xs text-gray-500 mt-1">{n.body}</div>}
+                      </div>
+                      <div className="text-xs text-gray-400 ml-2">
+                        {n.createdAt
+                          ? new Date(n.createdAt).toLocaleDateString("pt-BR")
+                          : ""}
+                      </div>
                     </div>
                   ))
                 )}
@@ -93,18 +147,19 @@ export default function Cabecalho({ pagina, descricao, usuarioId }: CabecalhoPro
           )}
         </div>
 
-        {/* Avatar */}
-        <div className="flex items-center space-x-2">
-          <Image
-            src="/avatar.png"
-            alt="avatar"
-            width={36}
-            height={36}
-            className="rounded-full object-cover"
+        {/* 👤 Ícone de Perfil */}
+        <button
+          onClick={handleProfileClick}
+          className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-full border-2 border-gray-200 hover:border-blue-500 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md"
+          aria-label="Perfil do usuário"
+        >
+          <img
+            src={user?.image || "/foto-default.svg"}
+            alt="Foto de perfil"
+            className="w-full h-full object-cover"
           />
-          <span className="text-gray-700 font-medium">Usuário</span>
-        </div>
+        </button>
       </div>
-    </header>
-  );
+    </div>
+  )
 }
