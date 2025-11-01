@@ -10,6 +10,7 @@ import { SidebarMenuItem } from "@/components/ui/sidebar"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { useState, useEffect } from "react"
 import SidebarButtonMenu from "./sidebarButton"
+import SidebarButtonWithSubmenu from "./sidebarButtonWithSubmenu"
 import { signOut } from "next-auth/react"
 import { useSidebarContext } from "@/contexts/SidebarContext"
 import { X } from "lucide-react"
@@ -32,29 +33,83 @@ interface MobileMenuItemProps {
   route: string
   isActive?: boolean
   onClick: () => void
+  subItems?: SubMenuItem[]
 }
 
-function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick }: MobileMenuItemProps) {
+interface SubMenuItem {
+  name: string
+  route: string
+}
+
+function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick, subItems }: MobileMenuItemProps) {
   const router = useRouter()
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleClick = () => {
-    router.push(route)
+    if (subItems && subItems.length > 0) {
+      setIsOpen(!isOpen)
+    } else {
+      router.push(route)
+      onClick()
+    }
+  }
+
+  const handleSubItemClick = (subRoute: string) => {
+    router.push(subRoute)
     onClick()
   }
 
   return (
-    <button
-      onClick={handleClick}
-      className={`text-[16px] pl-[20px] h-[50px] w-full cursor-pointer flex gap-[12px] items-center rounded-lg transition-all duration-300 ${isActive
-          ? 'bg-white text-black shadow-md'
-          : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.08)]'
-        }`}
-    >
-      <img src={isActive ? iconHover : icon} alt={name} className="w-[22px] h-[22px]" />
-      <span className={`text-[16px] font-medium ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}>
-        {name}
-      </span>
-    </button>
+    <div className="w-full">
+      <button
+        onClick={handleClick}
+        className={`text-[16px] pl-[20px] h-[50px] w-full cursor-pointer flex gap-[12px] items-center rounded-lg transition-all duration-300 ${isActive
+            ? 'bg-white text-black shadow-md'
+            : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.08)]'
+          }`}
+      >
+        <img src={isActive ? iconHover : icon} alt={name} className="w-[22px] h-[22px]" />
+        <span className={`text-[16px] font-medium flex-1 text-left ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}>
+          {name}
+        </span>
+        {subItems && subItems.length > 0 && (
+          <svg
+            className={`w-4 h-4 mr-3 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
+      </button>
+
+      {/* Sub-itens */}
+      {subItems && subItems.length > 0 && (
+        <div
+          className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+            }`}
+        >
+          <div className="ml-[34px] mt-1 space-y-1">
+            {subItems.map((item) => {
+              const isSubItemActive = window.location.pathname === item.route
+              return (
+                <button
+                  key={item.route}
+                  onClick={() => handleSubItemClick(item.route)}
+                  className={`w-full text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${isSubItemActive
+                      ? 'bg-[rgba(255,255,255,0.12)] text-white font-medium'
+                      : 'text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white'
+                    }`}
+                >
+                  {item.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -140,12 +195,16 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
-                  <SidebarButtonMenu
+                  <SidebarButtonWithSubmenu
                     src="/relatorios.svg"
                     srcHover="/relatorios-hover.svg"
                     name="Relatórios"
-                    route="/relatorios"
                     data-test="sidebar-btn-relatorios"
+                    subItems={[
+                      { name: "Componentes", route: "/relatorios/componentes" },
+                      { name: "Movimentações", route: "/relatorios/movimentacoes" },
+                      { name: "Orçamentos", route: "/relatorios/orcamentos" }
+                    ]}
                     path={path}
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
@@ -271,6 +330,11 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                 onClick={() => {
                   handleItemClick()
                 }}
+                subItems={[
+                  { name: "Componentes", route: "/relatorios/componentes" },
+                  { name: "Movimentações", route: "/relatorios/movimentacoes" },
+                  { name: "Orçamentos", route: "/relatorios/orcamentos" }
+                ]}
               />
               <MobileMenuItem
                 icon="/orcamentos.svg"
