@@ -276,7 +276,12 @@ function RelatorioComponentesPageContent() {
 
   return (
     <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-componentes-page">
-      <Cabecalho pagina="Relatórios" acao="Componentes" />
+      <Cabecalho 
+        pagina="Relatórios" 
+        acao="Componentes"
+        showBackButton={true}
+        onBackClick={() => router.push('/relatorios')}
+      />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
         <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
@@ -419,7 +424,7 @@ function RelatorioComponentesPageContent() {
                 <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px]">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -433,17 +438,17 @@ function RelatorioComponentesPageContent() {
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">PRODUTO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">QUANTIDADE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
                       <TableRow key={estoque._id} className="hover:bg-gray-50 border-b">
-                        <TableCell className="text-center px-2 sm:px-4">
+                        <TableCell className="text-center px-8">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
@@ -451,36 +456,39 @@ function RelatorioComponentesPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-center px-2 sm:px-4">
-                          <div className="truncate" title={estoque.componente._id}>
+                        <TableCell className="font-medium text-left px-8">
+                          <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-left px-2 sm:px-4">
-                          <div className="truncate font-medium" title={estoque.componente.nome}>
-                            {estoque.componente.nome}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center px-2 sm:px-4 font-medium">
-                          {estoque.quantidade}
-                        </TableCell>
-                        <TableCell className="text-center px-2 sm:px-">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-[10px] text-[14px] font-medium ${
-                              estoque.componente.status === 'Em Estoque'
-                                ? 'bg-green-100 text-green-800'
-                                : estoque.componente.status === 'Baixo Estoque'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}
-                          >
-                            {estoque.componente.status}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-2 sm:px-4 font-medium">
-                          <div className="truncate" title={estoque.localizacao.nome}>
-                            {estoque.localizacao.nome}
+                        <TableCell className="font-medium text-left px-8">
+                          <span className="truncate block max-w-[250px]" title={estoque.componente.nome}>
+                            {estoque.componente.nome}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center px-8 font-medium">
+                          {estoque.quantidade}
+                        </TableCell>
+                        <TableCell className="text-center px-8 whitespace-nowrap">
+                          <div className="flex justify-center">
+                            <span
+                              className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${
+                                estoque.componente.status === 'Em Estoque'
+                                  ? 'bg-green-100 text-green-800'
+                                  : estoque.componente.status === 'Baixo Estoque'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                              title={estoque.componente.status}
+                            >
+                              {estoque.componente.status}
+                            </span>
                           </div>
+                        </TableCell>
+                        <TableCell className="text-left px-8 font-medium">
+                          <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
+                            {estoque.localizacao.nome}
+                          </span>
                         </TableCell>
                       </TableRow>
                     ))}
