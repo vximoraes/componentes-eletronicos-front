@@ -29,7 +29,7 @@ export default function HomePage() {
         <Cabecalho pagina="Perfil" descricao="Informações do usuário" />
 
         {/* Conteúdo principal */}
-        <div className="container mx-auto px-6 pb-6 mt-4">
+        <div className="container mx-auto px-12 pb-12 mt-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Lado esquerdo */}
             <aside className="col-span-1">
