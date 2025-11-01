@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PulseLoader } from "react-spinners"
+import Link from "next/link"
 
 interface PasswordRequirement {
   text: string
@@ -198,9 +199,14 @@ function AtivarContaContent() {
       <LogoEi />
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
-          <h2 className="mb-6 md:mb-10 text-center text-2xl md:text-3xl font-semibold">
-            Ative sua conta!
-          </h2>
+          <div className="text-center mb-6 md:mb-10">
+            <h2 className="text-2xl md:text-3xl font-semibold mb-2">
+              Ativação de conta
+            </h2>
+            <p className="text-zinc-600 text-sm md:text-base mt-2">
+              Crie uma senha segura para ativar sua conta e começar a utilizar o sistema.
+            </p>
+          </div>
           <form onSubmit={handleSubmit}>
             <div className="pt-3 md:pt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
@@ -269,7 +275,7 @@ function AtivarContaContent() {
             
             <div className="pt-3 md:pt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="confirmarSenha">
-                Repetir Senha <span className="text-red-500">*</span>
+                Confirmar senha <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -317,15 +323,17 @@ function AtivarContaContent() {
             </div>
           </form>
           
-          <p className="mt-4 md:mt-6 text-center text-sm md:text-base">
-            Já tem uma conta ativa?{" "}
-            <span
-              className="text-[#306FCC] hover:text-[#2557a7] underline cursor-pointer"
-              onClick={() => router.push("/login")}
-            >
-              Entrar
-            </span>
-          </p>
+          <div className="text-center mt-6">
+            <p className="text-zinc-600 text-sm md:text-base">
+              Já tem uma conta ativa?{" "}
+              <Link
+                href="/login"
+                className="text-[#306FCC] hover:text-[#2557a7] underline font-medium"
+              >
+                Entrar
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
       <ToastContainer 

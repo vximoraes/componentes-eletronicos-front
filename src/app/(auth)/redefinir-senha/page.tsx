@@ -202,16 +202,16 @@ function RedefinirSenhaContent() {
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-6 md:mb-10">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-2">Redefinir Senha</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold mb-2">Redefinir senha</h2>
             <p className="text-zinc-600 text-sm md:text-base">
-              Digite sua nova senha abaixo
+              Digite sua nova senha abaixo.
             </p>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div>
               <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
-                Nova Senha<span className="text-red-500">*</span>
+                Nova senha<span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -241,11 +241,37 @@ function RedefinirSenhaContent() {
               {errors.senha && (
                 <p className="text-red-500 text-xs md:text-sm mt-1">{errors.senha}</p>
               )}
+
+              {/* Validação visual da senha em tempo real */}
+              {senha && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <ul className="space-y-1.5">
+                    {passwordRequirements.map((requirement, index) => {
+                      const isValid = checkPasswordRequirement(requirement)
+                      return (
+                        <li
+                          key={index}
+                          className={`text-sm flex items-center gap-2 transition-colors duration-200 ${
+                            isValid ? "text-green-600" : "text-gray-600"
+                          }`}
+                        >
+                          {isValid ? (
+                            <Check className="flex-shrink-0 w-4 h-4" />
+                          ) : (
+                            <X className="flex-shrink-0 w-4 h-4" />
+                          )}
+                          <span>{requirement.text}</span>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div className="mt-3 md:mt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="confirmarSenha">
-                Confirmar Nova Senha<span className="text-red-500">*</span>
+                Confirmar nova senha<span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -277,33 +303,11 @@ function RedefinirSenhaContent() {
               )}
             </div>
 
-            <div className="mt-4 md:mt-6 p-3 md:p-4 bg-zinc-50 rounded-lg border border-zinc-200">
-              <p className="font-semibold mb-2 text-sm md:text-base">Requisitos da senha:</p>
-              <ul className="space-y-1 text-xs md:text-sm">
-                {passwordRequirements.map((req, index) => {
-                  const isValid = checkPasswordRequirement(req)
-                  return (
-                    <li
-                      key={index}
-                      className={`flex items-center gap-2 ${isValid ? "text-green-600" : "text-zinc-600"}`}
-                    >
-                      {isValid ? (
-                        <Check className="w-3 h-3 md:w-4 md:h-4" />
-                      ) : (
-                        <X className="w-3 h-3 md:w-4 md:h-4" />
-                      )}
-                      <span>{req.text}</span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-
             <div className="mt-4 md:mt-6">
               <Button
                 type="submit"
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                disabled={isLoading || !isPasswordValid() || senha !== confirmarSenha}
+                disabled={isLoading}
               >
                 {isLoading ? "Redefinindo..." : "Redefinir Senha"}
               </Button>
