@@ -29,7 +29,12 @@ export async function fetchData<T>(
     // Verifica se a sessão tem erro de refresh
     if (session?.error === "RefreshAccessTokenError") {
       console.error("Sessão expirada, redirecionando para login...");
-      window.location.href = "/login";
+      if (!isRedirecting) {
+        isRedirecting = true;
+        await signOut({ callbackUrl: "/login", redirect: true }).catch(() => {
+          window.location.href = "/login";
+        });
+      }
       throw new Error("Sessão expirada");
     }
   }
@@ -70,33 +75,36 @@ export async function fetchData<T>(
   if (!response.ok) {
     // Token expirado ou inválido
     if (response.status === 401 || response.status === 498) {
-      if (typeof window !== "undefined" && !isRedirecting) {
-        if (!isRetry) {
-          console.log("Token expirado, tentando renovar sessão...");
+      if (typeof window !== "undefined" && !isRedirecting && !isRetry) {
+        console.log("Token expirado detectado, tentando renovar sessão...");
 
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        let newSession = await getSession();
+
+        if (newSession?.user?.accessToken === authToken) {
+          console.log("Tentativa 2 de renovação...");
           await new Promise(resolve => setTimeout(resolve, 500));
-
-          const newSession = await getSession();
-
-          if (newSession && !newSession.error && newSession.user?.accessToken) {
-            console.log("Sessão renovada, retentando requisição...");
-            return fetchData<T>(url, method, newSession.user.accessToken, body, true);
-          }
+          newSession = await getSession();
         }
 
-        if (!isRedirecting) {
-          isRedirecting = true;
-          console.error("Não foi possível renovar sessão, fazendo logout...");
-
-          signOut({ callbackUrl: "/login", redirect: true }).catch(() => {
-            window.location.href = "/login";
-          });
-          
-          throw {
-            status: response.status,
-            message: "Sessão expirada. Redirecionando para login...",
-          } as FetchError;
+        if (newSession && !newSession.error && newSession.user?.accessToken && 
+            newSession.user.accessToken !== authToken) {
+          console.log("Sessão renovada com sucesso, retentando requisição...");
+          return fetchData<T>(url, method, newSession.user.accessToken, body, true);
         }
+
+        console.error("Não foi possível renovar sessão, fazendo logout...");
+        isRedirecting = true;
+
+        await signOut({ callbackUrl: "/login", redirect: true }).catch(() => {
+          window.location.href = "/login";
+        });
+        
+        throw {
+          status: response.status,
+          message: "Sessão expirada. Redirecionando para login...",
+        } as FetchError;
       }
     }
     

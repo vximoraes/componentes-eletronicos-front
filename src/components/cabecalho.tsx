@@ -1,15 +1,17 @@
 "use client"
 import { useState } from "react"
 import { useSidebarContext } from "@/contexts/SidebarContext"
-import { Bell, Menu } from "lucide-react"
+import { Bell, Menu, ChevronLeft } from "lucide-react"
 
 export interface CabecalhoProps {
   pagina: string,
   acao?: string,
-  fotoPerfil?: string
+  fotoPerfil?: string,
+  showBackButton?: boolean,
+  onBackClick?: () => void
 }
 
-export default function Cabecalho({ pagina, acao }: CabecalhoProps) {
+export default function Cabecalho({ pagina, acao, showBackButton, onBackClick }: CabecalhoProps) {
   const { toggleSidebar } = useSidebarContext()
   const [showNotifications, setShowNotifications] = useState(false)
 
@@ -33,6 +35,19 @@ export default function Cabecalho({ pagina, acao }: CabecalhoProps) {
         >
           <Menu className="w-[24px] h-[24px] text-gray-700" strokeWidth={2} />
         </button>
+        
+        {/* Botão de voltar */}
+        {showBackButton && onBackClick && (
+          <button
+            onClick={onBackClick}
+            className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+            aria-label="Voltar"
+            title="Voltar"
+          >
+            <ChevronLeft className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-gray-700" strokeWidth={2} />
+          </button>
+        )}
+        
         <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">{pagina}</h1>
         {acao && (
           <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">{acao}</span>

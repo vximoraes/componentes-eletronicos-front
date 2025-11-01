@@ -260,7 +260,7 @@ export default function CadastroPage() {
             </div>
             <div className="pt-3 md:pt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="confirmarSenha">
-                Repetir Senha <span className="text-red-500">*</span>
+                Confirmar senha <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input

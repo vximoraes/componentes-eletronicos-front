@@ -24,23 +24,23 @@ export default function Card({ title, descricao, imagem, bg_imagem, url }: ICard
   }, [])
 
   return (
-    <div className="bg-[#FFFFFF] rounded-[10px] max-w-[475px] hover drop-shadow-[2px_2px_4px_rgba(0,0,0,0.20)] overflow-hidden transition-transform duration-300 hover:scale-105">
-      <div ref={cardRef} className={isCompact ? "flex flex-col gap-[30px] p-[35px] items-center text-center" : "flex flex-row gap-[30px] p-[35px] min-h-[190px]"}>
-        <div className={isCompact ? "" : "pt-[10px] flex-shrink-0"}>
-          <div className={"flex items-center justify-center w-[100px] h-[100px] rounded-[50%] " + bg_imagem}>
-            <img src={imagem} alt="" />
+    <div className="bg-white rounded-lg w-full shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:border-blue-300">
+      <div ref={cardRef} className={isCompact ? "flex flex-col gap-4 p-4 items-center text-center" : "flex flex-row gap-4 p-4 min-h-[130px]"}>
+        <div className={isCompact ? "" : "flex-shrink-0"}>
+          <div className={"flex items-center justify-center w-16 h-16 rounded-full " + bg_imagem}>
+            <img src={imagem} alt="" className="w-8 h-8" />
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-[26px] mb-[5px] overflow-hidden text-ellipsis whitespace-nowrap">{title}</h2>
-          <span className="text-[#6B7280] font-semibold text-[16px] block overflow-hidden text-ellipsis line-clamp-2">{descricao}</span>
+          <h2 className="font-semibold text-lg mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-gray-900">{title}</h2>
+          <span className="text-gray-600 text-sm block overflow-hidden text-ellipsis line-clamp-2">{descricao}</span>
         </div>
       </div>
-      <hr className=" border-[#4f668c71]" />
-      <div className="text-center p-[16px] text-[#5676A1] overflow-hidden">
-        <Link href={url} className="inline-flex items-center group font-medium transition-all duration-300 hover:text-[#3d5576] hover:scale-105">
+      <hr className="border-gray-200" />
+      <div className="text-center p-3 text-blue-600 overflow-hidden">
+        <Link href={url} className="inline-flex items-center group font-medium text-sm transition-all duration-300 hover:text-blue-700">
           Acessar
-          <img className="ml-[8px] w-[6px] transition-transform duration-300 group-hover:translate-x-1" src="/acessar.svg" alt="" />
+          <img className="ml-2 w-1.5 transition-transform duration-300 group-hover:translate-x-1" src="/acessar.svg" alt="" />
         </Link>
       </div>
     </div>
