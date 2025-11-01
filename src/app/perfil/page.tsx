@@ -53,6 +53,8 @@ export default function HomePage() {
   const [isSaving, setIsSaving] = useState(false)
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([])
   const [loadingNotificacaoId, setLoadingNotificacaoId] = useState<string | null>(null)
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
+  const [isLoadingNotificacoes, setIsLoadingNotificacoes] = useState(true)
   const [stats, setStats] = useState({
     totalComponentes: 0,
     totalMovimentacoes: 0,
@@ -81,6 +83,7 @@ export default function HomePage() {
     async function fetchStats() {
       if (!user?.id) return
       
+      setIsLoadingStats(true)
       try {
         // Buscar componentes do usuário
         const componentesResponse = await get<any>('/componentes?limite=100')
@@ -119,14 +122,20 @@ export default function HomePage() {
         })
       } catch (error) {
         console.error("Erro ao carregar estatísticas:", error)
+      } finally {
+        setIsLoadingStats(false)
       }
     }
 
     fetchStats()
   }, [user?.id])
 
-  const fetchNotificacoes = async () => {
+  const fetchNotificacoes = async (showLoading = true) => {
     if (!user?.id) return
+    
+    if (showLoading) {
+      setIsLoadingNotificacoes(true)
+    }
     
     try {
       const response = await get<NotificacoesApiResponse>('/notificacoes?limite=10')
@@ -134,14 +143,18 @@ export default function HomePage() {
       setNotificacoes(notifs)
     } catch (error) {
       console.error("Erro ao carregar notificações:", error)
+    } finally {
+      if (showLoading) {
+        setIsLoadingNotificacoes(false)
+      }
     }
   }
 
   useEffect(() => {
-    fetchNotificacoes()
+    fetchNotificacoes(true)
     
-    // Atualizar notificações a cada 30 segundos
-    const interval = setInterval(fetchNotificacoes, 30000)
+    // Atualizar notificações a cada 30 segundos (sem loading)
+    const interval = setInterval(() => fetchNotificacoes(false), 30000)
     return () => clearInterval(interval)
   }, [user?.id])
 
@@ -149,8 +162,8 @@ export default function HomePage() {
     setLoadingNotificacaoId(notificacaoId)
     try {
       await patch(`/notificacoes/${notificacaoId}/visualizar`, {})
-      // Atualizar a lista de notificações
-      await fetchNotificacoes()
+      // Atualizar a lista de notificações (sem loading)
+      await fetchNotificacoes(false)
       toast.success("Notificação marcada como lida!", {
         position: "bottom-right",
         autoClose: 2000,
@@ -185,8 +198,8 @@ export default function HomePage() {
         )
       )
       
-      // Atualizar a lista
-      await fetchNotificacoes()
+      // Atualizar a lista (sem loading)
+      await fetchNotificacoes(false)
       toast.success(`${naoVisualizadas.length} notificação${naoVisualizadas.length > 1 ? 'ões' : ''} marcada${naoVisualizadas.length > 1 ? 's' : ''} como lida${naoVisualizadas.length > 1 ? 's' : ''}`, {
         position: "bottom-right",
         autoClose: 2000,
@@ -276,7 +289,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="w-full h-screen flex flex-col">
-        <Cabecalho pagina="Perfil" descricao="Informações do usuário" />
+        <Cabecalho pagina="Perfil" />
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center">
             <div className="relative w-12 h-12">
@@ -293,7 +306,7 @@ export default function HomePage() {
   if (!userData) {
     return (
       <div className="w-full h-screen flex flex-col">
-        <Cabecalho pagina="Perfil" descricao="Informações do usuário" />
+        <Cabecalho pagina="Perfil" />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-gray-500">Erro ao carregar dados do usuário</p>
         </div>
@@ -304,7 +317,7 @@ export default function HomePage() {
   return (
     <div className="w-full h-screen flex flex-col">
       {/* Cabeçalho */}
-      <Cabecalho pagina="Perfil" descricao="Informações do usuário" />
+      <Cabecalho pagina="Perfil" />
 
       {/* Conteúdo principal */}
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
@@ -341,22 +354,33 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold mb-3">Estatísticas de uso</h3>
               <div className="w-full border-t border-gray-200 mb-4"></div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
-                <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                  <p className="text-4xl font-bold text-blue-600">{stats.totalComponentes}</p>
-                  <p className="text-sm text-gray-500 mt-3">Componentes cadastrados</p>
+              {isLoadingStats ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="py-6 px-6 bg-gray-50 rounded-lg text-center animate-pulse">
+                      <div className="h-10 bg-gray-300 rounded w-20 mx-auto mb-3"></div>
+                      <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+                    </div>
+                  ))}
                 </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
+                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
+                    <p className="text-4xl font-bold text-blue-600">{stats.totalComponentes}</p>
+                    <p className="text-sm text-gray-500 mt-3">Componentes cadastrados</p>
+                  </div>
 
-                <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                  <p className="text-4xl font-bold text-blue-600">{stats.totalMovimentacoes}</p>
-                  <p className="text-sm text-gray-500 mt-3">Movimentações</p>
-                </div>
+                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
+                    <p className="text-4xl font-bold text-blue-600">{stats.totalMovimentacoes}</p>
+                    <p className="text-sm text-gray-500 mt-3">Movimentações</p>
+                  </div>
 
-                <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                  <p className="text-4xl font-bold text-blue-600">{stats.totalOrcamentos}</p>
-                  <p className="text-sm text-gray-500 mt-3">Orçamentos</p>
+                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
+                    <p className="text-4xl font-bold text-blue-600">{stats.totalOrcamentos}</p>
+                    <p className="text-sm text-gray-500 mt-3">Orçamentos</p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </section>
 
@@ -383,9 +407,23 @@ export default function HomePage() {
               </div>
               <div className="w-full border-t border-gray-200 mb-4"></div>
 
-              <div className="max-h-60 overflow-y-auto">
-                {notificacoes.length > 0 ? (
-                  <div className="divide-y divide-gray-200">
+              <div className="max-h-60 overflow-y-auto flex items-center">
+                {isLoadingNotificacoes ? (
+                  <div className="divide-y divide-gray-200 w-full">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="px-3 py-3 animate-pulse">
+                        <div className="flex items-start gap-2">
+                          <div className="w-1.5 h-1.5 bg-gray-300 rounded-full flex-shrink-0 mt-1.5"></div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : notificacoes.length > 0 ? (
+                  <div className="divide-y divide-gray-200 w-full">
                     {notificacoes.map((notificacao) => {
                       const isLoadingThis = loadingNotificacaoId === notificacao._id
                       return (
@@ -414,8 +452,8 @@ export default function HomePage() {
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <p className="text-sm">Nenhuma notificação</p>
+                  <div className="flex items-center justify-center w-full h-60">
+                    <p className="text-sm text-gray-500">Nenhuma notificação</p>
                   </div>
                 )}
               </div>
