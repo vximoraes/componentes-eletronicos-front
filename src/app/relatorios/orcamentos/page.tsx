@@ -2,6 +2,7 @@
 import StatCard from "@/components/stat-card";
 import Cabecalho from "@/components/cabecalho";
 import ModalExportarRelatorio from "@/components/modal-exportar-relatorio";
+import ModalFiltrosOrcamentos from "@/components/modal-filtros-orcamentos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,7 +15,7 @@ import {
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { OrcamentoApiResponse } from '@/types/orcamentos';
-import { Search, FileText, DollarSign, TrendingUp, TrendingDown, Package } from 'lucide-react';
+import { Search, FileText, DollarSign, TrendingUp, TrendingDown, Package, Filter } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { PulseLoader } from 'react-spinners';
@@ -27,6 +28,11 @@ function RelatorioOrcamentosPageContent() {
   const router = useRouter();
   const { user } = useSession();
   const [searchTerm, setSearchTerm] = useState('');
+  const [valorMinFilter, setValorMinFilter] = useState('');
+  const [valorMaxFilter, setValorMaxFilter] = useState('');
+  const [dataInicioFilter, setDataInicioFilter] = useState('');
+  const [dataFimFilter, setDataFimFilter] = useState('');
+  const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -103,7 +109,21 @@ function RelatorioOrcamentosPageContent() {
         orcamento._id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         orcamento.descricao?.toLowerCase().includes(searchTerm.toLowerCase());
       
-      return matchSearch;
+      // Filtro por valor mínimo
+      const matchValorMin = !valorMinFilter || (orcamento.total >= parseFloat(valorMinFilter));
+      
+      // Filtro por valor máximo
+      const matchValorMax = !valorMaxFilter || (orcamento.total <= parseFloat(valorMaxFilter));
+      
+      // Filtro por data de início
+      const matchDataInicio = !dataInicioFilter || 
+        (orcamento.createdAt && new Date(orcamento.createdAt) >= new Date(dataInicioFilter));
+      
+      // Filtro por data de fim
+      const matchDataFim = !dataFimFilter || 
+        (orcamento.createdAt && new Date(orcamento.createdAt) <= new Date(dataFimFilter + 'T23:59:59'));
+      
+      return matchSearch && matchValorMin && matchValorMax && matchDataInicio && matchDataFim;
     })
     .sort((a, b) => {
       // Ordenar alfabeticamente pelo nome do orçamento
@@ -119,6 +139,21 @@ function RelatorioOrcamentosPageContent() {
   const maiorOrcamento = totalOrcamentos > 0 ? Math.max(...orcamentosFiltrados.map(orc => orc.total || 0)) : 0;
   const menorOrcamento = totalOrcamentos > 0 ? Math.min(...orcamentosFiltrados.map(orc => orc.total || 0)) : 0;
   const totalComponentes = orcamentosFiltrados.reduce((acc, orc) => acc + (orc.componentes?.length || 0), 0);
+
+  const handleOpenFiltrosModal = () => {
+    setIsFiltrosModalOpen(true);
+  };
+
+  const handleCloseFiltrosModal = () => {
+    setIsFiltrosModalOpen(false);
+  };
+
+  const handleFiltersChange = (valorMin: string, valorMax: string, dataInicio: string, dataFim: string) => {
+    setValorMinFilter(valorMin);
+    setValorMaxFilter(valorMax);
+    setDataInicioFilter(dataInicio);
+    setDataFimFilter(dataFim);
+  };
 
   const handleOpenExportarModal = () => {
     setIsExportarModalOpen(true);
@@ -307,6 +342,15 @@ function RelatorioOrcamentosPageContent() {
               />
             </div>
             <Button
+              variant="outline"
+              className="flex items-center gap-2 cursor-pointer"
+              data-test="filtros-button"
+              onClick={handleOpenFiltrosModal}
+            >
+              <Filter className="w-4 h-4" />
+              Filtros
+            </Button>
+            <Button
               disabled={selectedItems.size === 0}
               className={`flex items-center gap-2 text-white transition-all ${
                 selectedItems.size > 0
@@ -322,6 +366,66 @@ function RelatorioOrcamentosPageContent() {
               Exportar
             </Button>
           </div>
+
+          {/* Filtros aplicados */}
+          {(valorMinFilter || valorMaxFilter || dataInicioFilter || dataFimFilter) && (
+            <div className="mb-4" data-test="applied-filters">
+              <div className="flex flex-wrap items-center gap-2">
+                {valorMinFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">Valor mín:</span>
+                    <span>R$ {parseFloat(valorMinFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <button
+                      onClick={() => setValorMinFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de valor mínimo"
+                    >
+                      <span className="text-xs">✕</span>
+                    </button>
+                  </div>
+                )}
+                {valorMaxFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">Valor máx:</span>
+                    <span>R$ {parseFloat(valorMaxFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <button
+                      onClick={() => setValorMaxFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de valor máximo"
+                    >
+                      <span className="text-xs">✕</span>
+                    </button>
+                  </div>
+                )}
+                {dataInicioFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">De:</span>
+                    <span>{new Date(dataInicioFilter).toLocaleDateString('pt-BR')}</span>
+                    <button
+                      onClick={() => setDataInicioFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de data inicial"
+                    >
+                      <span className="text-xs">✕</span>
+                    </button>
+                  </div>
+                )}
+                {dataFimFilter && (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                    <span className="font-medium">Até:</span>
+                    <span>{new Date(dataFimFilter).toLocaleDateString('pt-BR')}</span>
+                    <button
+                      onClick={() => setDataFimFilter('')}
+                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                      title="Remover filtro de data final"
+                    >
+                      <span className="text-xs">✕</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {error && (
             <div
@@ -429,6 +533,17 @@ function RelatorioOrcamentosPageContent() {
           )}
         </div>
       </div>
+
+      {/* Modal de Filtros */}
+      <ModalFiltrosOrcamentos
+        isOpen={isFiltrosModalOpen}
+        onClose={handleCloseFiltrosModal}
+        valorMinFilter={valorMinFilter}
+        valorMaxFilter={valorMaxFilter}
+        dataInicioFilter={dataInicioFilter}
+        dataFimFilter={dataFimFilter}
+        onFiltersChange={handleFiltersChange}
+      />
 
       {/* Modal de Exportar */}
       <ModalExportarRelatorio
