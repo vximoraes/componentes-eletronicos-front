@@ -98,7 +98,7 @@ export default function SidebarButtonWithSubmenu({
   }
 
   return (
-    <div className="w-full">
+    <>
       <SidebarMenuButton
         className={`text-[17px] pl-[20px] h-[50px] w-[250px] cursor-pointer flex gap-[12px] items-center relative transition-all duration-300 ease-in-out group ${
           isActive 
@@ -142,6 +142,6 @@ export default function SidebarButtonWithSubmenu({
           ))}
         </div>
       </div>
-    </div>
+    </>
   )
 }
