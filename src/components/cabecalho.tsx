@@ -147,7 +147,7 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
           )}
         </div>
 
-        {/* 👤 Ícone de Perfil */}
+        {/* Ícone de Perfil */}
         <button
           onClick={handleProfileClick}
           className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-full border-2 border-gray-200 hover:border-blue-500 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md"
