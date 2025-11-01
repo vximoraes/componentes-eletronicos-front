@@ -113,7 +113,9 @@ export default function SidebarButtonWithSubmenu({
           {name}
         </span>
         <ChevronDown 
-          className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""} ${
+          className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? "!rotate-180" : ""} ${
+            (isActive || isOpen) ? "opacity-100" : "opacity-0"
+          } ${
             isActive ? "text-black" : "text-[#B4BAC5]"
           }`}
         />
@@ -125,7 +127,7 @@ export default function SidebarButtonWithSubmenu({
           isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="ml-[34px] mt-1 space-y-1">
+        <div className="ml-[34px] mt-0.5 space-y-1">
           {subItems.map((item) => (
             <button
               key={item.route}

@@ -17,7 +17,6 @@ import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { PulseLoader } from 'react-spinners';
 import { generateComponentesPDF } from '@/utils/pdfGenerator';
 import { generateComponentesCSV } from '@/utils/csvGenerator';
@@ -31,7 +30,6 @@ interface CategoriasApiResponse {
 }
 
 function RelatorioComponentesPageContent() {
-  const router = useRouter();
   const {user} = useSession()
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
@@ -79,6 +77,8 @@ function RelatorioComponentesPageContent() {
 
   // Intersection Observer para infinite scroll
   useEffect(() => {
+    if (!observerTarget.current) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -88,16 +88,10 @@ function RelatorioComponentesPageContent() {
       { threshold: 0.1 }
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
-
-    const currentTarget = observerTarget.current;
+    observer.observe(observerTarget.current);
 
     return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
+      observer.disconnect();
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
@@ -282,8 +276,6 @@ function RelatorioComponentesPageContent() {
       <Cabecalho 
         pagina="Relatórios" 
         acao="Componentes"
-        showBackButton={true}
-        onBackClick={() => router.push('/relatorios')}
       />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">

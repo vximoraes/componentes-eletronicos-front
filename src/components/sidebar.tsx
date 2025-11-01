@@ -74,7 +74,9 @@ function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick, subIt
         </span>
         {subItems && subItems.length > 0 && (
           <svg
-            className={`w-4 h-4 mr-3 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''} ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
+            className={`w-4 h-4 mr-3 transition-all duration-300 rotate-0 ${isOpen ? '!rotate-180' : ''} ${
+              (isActive || isOpen) ? 'opacity-100' : 'opacity-0'
+            } ${isActive ? 'text-black' : 'text-[#B4BAC5]'}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -90,7 +92,7 @@ function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick, subIt
           className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
             }`}
         >
-          <div className="ml-[34px] mt-1 space-y-1">
+          <div className="ml-[34px] mt-0.5 space-y-1">
             {subItems.map((item) => {
               const isSubItemActive = window.location.pathname === item.route
               return (
