@@ -54,7 +54,7 @@ function RelatorioComponentesPageContent() {
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('limit', '20'); // 20 itens por página
+      params.append('limit', '20');
       params.append('page', page.toString());
 
       const queryString = params.toString();
@@ -67,7 +67,8 @@ function RelatorioComponentesPageContent() {
     },
     initialPageParam: 1,
     staleTime: 1000 * 60 * 5,
-    refetchOnMount: 'always',
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -91,9 +92,11 @@ function RelatorioComponentesPageContent() {
       observer.observe(observerTarget.current);
     }
 
+    const currentTarget = observerTarget.current;
+
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -284,51 +287,52 @@ function RelatorioComponentesPageContent() {
       />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
-            <StatCard
-              title="Total de"
-              subtitle="componentes"
-              value={totalComponentes}
-              icon={Package}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
-              data-test="stat-total-componentes"
-              hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
-            />
+        {/* Stats Cards - Fixo no topo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] flex-shrink-0" data-test="stats-grid">
+          <StatCard
+            title="Total de"
+            subtitle="componentes"
+            value={totalComponentes}
+            icon={Package}
+            iconColor="text-blue-600"
+            iconBgColor="bg-blue-100"
+            data-test="stat-total-componentes"
+            hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
+          />
 
-            <StatCard
-              title="Em estoque"
-              value={emEstoque}
-              icon={CheckCircle}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
-              data-test="stat-em-estoque"
-              hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
-            />
+          <StatCard
+            title="Em estoque"
+            value={emEstoque}
+            icon={CheckCircle}
+            iconColor="text-green-600"
+            iconBgColor="bg-green-100"
+            data-test="stat-em-estoque"
+            hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
+          />
 
-            <StatCard
-              title="Baixo estoque"
-              value={baixoEstoque}
-              icon={AlertTriangle}
-              iconColor="text-yellow-600"
-              iconBgColor="bg-yellow-100"
-              data-test="stat-baixo-estoque"
-              hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
-            />
+          <StatCard
+            title="Baixo estoque"
+            value={baixoEstoque}
+            icon={AlertTriangle}
+            iconColor="text-yellow-600"
+            iconBgColor="bg-yellow-100"
+            data-test="stat-baixo-estoque"
+            hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
+          />
 
-            <StatCard
-              title="Indisponível"
-              value={indisponiveis}
-              icon={XCircle}
-              iconColor="text-red-600"
-              iconBgColor="bg-red-100"
-              data-test="stat-indisponiveis"
-              hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
-            />
-          </div>
+          <StatCard
+            title="Indisponível"
+            value={indisponiveis}
+            icon={XCircle}
+            iconColor="text-red-600"
+            iconBgColor="bg-red-100"
+            data-test="stat-indisponiveis"
+            hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
+          />
+        </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
+        {/* Barra de Pesquisa e Botões */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0" data-test="search-actions-bar">
             <div className="relative flex-1" data-test="search-container">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -366,52 +370,55 @@ function RelatorioComponentesPageContent() {
             </Button>
           </div>
 
-          {/* Filtros aplicados */}
-          {(categoriaFilter || statusFilter) && (
-            <div className="mb-4" data-test="applied-filters">
-              <div className="flex flex-wrap items-center gap-2">
-                {categoriaFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">Categoria:</span>
-                    <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
-                    <button
-                      onClick={() => setCategoriaFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de categoria"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-                {statusFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">Status:</span>
-                    <span>{statusFilter}</span>
-                    <button
-                      onClick={() => setStatusFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de status"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-              </div>
+        {/* Filtros aplicados */}
+        {(categoriaFilter || statusFilter) && (
+          <div className="mb-4 flex-shrink-0" data-test="applied-filters">
+            <div className="flex flex-wrap items-center gap-2">
+              {categoriaFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">Categoria:</span>
+                  <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
+                  <button
+                    onClick={() => setCategoriaFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de categoria"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+              {statusFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">Status:</span>
+                  <span>{statusFilter}</span>
+                  <button
+                    onClick={() => setStatusFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de status"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          {error && (
-            <div
-              className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
-              data-test="error-message"
-              title={`Erro completo: ${error.message}`}
-            >
-              Erro ao carregar componentes: {error.message}
-            </div>
-          )}
+        {/* Mensagem de Erro */}
+        {error && (
+          <div
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex-shrink-0"
+            data-test="error-message"
+            title={`Erro completo: ${error.message}`}
+          >
+            Erro ao carregar componentes: {error.message}
+          </div>
+        )}
 
+        {/* Área da Tabela com Scroll */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+            <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -504,11 +511,15 @@ function RelatorioComponentesPageContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-8" data-test="empty-state">
-              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">
-                {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
-              </p>
+            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-lg">
+                  {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
+                </p>
+              </div>
             </div>
           )}
         </div>
