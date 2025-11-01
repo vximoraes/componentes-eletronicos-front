@@ -8,7 +8,7 @@ interface ComponenteReact {
 
 export default function Header ({children}:ComponenteReact){
     const pathName = usePathname()
-    const rotasIgnoradas = ["/", "/login", "/cadastro"]
+    const rotasIgnoradas = ["/", "/login", "/cadastro", "/ativar-conta", "/esqueci-senha", "/redefinir-senha"]
     const isPerfilPage = pathName === "/perfil"
     
     if(!rotasIgnoradas.includes(pathName)){

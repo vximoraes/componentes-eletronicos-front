@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "@/hooks/use-session"
 import { useSidebarContext } from "@/contexts/SidebarContext"
-import { Bell, Menu } from "lucide-react"
+import { Bell, Menu, ChevronLeft } from "lucide-react"
 
 type NotificationItem = {
   id: string
@@ -15,10 +15,12 @@ type NotificationItem = {
 
 export interface CabecalhoProps {
   pagina: string
-  descricao?: string
+  descricao?: string,
+  showBackButton?: boolean,
+  onBackClick?: () => void
 }
 
-export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
+export default function Cabecalho({ pagina, descricao, showBackButton, onBackClick }: CabecalhoProps) {
   const router = useRouter()
   const { user } = useSession()
   const { toggleSidebar } = useSidebarContext()
@@ -81,6 +83,19 @@ export default function Cabecalho({ pagina, descricao }: CabecalhoProps) {
         >
           <Menu className="w-[24px] h-[24px] text-gray-700" strokeWidth={2} />
         </button>
+        
+        {/* Botão de voltar */}
+        {showBackButton && onBackClick && (
+          <button
+            onClick={onBackClick}
+            className="w-[36px] h-[36px] md:w-[40px] md:h-[40px] flex items-center justify-center rounded-full bg-white shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+            aria-label="Voltar"
+            title="Voltar"
+          >
+            <ChevronLeft className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] text-gray-700" strokeWidth={2} />
+          </button>
+        )}
+        
 
         <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">{pagina}</h1>
         {descricao && (
