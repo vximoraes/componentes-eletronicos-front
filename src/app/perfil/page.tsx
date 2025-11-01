@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Pencil, X } from "lucide-react"
 import Cabecalho from "@/components/cabecalho"
@@ -8,6 +8,7 @@ import { useSession } from "@/hooks/use-session"
 import { get, patch } from "@/lib/fetchData"
 import { toast, ToastContainer, Slide } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { useInfiniteQuery } from '@tanstack/react-query'
 
 interface UsuarioData {
   _id: string
@@ -42,6 +43,10 @@ interface NotificacoesApiResponse {
     totalDocs: number
     page: number
     totalPages: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    nextPage: number | null
+    prevPage: number | null
   }
 }
 
@@ -51,10 +56,9 @@ export default function HomePage() {
   const [userData, setUserData] = useState<UsuarioData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([])
   const [loadingNotificacaoId, setLoadingNotificacaoId] = useState<string | null>(null)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
-  const [isLoadingNotificacoes, setIsLoadingNotificacoes] = useState(true)
+  const observerTarget = useRef<HTMLDivElement>(null)
   const [stats, setStats] = useState({
     totalComponentes: 0,
     totalMovimentacoes: 0,
@@ -130,40 +134,58 @@ export default function HomePage() {
     fetchStats()
   }, [user?.id])
 
-  const fetchNotificacoes = async (showLoading = true) => {
-    if (!user?.id) return
-    
-    if (showLoading) {
-      setIsLoadingNotificacoes(true)
-    }
-    
-    try {
-      const response = await get<NotificacoesApiResponse>('/notificacoes?limite=10')
-      const notifs = response.data?.docs || []
-      setNotificacoes(notifs)
-    } catch (error) {
-      console.error("Erro ao carregar notificações:", error)
-    } finally {
-      if (showLoading) {
-        setIsLoadingNotificacoes(false)
-      }
-    }
-  }
+  const {
+    data: notificacoesData,
+    isLoading: isLoadingNotificacoes,
+    fetchNextPage: fetchNextNotificacoes,
+    hasNextPage: hasNextNotificacoes,
+    isFetchingNextPage: isFetchingNextNotificacoes
+  } = useInfiniteQuery<NotificacoesApiResponse>({
+    queryKey: ['notificacoes', user?.id],
+    queryFn: async ({ pageParam }) => {
+      const page = (pageParam as number) || 1
+      return await get<NotificacoesApiResponse>(`/notificacoes?limite=10&page=${page}`)
+    },
+    getNextPageParam: (lastPage) => {
+      const data = lastPage.data || lastPage
+      return data.hasNextPage ? data.nextPage : undefined
+    },
+    initialPageParam: 1,
+    enabled: !!user?.id,
+    staleTime: 30000,
+    refetchInterval: 30000,
+  })
+
+  const notificacoes = notificacoesData?.pages.flatMap(page => {
+    const data = page.data || page
+    return data.docs || []
+  }) || []
 
   useEffect(() => {
-    fetchNotificacoes(true)
-    
-    // Atualizar notificações a cada 30 segundos (sem loading)
-    const interval = setInterval(() => fetchNotificacoes(false), 30000)
-    return () => clearInterval(interval)
-  }, [user?.id])
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextNotificacoes && !isFetchingNextNotificacoes) {
+          fetchNextNotificacoes()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current)
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current)
+      }
+    }
+  }, [hasNextNotificacoes, isFetchingNextNotificacoes, fetchNextNotificacoes])
 
   async function marcarComoVisualizada(notificacaoId: string) {
     setLoadingNotificacaoId(notificacaoId)
     try {
       await patch(`/notificacoes/${notificacaoId}/visualizar`, {})
-      // Atualizar a lista de notificações (sem loading)
-      await fetchNotificacoes(false)
       toast.success("Notificação marcada como lida!", {
         position: "bottom-right",
         autoClose: 2000,
@@ -198,8 +220,6 @@ export default function HomePage() {
         )
       )
       
-      // Atualizar a lista (sem loading)
-      await fetchNotificacoes(false)
       toast.success(`${naoVisualizadas.length} notificação${naoVisualizadas.length > 1 ? 'ões' : ''} marcada${naoVisualizadas.length > 1 ? 's' : ''} como lida${naoVisualizadas.length > 1 ? 's' : ''}`, {
         position: "bottom-right",
         autoClose: 2000,
@@ -407,7 +427,7 @@ export default function HomePage() {
               </div>
               <div className="w-full border-t border-gray-200 mb-4"></div>
 
-              <div className="max-h-60 overflow-y-auto flex items-center">
+              <div className="max-h-60 overflow-y-auto">
                 {isLoadingNotificacoes ? (
                   <div className="divide-y divide-gray-200 w-full">
                     {[1, 2, 3].map((i) => (
@@ -450,6 +470,12 @@ export default function HomePage() {
                         </div>
                       )
                     })}
+                    <div ref={observerTarget} className="h-2" />
+                    {isFetchingNextNotificacoes && (
+                      <div className="px-3 py-3 text-center">
+                        <p className="text-sm text-gray-500">Carregando mais...</p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center justify-center w-full h-60">
