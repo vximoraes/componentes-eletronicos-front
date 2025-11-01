@@ -46,9 +46,7 @@ export default function SidebarButtonWithSubmenu({
   }, [path, name, src, srcHover])
 
   function handleToggle() {
-    if (!collapsed) {
-      setIsOpen(!isOpen)
-    }
+    setIsOpen(!isOpen)
   }
 
   function handleSubItemClick(route: string) {
@@ -60,7 +58,7 @@ export default function SidebarButtonWithSubmenu({
 
   if (collapsed) {
     return (
-      <div className="relative group">
+      <div className="w-full flex flex-col items-center">
         <SidebarMenuButton
           className={`flex justify-center items-center h-[50px] w-[80px] cursor-pointer relative transition-all duration-300 ease-in-out rounded-lg ${
             isActive 
@@ -74,21 +72,26 @@ export default function SidebarButtonWithSubmenu({
           <img src={isHover} alt={name} className="w-[24px] h-[24px]" />
         </SidebarMenuButton>
         
-        {/* Tooltip com sub-itens ao passar o mouse */}
-        <div className="absolute left-full ml-2 top-0 hidden group-hover:block z-50">
-          <div className="bg-[#1a1f26] rounded-lg shadow-lg py-2 min-w-[180px] border border-gray-700">
-            <div className="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">{name}</div>
+        {/* Submenu colapsado - mostra primeira letra */}
+        <div 
+          className={`overflow-hidden transition-all duration-300 w-full flex flex-col items-center ${
+            isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="mt-0.5 space-y-1 flex flex-col items-center">
             {subItems.map((item) => (
               <button
                 key={item.route}
                 onClick={() => handleSubItemClick(item.route)}
-                className={`w-full text-left px-3 py-2 text-sm transition-colors cursor-pointer ${
+                className={`w-[50px] h-[50px] flex items-center justify-center text-[16px] font-medium rounded-lg transition-all duration-200 cursor-pointer ${
                   path === item.route
-                    ? "bg-white text-black"
-                    : "text-gray-300 hover:bg-[rgba(255,255,255,0.08)]"
+                    ? "bg-[rgba(255,255,255,0.12)] text-white"
+                    : "text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
                 }`}
+                data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
+                title={item.name}
               >
-                {item.name}
+                {item.name.charAt(0).toUpperCase()}
               </button>
             ))}
           </div>
@@ -122,28 +125,26 @@ export default function SidebarButtonWithSubmenu({
       </SidebarMenuButton>
 
       {/* Sub-menu expandido */}
-      <div 
-        className={`overflow-hidden transition-all duration-300 ${
-          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="ml-[34px] mt-0.5 space-y-1">
-          {subItems.map((item) => (
-            <button
-              key={item.route}
-              onClick={() => handleSubItemClick(item.route)}
-              className={`w-[216px] text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${
-                path === item.route
-                  ? "bg-[rgba(255,255,255,0.12)] text-white font-medium"
-                  : "text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
-              }`}
-              data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
-            >
-              {item.name}
-            </button>
-          ))}
+      {isOpen && (
+        <div className="overflow-hidden transition-all duration-300 max-h-[500px] opacity-100 mt-0.5">
+          <div className="ml-[34px] space-y-1">
+            {subItems.map((item) => (
+              <button
+                key={item.route}
+                onClick={() => handleSubItemClick(item.route)}
+                className={`w-[216px] text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${
+                  path === item.route
+                    ? "bg-[rgba(255,255,255,0.12)] text-white font-medium"
+                    : "text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+                }`}
+                data-test={`${dataTest}-subitem-${item.name.toLowerCase()}`}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </>
   )
 }
