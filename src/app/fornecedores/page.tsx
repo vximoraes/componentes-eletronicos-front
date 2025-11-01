@@ -224,9 +224,9 @@ function PageFornecedoresContent() {
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">URL</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CONTATO</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">URL</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CONTATO</TableHead>
+                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -245,15 +245,17 @@ function PageFornecedoresContent() {
                           </div>
                         )}
                         <TableCell className="font-medium text-left px-8">
-                          {fornecedor.nome}
+                          <span className="truncate block max-w-[200px]" title={fornecedor.nome}>
+                            {fornecedor.nome}
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-8">
+                        <TableCell className="hidden xl:table-cell text-left px-8">
                           {fornecedor.url ? (
                             <a
                               href={fornecedor.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                              className="text-blue-600 hover:text-blue-800 hover:underline truncate block max-w-[200px]"
                               title={fornecedor.url}
                             >
                               {fornecedor.url}
@@ -262,11 +264,15 @@ function PageFornecedoresContent() {
                             <span className="text-gray-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-8">
-                          {fornecedor.contato || '-'}
+                        <TableCell className="hidden xl:table-cell text-left px-8">
+                          <span className="truncate block max-w-[150px]" title={fornecedor.contato || '-'}>
+                            {fornecedor.contato || '-'}
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-8">
-                          {fornecedor.descricao || '-'}
+                        <TableCell className="hidden 2xl:table-cell text-left px-8">
+                          <span className="truncate block max-w-[200px]" title={fornecedor.descricao || '-'}>
+                            {fornecedor.descricao || '-'}
+                          </span>
                         </TableCell>
                         <TableCell className="text-center px-8 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">

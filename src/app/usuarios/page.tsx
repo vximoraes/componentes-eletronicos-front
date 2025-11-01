@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table"
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { get, post } from '@/lib/fetchData'
-import { Search, Plus, Trash2, Mail, Loader2 } from 'lucide-react'
+import { Search, Plus, Trash2, Mail, Loader2, Eye } from 'lucide-react'
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { ToastContainer, toast, Slide } from 'react-toastify'
@@ -19,6 +19,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { PulseLoader } from 'react-spinners'
 import ModalCadastrarUsuario from '@/components/modal-cadastrar-usuario'
 import ModalExcluirUsuario from '@/components/modal-excluir-usuario'
+import ModalDetalhesUsuario from '@/components/modal-detalhes-usuario'
 import { useSession } from '@/hooks/use-session'
 
 interface Usuario {
@@ -54,6 +55,8 @@ function PageUsuariosContent() {
   const [isRefetchingAfterDelete, setIsRefetchingAfterDelete] = useState(false)
   const [isCadastrarModalOpen, setIsCadastrarModalOpen] = useState(false)
   const [reenviarConviteId, setReenviarConviteId] = useState<string | null>(null)
+  const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false)
+  const [detalhesUsuarioId, setDetalhesUsuarioId] = useState<string | null>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -190,6 +193,11 @@ function PageUsuariosContent() {
     }
   }
 
+  const handleViewDetails = (id: string) => {
+    setDetalhesUsuarioId(id)
+    setIsDetalhesModalOpen(true)
+  }
+
   const usuarios = (data?.pages.flatMap((page) => page.data.docs) || []).filter(
     (usuario) => usuario._id !== user?.id
   )
@@ -245,8 +253,8 @@ function PageUsuariosContent() {
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">E-MAIL</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">STATUS</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">E-MAIL</TableHead>
+                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">STATUS</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -254,12 +262,16 @@ function PageUsuariosContent() {
                     {usuarios.map((usuario) => (
                       <TableRow key={usuario._id} className="hover:bg-gray-50 border-b relative">
                         <TableCell className="font-medium text-left px-8">
-                          {usuario.nome}
+                          <span className="truncate block max-w-[200px]" title={usuario.nome}>
+                            {usuario.nome}
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-8">
-                          {usuario.email}
+                        <TableCell className="hidden xl:table-cell text-left px-8">
+                          <span className="truncate block max-w-[250px]" title={usuario.email}>
+                            {usuario.email}
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-center px-8 whitespace-nowrap">
+                        <TableCell className="hidden 2xl:table-cell text-center px-8 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
                               className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${usuario.ativo
@@ -274,6 +286,13 @@ function PageUsuariosContent() {
                         </TableCell>
                         <TableCell className="text-center px-8 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
+                            <button
+                              onClick={() => handleViewDetails(usuario._id)}
+                              className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
+                              title="Ver detalhes do usuário"
+                            >
+                              <Eye size={16} className="sm:w-5 sm:h-5" />
+                            </button>
                             {!usuario.ativo && (
                               <button
                                 onClick={() => handleReenviarConvite(usuario._id, usuario.nome)}
@@ -341,6 +360,18 @@ function PageUsuariosContent() {
           onSuccess={handleExcluirSuccess}
           usuarioId={excluirUsuarioId}
           usuarioNome={excluirUsuarioNome}
+        />
+      )}
+
+      {/* Modal Detalhes Usuário */}
+      {detalhesUsuarioId && (
+        <ModalDetalhesUsuario
+          isOpen={isDetalhesModalOpen}
+          onClose={() => {
+            setIsDetalhesModalOpen(false)
+            setDetalhesUsuarioId(null)
+          }}
+          usuarioId={detalhesUsuarioId}
         />
       )}
 
