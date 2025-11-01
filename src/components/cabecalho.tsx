@@ -43,25 +43,6 @@ export default function Cabecalho({ pagina, descricao, showBackButton, onBackCli
     return () => document.removeEventListener("click", handleDocClick)
   }, [])
 
-  //  notificações teste (puxar do banco)
-  useEffect(() => {
-    setNotifications([
-      {
-        id: "1",
-        title: "Atualização disponível",
-        body: "Versão 2.0 já está no ar!",
-        createdAt: "2025-10-31",
-        read: false,
-      },
-      {
-        id: "2",
-        title: "Senha expira em breve",
-        body: "Sua senha expira em 7 dias.",
-        createdAt: "2025-10-30",
-        read: true,
-      },
-    ])
-  }, [])
 
   // Marcar notificações como lidas
   function markAsRead(id?: string) {
