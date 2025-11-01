@@ -206,9 +206,9 @@ function PageUsuariosContent() {
     <div className="w-full h-screen flex flex-col">
       <Cabecalho pagina="Usuários" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
+      <div className="flex-1 overflow-hidden flex flex-col px-6 pb-6">
         {/* Barra de Pesquisa e Botão Adicionar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4 flex-shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
@@ -252,29 +252,29 @@ function PageUsuariosContent() {
                 <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">E-MAIL</TableHead>
-                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-4">NOME</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-4">E-MAIL</TableHead>
+                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-4 whitespace-nowrap">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-4 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {usuarios.map((usuario) => (
                       <TableRow key={usuario._id} className="hover:bg-gray-50 border-b relative">
-                        <TableCell className="font-medium text-left px-8">
+                        <TableCell className="font-medium text-left px-4 py-3">
                           <span className="truncate block max-w-[200px]" title={usuario.nome}>
                             {usuario.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-left px-8">
+                        <TableCell className="hidden xl:table-cell text-left px-4 py-3">
                           <span className="truncate block max-w-[250px]" title={usuario.email}>
                             {usuario.email}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden 2xl:table-cell text-center px-8 whitespace-nowrap">
+                        <TableCell className="hidden 2xl:table-cell text-center px-4 py-3 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
-                              className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${usuario.ativo
+                              className={`inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-medium text-center whitespace-nowrap ${usuario.ativo
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-yellow-100 text-yellow-800'
                                 }`}
@@ -284,7 +284,7 @@ function PageUsuariosContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center px-8 whitespace-nowrap">
+                        <TableCell className="text-center px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(usuario._id)}

@@ -10,7 +10,7 @@ import Cabecalho from "@/components/cabecalho"
 import { useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query'
 import { get, post } from '@/lib/fetchData'
 import { getSession } from 'next-auth/react'
-import { ToastContainer, toast, Slide } from 'react-toastify'
+import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import ModalEditarCategoria from '@/components/modal-editar-categoria'
 import ModalExcluirCategoria from '@/components/modal-excluir-categoria'
