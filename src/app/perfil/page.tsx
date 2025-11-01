@@ -11,7 +11,7 @@ export default function HomePage() {
 
   const [userData, setUserData] = useState({
     nome: "Nome do Usuário",
-    email: "admin@admin.com",
+    email: "usuario@email.com",
     descricao: "Descrição personalizada",
     senha: "Senha@123",
   })
@@ -59,7 +59,7 @@ export default function HomePage() {
                       <Calendar className="w-4 h-4" />
                       <span>Cadastrado em</span>
                     </div>
-                    <div className="font-medium">18/09/2025</div>
+                    <div className="font-medium">04/03/2025</div>
                   </div>
 
                   <div className="flex justify-between items-center">
@@ -67,14 +67,15 @@ export default function HomePage() {
                       <Clock className="w-4 h-4" />
                       <span>Último acesso</span>
                     </div>
-                    <div className="font-medium">Hoje, 22:29</div>
+                    <div className="font-medium">Hoje, 17:01</div>
                   </div>
                 </div>
               </div>
             </aside>
 
-            {/* Lado direito - informações */}
+            {/* Lado direito */}
             <section className="col-span-2 space-y-6">
+              {/* Informações pessoais */}
               <div className="p-6 bg-white rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Informações pessoais</h3>
                 <div className="w-full border-t border-gray-200 my-4"></div>
@@ -109,7 +110,7 @@ export default function HomePage() {
 
                   {/* Senha */}
                   <div className="flex items-start space-x-4 md:col-span-2">
-                    <Image src="/senha.png" alt="Descrição" width={20} height={20} />
+                    <Image src="/senha.png" alt="Senha" width={20} height={20} />
                     <div className="w-full">
                       <div className="text-sm text-gray-500">Senha</div>
                       <div className="flex items-center justify-between">
@@ -124,6 +125,31 @@ export default function HomePage() {
                         </button>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estatísticas de uso */}
+              <div className="p-6 bg-white rounded-lg shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold">Estatísticas de uso</h3>
+                  <span className="text-sm text-blue-600 font-medium cursor-pointer">Semanal</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-lg text-center">
+                    <p className="text-3xl font-bold text-blue-600">42</p>
+                    <p className="text-sm text-gray-500 mt-1">Componentes registrados</p>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg text-center">
+                    <p className="text-3xl font-bold text-blue-600">8</p>
+                    <p className="text-sm text-gray-500 mt-1">Componentes removidos</p>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg text-center">
+                    <p className="text-3xl font-bold text-blue-600">3</p>
+                    <p className="text-sm text-gray-500 mt-1">Orçamentos criados</p>
                   </div>
                 </div>
               </div>
