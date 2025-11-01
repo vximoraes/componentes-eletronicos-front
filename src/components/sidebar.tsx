@@ -87,12 +87,9 @@ function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick, subIt
       </button>
 
       {/* Sub-itens */}
-      {subItems && subItems.length > 0 && (
-        <div
-          className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-            }`}
-        >
-          <div className="ml-[34px] mt-0.5 space-y-1">
+      {subItems && subItems.length > 0 && isOpen && (
+        <div className="overflow-hidden transition-all duration-300 max-h-[500px] opacity-100 mt-0.5">
+          <div className="ml-[34px] space-y-1">
             {subItems.map((item) => {
               const isSubItemActive = window.location.pathname === item.route
               return (
