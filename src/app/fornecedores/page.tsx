@@ -220,14 +220,14 @@ function PageFornecedoresContent() {
           ) : fornecedores.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm md:table-fixed">
+                <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 md:w-1/5">NOME</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">URL</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">CONTATO</TableHead>
-                      <TableHead className="hidden md:table-cell font-semibold text-gray-700 bg-gray-50 text-center md:w-1/5">DESCRIÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 md:w-1/5">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">URL</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CONTATO</TableHead>
+                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -244,18 +244,18 @@ function PageFornecedoresContent() {
                             </div>
                           </div>
                         )}
-                        <TableCell className="font-medium text-left px-2 sm:px-4">
-                          <div className="truncate max-w-[150px] md:max-w-none" title={fornecedor.nome}>
+                        <TableCell className="font-medium text-left px-8">
+                          <span className="truncate block max-w-[200px]" title={fornecedor.nome}>
                             {fornecedor.nome}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-4">
+                        <TableCell className="hidden xl:table-cell text-left px-8">
                           {fornecedor.url ? (
                             <a
                               href={fornecedor.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 hover:underline truncate block"
+                              className="text-blue-600 hover:text-blue-800 hover:underline truncate block max-w-[200px]"
                               title={fornecedor.url}
                             >
                               {fornecedor.url}
@@ -264,17 +264,17 @@ function PageFornecedoresContent() {
                             <span className="text-gray-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-4">
-                          <div className="truncate" title={fornecedor.contato || 'Sem contato'}>
+                        <TableCell className="hidden xl:table-cell text-left px-8">
+                          <span className="truncate block max-w-[150px]" title={fornecedor.contato || '-'}>
                             {fornecedor.contato || '-'}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden md:table-cell text-left px-4">
-                          <div className="truncate" title={fornecedor.descricao}>
+                        <TableCell className="hidden 2xl:table-cell text-left px-8">
+                          <span className="truncate block max-w-[200px]" title={fornecedor.descricao || '-'}>
                             {fornecedor.descricao || '-'}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center px-8 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(fornecedor._id)}

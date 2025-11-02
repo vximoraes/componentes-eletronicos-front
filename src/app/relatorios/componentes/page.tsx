@@ -17,7 +17,6 @@ import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/componentes';
 import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { PulseLoader } from 'react-spinners';
 import { generateComponentesPDF } from '@/utils/pdfGenerator';
 import { generateComponentesCSV } from '@/utils/csvGenerator';
@@ -31,7 +30,6 @@ interface CategoriasApiResponse {
 }
 
 function RelatorioComponentesPageContent() {
-  const router = useRouter();
   const {user} = useSession()
   const [searchTerm, setSearchTerm] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
@@ -54,7 +52,7 @@ function RelatorioComponentesPageContent() {
     queryFn: async ({ pageParam }) => {
       const page = (pageParam as number) || 1;
       const params = new URLSearchParams();
-      params.append('limit', '20'); // 20 itens por página
+      params.append('limit', '20');
       params.append('page', page.toString());
 
       const queryString = params.toString();
@@ -67,7 +65,8 @@ function RelatorioComponentesPageContent() {
     },
     initialPageParam: 1,
     staleTime: 1000 * 60 * 5,
-    refetchOnMount: 'always',
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -78,6 +77,8 @@ function RelatorioComponentesPageContent() {
 
   // Intersection Observer para infinite scroll
   useEffect(() => {
+    if (!observerTarget.current) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -87,14 +88,10 @@ function RelatorioComponentesPageContent() {
       { threshold: 0.1 }
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
+    observer.observe(observerTarget.current);
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
-      }
+      observer.disconnect();
     };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
@@ -276,54 +273,58 @@ function RelatorioComponentesPageContent() {
 
   return (
     <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-componentes-page">
-      <Cabecalho pagina="Relatórios" acao="Componentes" />
+      <Cabecalho 
+        pagina="Relatórios" 
+        acao="Componentes"
+      />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
-            <StatCard
-              title="Total de"
-              subtitle="componentes"
-              value={totalComponentes}
-              icon={Package}
-              iconColor="text-blue-600"
-              iconBgColor="bg-blue-100"
-              data-test="stat-total-componentes"
-              hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
-            />
+        {/* Stats Cards - Fixo no topo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] flex-shrink-0" data-test="stats-grid">
+          <StatCard
+            title="Total de"
+            subtitle="componentes"
+            value={totalComponentes}
+            icon={Package}
+            iconColor="text-blue-600"
+            iconBgColor="bg-blue-100"
+            data-test="stat-total-componentes"
+            hoverTitle={`Total de componentes cadastrados: ${totalComponentes}`}
+          />
 
-            <StatCard
-              title="Em estoque"
-              value={emEstoque}
-              icon={CheckCircle}
-              iconColor="text-green-600"
-              iconBgColor="bg-green-100"
-              data-test="stat-em-estoque"
-              hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
-            />
+          <StatCard
+            title="Em estoque"
+            value={emEstoque}
+            icon={CheckCircle}
+            iconColor="text-green-600"
+            iconBgColor="bg-green-100"
+            data-test="stat-em-estoque"
+            hoverTitle={`Componentes disponíveis em estoque: ${emEstoque}`}
+          />
 
-            <StatCard
-              title="Baixo estoque"
-              value={baixoEstoque}
-              icon={AlertTriangle}
-              iconColor="text-yellow-600"
-              iconBgColor="bg-yellow-100"
-              data-test="stat-baixo-estoque"
-              hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
-            />
+          <StatCard
+            title="Baixo estoque"
+            value={baixoEstoque}
+            icon={AlertTriangle}
+            iconColor="text-yellow-600"
+            iconBgColor="bg-yellow-100"
+            data-test="stat-baixo-estoque"
+            hoverTitle={`Componentes com baixo estoque: ${baixoEstoque}`}
+          />
 
-            <StatCard
-              title="Indisponível"
-              value={indisponiveis}
-              icon={XCircle}
-              iconColor="text-red-600"
-              iconBgColor="bg-red-100"
-              data-test="stat-indisponiveis"
-              hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
-            />
-          </div>
+          <StatCard
+            title="Indisponível"
+            value={indisponiveis}
+            icon={XCircle}
+            iconColor="text-red-600"
+            iconBgColor="bg-red-100"
+            data-test="stat-indisponiveis"
+            hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
+          />
+        </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
+        {/* Barra de Pesquisa e Botões */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0" data-test="search-actions-bar">
             <div className="relative flex-1" data-test="search-container">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -361,52 +362,55 @@ function RelatorioComponentesPageContent() {
             </Button>
           </div>
 
-          {/* Filtros aplicados */}
-          {(categoriaFilter || statusFilter) && (
-            <div className="mb-4" data-test="applied-filters">
-              <div className="flex flex-wrap items-center gap-2">
-                {categoriaFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">Categoria:</span>
-                    <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
-                    <button
-                      onClick={() => setCategoriaFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de categoria"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-                {statusFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">Status:</span>
-                    <span>{statusFilter}</span>
-                    <button
-                      onClick={() => setStatusFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de status"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-              </div>
+        {/* Filtros aplicados */}
+        {(categoriaFilter || statusFilter) && (
+          <div className="mb-4 flex-shrink-0" data-test="applied-filters">
+            <div className="flex flex-wrap items-center gap-2">
+              {categoriaFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">Categoria:</span>
+                  <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
+                  <button
+                    onClick={() => setCategoriaFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de categoria"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+              {statusFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">Status:</span>
+                  <span>{statusFilter}</span>
+                  <button
+                    onClick={() => setStatusFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de status"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          {error && (
-            <div
-              className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
-              data-test="error-message"
-              title={`Erro completo: ${error.message}`}
-            >
-              Erro ao carregar componentes: {error.message}
-            </div>
-          )}
+        {/* Mensagem de Erro */}
+        {error && (
+          <div
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex-shrink-0"
+            data-test="error-message"
+            title={`Erro completo: ${error.message}`}
+          >
+            Erro ao carregar componentes: {error.message}
+          </div>
+        )}
 
+        {/* Área da Tabela com Scroll */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+            <div className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -419,7 +423,7 @@ function RelatorioComponentesPageContent() {
                 <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px]">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -433,17 +437,17 @@ function RelatorioComponentesPageContent() {
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">PRODUTO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">QUANTIDADE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
                       <TableRow key={estoque._id} className="hover:bg-gray-50 border-b">
-                        <TableCell className="text-center px-2 sm:px-4">
+                        <TableCell className="text-center px-8">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
@@ -451,36 +455,39 @@ function RelatorioComponentesPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-center px-2 sm:px-4">
-                          <div className="truncate" title={estoque.componente._id}>
+                        <TableCell className="font-medium text-left px-8">
+                          <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-left px-2 sm:px-4">
-                          <div className="truncate font-medium" title={estoque.componente.nome}>
-                            {estoque.componente.nome}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center px-2 sm:px-4 font-medium">
-                          {estoque.quantidade}
-                        </TableCell>
-                        <TableCell className="text-center px-2 sm:px-">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-[10px] text-[14px] font-medium ${
-                              estoque.componente.status === 'Em Estoque'
-                                ? 'bg-green-100 text-green-800'
-                                : estoque.componente.status === 'Baixo Estoque'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}
-                          >
-                            {estoque.componente.status}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-2 sm:px-4 font-medium">
-                          <div className="truncate" title={estoque.localizacao.nome}>
-                            {estoque.localizacao.nome}
+                        <TableCell className="font-medium text-left px-8">
+                          <span className="truncate block max-w-[250px]" title={estoque.componente.nome}>
+                            {estoque.componente.nome}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center px-8 font-medium">
+                          {estoque.quantidade}
+                        </TableCell>
+                        <TableCell className="text-center px-8 whitespace-nowrap">
+                          <div className="flex justify-center">
+                            <span
+                              className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${
+                                estoque.componente.status === 'Em Estoque'
+                                  ? 'bg-green-100 text-green-800'
+                                  : estoque.componente.status === 'Baixo Estoque'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                              title={estoque.componente.status}
+                            >
+                              {estoque.componente.status}
+                            </span>
                           </div>
+                        </TableCell>
+                        <TableCell className="text-left px-8 font-medium">
+                          <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
+                            {estoque.localizacao.nome}
+                          </span>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -496,11 +503,15 @@ function RelatorioComponentesPageContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-8" data-test="empty-state">
-              <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">
-                {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
-              </p>
+            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-lg">
+                  {searchTerm ? 'Nenhum componente encontrado para sua pesquisa.' : 'Não há componentes cadastrados...'}
+                </p>
+              </div>
             </div>
           )}
         </div>

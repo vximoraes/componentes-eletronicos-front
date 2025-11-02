@@ -320,36 +320,32 @@ function PageOrcamentosContent() {
           ) : orcamentos.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm md:table-fixed">
+                <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 lg:w-1/4">NOME</TableHead>
-                      <TableHead className="hidden lg:table-cell font-semibold text-gray-700 bg-gray-50 text-center lg:w-1/4">DESCRIÇÃO</TableHead>
-                      <TableHead className="hidden lg:table-cell font-semibold text-gray-700 bg-gray-50 text-center lg:w-1/4">TOTAL</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-1/2 lg:w-1/4">AÇÕES</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
+                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8 whitespace-nowrap">TOTAL</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orcamentos.map((orcamento) => (
                       <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b relative">
-                        <TableCell className="font-medium text-left px-2 sm:px-4">
-                          <div className="truncate max-w-[150px] lg:max-w-none" title={orcamento.nome}>
+                        <TableCell className="font-medium text-left px-8">
+                          <span className="truncate block max-w-[150px]" title={orcamento.nome}>
                             {orcamento.nome}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden lg:table-cell text-left px-4">
-                          <div className="truncate" title={orcamento.descricao}>
+                        <TableCell className="hidden xl:table-cell text-left px-8">
+                          <span className="truncate block max-w-[250px]" title={orcamento.descricao || '-'}>
                             {orcamento.descricao || '-'}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="hidden lg:table-cell px-4">
-                          <div className="text-gray-900 flex justify-center">
-                            <span className="truncate text-center min-w-[100px] max-w-[150px]" title={`R$ ${orcamento.total.toFixed(2)}`}>
-                              R$ {orcamento.total.toFixed(2)}
-                            </span>
-                          </div>
+                        <TableCell className="hidden 2xl:table-cell text-left px-8 whitespace-nowrap">
+                          R$ {orcamento.total.toFixed(2)}
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center px-8 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(orcamento._id)}
