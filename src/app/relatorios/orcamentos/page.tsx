@@ -317,16 +317,23 @@ function RelatorioOrcamentosPageContent() {
               </div>
             </div>
 
-            <StatCard
-              title="Total de"
-              subtitle="componentes"
-              value={totalComponentes}
-              icon={Package}
-              iconColor="text-purple-600"
-              iconBgColor="bg-purple-100"
-              data-test="stat-total-componentes"
-              hoverTitle={`Total de componentes em todos os orçamentos: ${totalComponentes}`}
-            />
+            <div 
+              className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 w-full h-full min-h-[120px] flex items-center"
+              data-test="stat-menor-orcamento"
+              title={`Menor valor de orçamento: R$ ${menorOrcamento.toFixed(2)}`}
+            >
+              <div className="flex items-center w-full">
+                <div className="p-2 bg-purple-100 rounded-lg shrink-0">
+                  <TrendingDown className="w-6 h-6 text-purple-600" />
+                </div>
+                <div className="ml-3 flex-1">
+                  <p className="text-sm font-medium text-gray-600">Menor orçamento</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    R$ {menorOrcamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
