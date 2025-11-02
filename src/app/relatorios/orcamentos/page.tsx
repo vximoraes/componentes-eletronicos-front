@@ -265,7 +265,7 @@ function RelatorioOrcamentosPageContent() {
 
   return (
     <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-orcamentos-page">
-      <Cabecalho pagina="Relatórios" acao="Orçamentos" />
+      <Cabecalho pagina="Relatórios" descricao="Orçamentos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
         <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
@@ -446,12 +446,12 @@ function RelatorioOrcamentosPageContent() {
               <p className="mt-4 text-gray-600 font-medium">Carregando orçamentos...</p>
             </div>
           ) : orcamentosFiltrados.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col min-h-0">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px]">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -465,18 +465,18 @@ function RelatorioOrcamentosPageContent() {
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">NOME</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">DESCRIÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">ITENS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">VALOR TOTAL</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center">DATA</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">ITENS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">VALOR TOTAL</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">DATA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orcamentosFiltrados.map((orcamento) => (
                       <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b">
-                        <TableCell className="text-center px-2 sm:px-4">
+                        <TableCell className="text-center px-8">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(orcamento._id)}
@@ -484,31 +484,31 @@ function RelatorioOrcamentosPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-center px-2 sm:px-4">
-                          <div className="truncate" title={orcamento._id}>
+                        <TableCell className="font-medium text-left px-8">
+                          <span className="inline-block max-w-[150px] truncate align-middle" title={orcamento._id}>
                             {orcamento._id.slice(-8)}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="text-left px-2 sm:px-4">
-                          <div className="truncate font-medium" title={orcamento.nome}>
+                        <TableCell className="text-left px-8">
+                          <span className="inline-block max-w-[200px] truncate align-middle font-medium" title={orcamento.nome}>
                             {orcamento.nome}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="text-left px-2 sm:px-4">
-                          <div className="truncate" title={orcamento.descricao || '-'}>
+                        <TableCell className="text-left px-8">
+                          <span className="inline-block max-w-[250px] truncate align-middle" title={orcamento.descricao || '-'}>
                             {orcamento.descricao || '-'}
-                          </div>
+                          </span>
                         </TableCell>
-                        <TableCell className="text-center px-2 sm:px-4 font-medium">
+                        <TableCell className="text-center px-8 font-medium">
                           {orcamento.componentes?.length || 0}
                         </TableCell>
-                        <TableCell className="text-center px-2 sm:px-4 font-medium text-green-700">
+                        <TableCell className="text-center px-8 font-medium text-green-700">
                           R$ {orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-center px-2 sm:px-4 font-medium">
-                          <div className="truncate" title={orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleString('pt-BR') : '-'}>
+                        <TableCell className="text-center px-8 font-medium">
+                          <span className="inline-block max-w-[150px] truncate align-middle" title={orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleString('pt-BR') : '-'}>
                             {orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleDateString('pt-BR') : '-'}
-                          </div>
+                          </span>
                         </TableCell>
                       </TableRow>
                     ))}
