@@ -45,4 +45,10 @@ export default function RelatoriosMovimentacoes() {
 
       </div>
 
+      {/* Tabela  */}
+      <div>[Tabela]</div>
+    </div>
+  )
+}
+
   
