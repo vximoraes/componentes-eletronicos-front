@@ -85,6 +85,15 @@ export default function RelatoriosMovimentacoes() {
   },
 ]
 
+export default function RelatoriosMovimentacoes() {
+  const [movimentacoes, setMovimentacoes] = useState([])
+  const [filtro, setFiltro] = useState("")
+
+  useEffect(() => {
+    console.log("Carregar movimentações da API...")
+  }, [])
+
+
 }
 
   
