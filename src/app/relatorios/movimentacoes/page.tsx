@@ -34,8 +34,15 @@ export default function RelatoriosMovimentacoes() {
           />
   </div>
 
+      <div>
         <Button variant="outline" className="flex items-center gap-2">
           <Filter size={16} /> Filtros
         </Button>
 
         <Button className="flex items-center gap-2"></Button>
+
+       <Button><FileText size={16} /> Gerar relatório</Button>
+
+      </div>
+
+  
