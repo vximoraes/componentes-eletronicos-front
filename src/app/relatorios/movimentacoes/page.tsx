@@ -3,6 +3,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Filter, FileText } from "lucide-react"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
+import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react"
+
 
 export default function RelatoriosMovimentacoes() {
   const [movimentacoes, setMovimentacoes] = useState([])
@@ -49,6 +52,16 @@ export default function RelatoriosMovimentacoes() {
       <div>[Tabela]</div>
     </div>
   )
+
+  const dadosGrafico = [
+  { mes: "Jan", entradas: 20, saidas: 10 },
+  { mes: "Fev", entradas: 25, saidas: 18 },
+  { mes: "Mar", entradas: 30, saidas: 12 },
+  { mes: "Abr", entradas: 22, saidas: 16 },
+  { mes: "Mai", entradas: 28, saidas: 20 },
+  { mes: "Jun", entradas: 32, saidas: 25 },
+  ]
+
 }
 
   
