@@ -1,13 +1,5 @@
-"use client"
-import Cabecalho from "@/components/cabecalho"
-
-export default function RelatorioMovimentacoesPage() {
-  return (
-    <div className="w-full">
-      <Cabecalho pagina="Relatórios" acao="Movimentações" />
-      <div className="p-6 pt-0">
-        <p>Conteúdo do relatório de movimentações aqui...</p>
-      </div>
-    </div>
-  )
-}
+import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Search, Filter, FileText } from "lucide-react"
