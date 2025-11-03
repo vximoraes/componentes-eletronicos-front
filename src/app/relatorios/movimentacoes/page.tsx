@@ -23,3 +23,13 @@ export default function RelatoriosMovimentacoes() {
     
     {/* Barra de pesquisa e botões */}
       <div className="flex items-center gap-2 mb-4"></div>
+    
+  <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 text-gray-400 w-4 h-4" />
+          <Input
+            placeholder="Pesquisar componentes..."
+            className="pl-8"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+    </div>
