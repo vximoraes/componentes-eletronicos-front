@@ -62,6 +62,29 @@ export default function RelatoriosMovimentacoes() {
   { mes: "Jun", entradas: 32, saidas: 25 },
   ]
 
+  const cards = [
+  {
+    titulo: "Total de movimentações",
+    valor: 127,
+    icone: <Package className="text-blue-500" size={20} />,
+  },
+  {
+    titulo: "Entradas registradas",
+    valor: 90,
+    icone: <CheckCircle className="text-green-500" size={20} />,
+  },
+  {
+    titulo: "Saídas registradas",
+    valor: 37,
+    icone: <AlertTriangle className="text-yellow-500" size={20} />,
+  },
+  {
+    titulo: "Pendentes",
+    valor: 5,
+    icone: <XCircle className="text-red-500" size={20} />,
+  },
+]
+
 }
 
   
