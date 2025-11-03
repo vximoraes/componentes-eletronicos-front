@@ -16,27 +16,28 @@ type sidebarMenuButton = {
   collapsed?: boolean
 }
 export default function SidebarButtonMenu({ src, srcHover, name, "data-test": dataTest, route, path, onItemClick, collapsed = false }: sidebarMenuButton) {
-  const [isHover, setIsHover] = useState<string>(src)
-  const [isRouter, setIsRouter] = useState<string>()
-  const [isBlack, setIsBlack] = useState<string>()
-  const [isActive, setIsActive] = useState<boolean>(false)
+  const isActivePath = path?.startsWith("/" + name?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+  const [isHover, setIsHover] = useState<string>(isActivePath ? srcHover : src)
+  const [isRouter, setIsRouter] = useState<string>(isActivePath ? "bg-white" : "")
+  const [isBlack, setIsBlack] = useState<string>(isActivePath ? "text-[#000]" : "")
+  const [isActive, setIsActive] = useState<boolean>(isActivePath || false)
   const router = useRouter()
 
   useEffect(() => {
+    const isActive = path?.startsWith("/" + name?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
 
-    if (path?.startsWith("/" + name?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))) {
+    if (isActive) {
       setIsHover(srcHover)
       setIsRouter("bg-white")
       setIsBlack("text-[#000]")
       setIsActive(true)
-    }
-    else if (isHover && isBlack) {
+    } else {
       setIsRouter("")
       setIsHover(src)
       setIsBlack("")
       setIsActive(false)
     }
-  }, [path])
+  }, [path, src, srcHover, name])
   function trocarPagina() {
     router.push(route)
     if (onItemClick) {

@@ -9,6 +9,7 @@ import { toast, ToastContainer, Slide } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getSession, useSession as useNextAuthSession } from 'next-auth/react'
+import { Button } from "@/components/ui/button"
 
 interface UsuarioData {
   _id: string
@@ -56,6 +57,7 @@ export default function HomePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isEditingFoto, setIsEditingFoto] = useState(false)
   const [userData, setUserData] = useState<UsuarioData | null>(null)
+  const [editedNome, setEditedNome] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [loadingNotificacaoId, setLoadingNotificacaoId] = useState<string | null>(null)
@@ -345,45 +347,6 @@ export default function HomePage() {
     return `Há ${Math.floor(diferencaDias / 30)} mês${Math.floor(diferencaDias / 30) > 1 ? 'es' : ''}`
   }
 
-
-  async function handleSaveEdit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!userData || !user?.id) return
-
-    setIsSaving(true)
-    try {
-      const response = await patch<UsuarioApiResponse>(`/usuarios/${user.id}`, {
-        nome: userData.nome,
-      })
-
-      setUserData(response.data)
-      setIsEditing(false)
-
-      toast.success("Perfil atualizado com sucesso!", {
-        position: "bottom-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
-    } catch (error: any) {
-      console.error("Erro ao atualizar perfil:", error)
-      toast.error(error?.message || "Erro ao atualizar perfil", {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
   function formatDate(dateString?: string) {
     if (!dateString) return "N/A"
     return new Date(dateString).toLocaleDateString("pt-BR")
@@ -464,6 +427,50 @@ export default function HomePage() {
     }
   }
 
+  const handleOpenEdit = () => {
+    if (userData) {
+      setEditedNome(userData.nome)
+    }
+    setIsEditing(true)
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setEditedNome("")
+  }
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!userData) return
+
+    setIsSaving(true)
+    try {
+      await patch<UsuarioApiResponse>(`/usuarios/${userData._id}`, {
+        nome: editedNome
+      })
+
+      // Atualiza o estado local
+      setUserData({ ...userData, nome: editedNome })
+
+      toast.success("Perfil atualizado com sucesso!", {
+        position: 'bottom-right',
+        autoClose: 3000,
+        transition: Slide,
+      })
+      setIsEditing(false)
+      setEditedNome("")
+    } catch (error) {
+      console.error("Erro ao salvar:", error)
+      toast.error("Erro ao atualizar perfil", {
+        position: 'bottom-right',
+        autoClose: 5000,
+        transition: Slide,
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="w-full h-screen flex flex-col">
@@ -530,7 +537,7 @@ export default function HomePage() {
               </div>
 
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={handleOpenEdit}
                 className="mt-4 flex items-center gap-2 justify-center text-blue-600 hover:underline transition-all cursor-pointer"
               >
                 <Pencil className="w-4 h-4" />
@@ -662,7 +669,7 @@ export default function HomePage() {
       {/* painel de edição */}
       {isEditing && (
         <div 
-          className="fixed inset-0 flex items-center justify-center"
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
           style={{
             zIndex: 99999,
             backgroundColor: 'rgba(0, 0, 0, 0.5)'
@@ -670,13 +677,13 @@ export default function HomePage() {
           onClick={() => setIsEditing(false)}
         >
           <div 
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de fechar */}
             <div className="relative p-6 pb-0">
               <button
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancelEdit}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                 title="Fechar"
               >
@@ -687,35 +694,69 @@ export default function HomePage() {
             {/* Conteúdo do Modal */}
             <div className="px-6 pb-6 space-y-6">
               <div className="text-center pt-4 px-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                  Editar Perfil
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Editar perfil
                 </h2>
               </div>
 
-              <form onSubmit={handleSaveEdit} className="space-y-6">
+              <form onSubmit={handleSaveEdit} id="edit-profile-form" className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="nome" className="block text-base font-medium text-gray-700">
-                    Nome <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label htmlFor="nome" className="block text-sm sm:text-base font-medium text-gray-700">
+                      Nome <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      {editedNome.length}/100
+                    </span>
+                  </div>
                   <input
                     id="nome"
                     type="text"
-                    value={userData?.nome || ""}
-                    onChange={e => setUserData(prev => prev ? { ...prev, nome: e.target.value } : null)}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    value={editedNome}
+                    onChange={e => setEditedNome(e.target.value)}
+                    maxLength={100}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                     disabled={isSaving}
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isSaving}
-                >
-                  {isSaving ? "Salvando..." : "Salvar alterações"}
-                </button>
+                <div className="space-y-2">
+                  <label htmlFor="email" className="block text-sm sm:text-base font-medium text-gray-700">
+                    E-mail
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={userData?.email || ''}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 border border-gray-300 rounded-md text-sm sm:text-base text-gray-500 cursor-not-allowed"
+                    disabled
+                  />
+                </div>
               </form>
+            </div>
+
+            {/* Footer com ações */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                  className="flex-1 cursor-pointer"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  form="edit-profile-form"
+                  disabled={isSaving}
+                  className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                  style={{ backgroundColor: '#306FCC' }}
+                >
+                  {isSaving ? "Salvando..." : "Salvar"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -724,7 +765,7 @@ export default function HomePage() {
       {/* Modal de edição de foto */}
       {isEditingFoto && (
         <div 
-          className="fixed inset-0 flex items-center justify-center p-4"
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
           style={{
             zIndex: 99999,
             backgroundColor: 'rgba(0, 0, 0, 0.5)'
@@ -732,7 +773,7 @@ export default function HomePage() {
           onClick={handleCancelarEdicaoFoto}
         >
           <div 
-            className="bg-white rounded-lg shadow-xl max-w-md w-full animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de fechar */}
@@ -748,8 +789,8 @@ export default function HomePage() {
 
             {/* Conteúdo do Modal */}
             <div className="px-6 pb-6 space-y-6">
-              <div className="text-center pt-4">
-                <h2 className="text-xl font-semibold text-gray-900">
+              <div className="text-center pt-4 px-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
                   Editar foto do perfil
                 </h2>
               </div>
@@ -797,33 +838,39 @@ export default function HomePage() {
                   className="hidden"
                 />
               </div>
+            </div>
 
-              {/* Botões de ação */}
-              <div className="flex flex-col gap-3">
-                {novaFoto && (
-                  <button
-                    onClick={handleSalvarFoto}
-                    disabled={uploadFotoMutation.isPending}
-                    className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {uploadFotoMutation.isPending ? 'Salvando...' : 'Salvar foto'}
-                  </button>
-                )}
-                {imagemPreview && !novaFoto && (
-                  <button
-                    onClick={handleRemoverFoto}
-                    disabled={deleteFotoMutation.isPending}
-                    className="w-full bg-red-600 text-white py-3 rounded-md hover:bg-red-700 transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover foto'}
-                  </button>
-                )}
-                <button
+            {/* Footer com ações */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
                   onClick={handleCancelarEdicaoFoto}
-                  className="w-full border border-gray-300 text-gray-700 py-3 rounded-md hover:bg-gray-50 transition-colors font-medium cursor-pointer"
+                  disabled={uploadFotoMutation.isPending || deleteFotoMutation.isPending}
+                  className="flex-1 cursor-pointer"
                 >
                   Cancelar
-                </button>
+                </Button>
+                {imagemPreview && !novaFoto && (
+                  <Button
+                    onClick={handleRemoverFoto}
+                    disabled={deleteFotoMutation.isPending}
+                    className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                    style={{ backgroundColor: '#DC2626' }}
+                  >
+                    {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover foto'}
+                  </Button>
+                )}
+                {novaFoto && (
+                  <Button
+                    onClick={handleSalvarFoto}
+                    disabled={uploadFotoMutation.isPending}
+                    className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                    style={{ backgroundColor: '#306FCC' }}
+                  >
+                    {uploadFotoMutation.isPending ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
