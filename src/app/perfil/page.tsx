@@ -531,9 +531,9 @@ export default function HomePage() {
                 </button>
               </div>
 
-              <div className="text-center mt-4">
-                <h2 className="text-xl font-semibold">{userData.nome}</h2>
-                <p className="text-sm text-gray-500 mt-1">{userData.email}</p>
+              <div className="text-center mt-4 w-full px-2">
+                <h2 className="text-xl font-semibold truncate w-full">{userData.nome}</h2>
+                <p className="text-sm text-gray-500 mt-1 truncate w-full">{userData.email}</p>
               </div>
 
               <button
