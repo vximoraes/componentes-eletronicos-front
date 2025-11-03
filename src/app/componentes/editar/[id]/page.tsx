@@ -71,6 +71,7 @@ export default function EditarComponentePage() {
   const [imagem, setImagem] = useState<File | null>(null)
   const [imagemPreview, setImagemPreview] = useState<string | null>(null)
   const [imagemAtual, setImagemAtual] = useState<string | null>(null)
+  const [imagemParaDeletar, setImagemParaDeletar] = useState(false)
   const [isAddingCategoria, setIsAddingCategoria] = useState(false)
   const [novaCategoria, setNovaCategoria] = useState('')
   const [isCategoriaDropdownOpen, setIsCategoriaDropdownOpen] = useState(false)
@@ -120,6 +121,7 @@ export default function EditarComponentePage() {
       setCategoriaId(componente.categoria._id || '')
       setEstoqueMinimo(componente.estoque_minimo?.toString() || '0')
       setDescricao(componente.descricao || '')
+      setImagemParaDeletar(false)
       if (componente.imagem) {
         console.log(componente.imagem)
         setImagemAtual(componente.imagem)
@@ -159,6 +161,37 @@ export default function EditarComponentePage() {
       setErrors(prev => ({ ...prev, novaCategoria: errorMessage }))
     }
   })
+  const deleteComponenteImagem = useMutation({
+    mutationFn: async (componenteIdParam: string) => {
+      const session = await getSession();
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/componentes/${componenteIdParam}/foto`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.user?.accessToken}`
+        },
+      });
+      return await response.json();
+    },
+    onSuccess: () => {
+      console.log('Imagem deletada com sucesso')
+      setImagemAtual(null)
+      setImagemPreview(null)
+      setImagemParaDeletar(false)
+    },
+    onError: (error: any) => {
+      console.log("Erro ao deletar imagem:", error)
+      toast.error('Erro ao deletar a imagem do componente.', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        transition: Slide,
+      })
+    }
+  })
+
   const sendComponenteImagem = useMutation({
     mutationFn: async (componenteIdParam: string) =>  {
       if (imagem) {
@@ -212,13 +245,18 @@ export default function EditarComponentePage() {
     mutationFn: async (data: any) => {
       return await patch<ComponentePatch>(`/componentes/${componenteId}`, data);
     },
-    onSuccess: (data: any) => {
+    onSuccess: async (data: any) => {
       const componenteIdAtualizado = data.data._id
       setIdComponente(componenteIdAtualizado)
       queryClient.invalidateQueries({ queryKey: ['componentes'] })
       queryClient.invalidateQueries({ queryKey: ['componente', componenteId] })
       
-      // Se há imagem para enviar, envia usando o ID retornado
+      // Se a imagem foi marcada para deletar, deleta primeiro
+      if (imagemParaDeletar && imagemAtual) {
+        await deleteComponenteImagem.mutateAsync(componenteIdAtualizado)
+      }
+
+      // Se há imagem nova para enviar, envia usando o ID retornado
       if (imagem) {
         sendComponenteImagem.mutate(componenteIdAtualizado)
       } else {
@@ -264,6 +302,7 @@ export default function EditarComponentePage() {
     const file = e.target.files?.[0]
     if (file) {
       setImagem(file)
+      setImagemParaDeletar(false) // Limpa a flag de deletar ao selecionar nova imagem
 
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -276,7 +315,10 @@ export default function EditarComponentePage() {
   const handleRemoveImage = () => {
     setImagem(null)
     setImagemPreview(null)
-    setImagemAtual(null)
+    // Marca para deletar se havia uma imagem no servidor
+    if (imagemAtual) {
+      setImagemParaDeletar(true)
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -304,6 +346,7 @@ export default function EditarComponentePage() {
       const file = files[0]
       if (file.type.startsWith('image/')) {
         setImagem(file)
+        setImagemParaDeletar(false) // Limpa a flag de deletar ao fazer drop de nova imagem
 
         const reader = new FileReader()
         reader.onloadend = () => {
@@ -342,11 +385,7 @@ export default function EditarComponentePage() {
       componenteData.descricao = descricao
     }
 
-    // Se o usuário removeu a imagem (sem preview e tinha imagem antes)
-    if (!imagemPreview && imagemAtual) {
-      componenteData.imagem = ''
-    }
-    // Não envia imagem.name no PATCH - o backend vai definir o nome como idComponente.jpeg após o POST /foto
+    // Não envia imagem no PATCH - gerenciada via endpoints POST /foto e DELETE /foto
 
     updateComponenteMutation.mutate(componenteData)
   }

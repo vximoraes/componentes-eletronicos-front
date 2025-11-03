@@ -19,6 +19,7 @@ export default function SidebarButtonMenu({ src, srcHover, name, "data-test": da
   const [isHover, setIsHover] = useState<string>(src)
   const [isRouter, setIsRouter] = useState<string>()
   const [isBlack, setIsBlack] = useState<string>()
+  const [isActive, setIsActive] = useState<boolean>(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -27,11 +28,13 @@ export default function SidebarButtonMenu({ src, srcHover, name, "data-test": da
       setIsHover(srcHover)
       setIsRouter("bg-white")
       setIsBlack("text-[#000]")
+      setIsActive(true)
     }
     else if (isHover && isBlack) {
       setIsRouter("")
       setIsHover(src)
       setIsBlack("")
+      setIsActive(false)
     }
   }, [path])
   function trocarPagina() {
