@@ -264,13 +264,13 @@ function RelatorioOrcamentosPageContent() {
   const isSomeSelected = selectedItems.size > 0 && selectedItems.size < orcamentosFiltrados.length;
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-orcamentos-page">
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-orcamentos-page">
       <Cabecalho 
         pagina="Relatórios" 
         acao="Orçamentos"
       />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         {/* Stats Cards - Fixo no topo */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] shrink-0" data-test="stats-grid">
             <StatCard

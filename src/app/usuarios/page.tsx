@@ -203,10 +203,10 @@ function PageUsuariosContent() {
   )
 
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
       <Cabecalho pagina="Usuários" />
 
-      <div className="flex-1 overflow-hidden flex flex-col px-6 pb-6">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0 max-w-full">
         {/* Barra de Pesquisa e Botão Adicionar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0">
           <div className="relative flex-1">
@@ -249,12 +249,12 @@ function PageUsuariosContent() {
           ) : usuarios.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm">
+                <table className="w-full min-w-[800px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">E-MAIL</TableHead>
-                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">E-MAIL</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">STATUS</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -266,12 +266,12 @@ function PageUsuariosContent() {
                             {usuario.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-4">
                           <span className="truncate block max-w-[250px]" title={usuario.email}>
                             {usuario.email}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden 2xl:table-cell text-center px-8 py-4 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
                               className={`inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-medium text-center whitespace-nowrap ${usuario.ativo

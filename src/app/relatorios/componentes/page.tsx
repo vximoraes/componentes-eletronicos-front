@@ -272,13 +272,13 @@ function RelatorioComponentesPageContent() {
   const isSomeSelected = selectedItems.size > 0 && selectedItems.size < estoquesFiltrados.length;
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-componentes-page">
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-componentes-page">
       <Cabecalho 
         pagina="Relatórios" 
         acao="Componentes"
       />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         {/* Stats Cards - Fixo no topo */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] shrink-0" data-test="stats-grid">
           <StatCard
@@ -420,7 +420,7 @@ function RelatorioComponentesPageContent() {
           ) : estoquesFiltrados.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm">
+                <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
@@ -437,11 +437,11 @@ function RelatorioComponentesPageContent() {
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
                         />
                       </TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
-                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -455,7 +455,7 @@ function RelatorioComponentesPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell font-medium text-left px-8 py-4">
+                        <TableCell className="font-medium text-left px-8 py-4">
                           <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
                           </span>
@@ -465,10 +465,10 @@ function RelatorioComponentesPageContent() {
                             {estoque.componente.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 font-medium">
+                        <TableCell className="text-center px-8 py-4 font-medium">
                           {estoque.quantidade}
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
                               className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
