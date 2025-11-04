@@ -332,20 +332,20 @@ function PageOrcamentosContent() {
                   <TableBody>
                     {orcamentos.map((orcamento) => (
                       <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b relative">
-                        <TableCell className="font-medium text-left px-8">
+                        <TableCell className="font-medium text-left px-8 py-4">
                           <span className="truncate block max-w-[150px]" title={orcamento.nome}>
                             {orcamento.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-left px-8">
+                        <TableCell className="hidden xl:table-cell text-left px-8 py-4">
                           <span className="truncate block max-w-[250px]" title={orcamento.descricao || '-'}>
                             {orcamento.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden 2xl:table-cell text-left px-8 whitespace-nowrap">
+                        <TableCell className="hidden 2xl:table-cell text-left px-8 py-4 whitespace-nowrap">
                           R$ {orcamento.total.toFixed(2)}
                         </TableCell>
-                        <TableCell className="text-center px-8 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(orcamento._id)}

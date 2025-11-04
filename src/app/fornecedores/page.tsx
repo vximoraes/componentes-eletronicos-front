@@ -244,12 +244,12 @@ function PageFornecedoresContent() {
                             </div>
                           </div>
                         )}
-                        <TableCell className="font-medium text-left px-8">
+                        <TableCell className="font-medium text-left px-8 py-4">
                           <span className="truncate block max-w-[200px]" title={fornecedor.nome}>
                             {fornecedor.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-left px-8">
+                        <TableCell className="hidden xl:table-cell text-left px-8 py-4">
                           {fornecedor.url ? (
                             <a
                               href={fornecedor.url}
@@ -264,17 +264,17 @@ function PageFornecedoresContent() {
                             <span className="text-gray-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-left px-8">
+                        <TableCell className="hidden xl:table-cell text-left px-8 py-4">
                           <span className="truncate block max-w-[150px]" title={fornecedor.contato || '-'}>
                             {fornecedor.contato || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden 2xl:table-cell text-left px-8">
+                        <TableCell className="hidden 2xl:table-cell text-left px-8 py-4">
                           <span className="truncate block max-w-[200px]" title={fornecedor.descricao || '-'}>
                             {fornecedor.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(fornecedor._id)}

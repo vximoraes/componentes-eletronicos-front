@@ -278,9 +278,9 @@ function RelatorioComponentesPageContent() {
         acao="Componentes"
       />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
         {/* Stats Cards - Fixo no topo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] flex-shrink-0" data-test="stats-grid">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] shrink-0" data-test="stats-grid">
           <StatCard
             title="Total de"
             subtitle="componentes"
@@ -324,7 +324,7 @@ function RelatorioComponentesPageContent() {
         </div>
 
         {/* Barra de Pesquisa e Botões */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0" data-test="search-actions-bar">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0" data-test="search-actions-bar">
             <div className="relative flex-1" data-test="search-container">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -364,7 +364,7 @@ function RelatorioComponentesPageContent() {
 
         {/* Filtros aplicados */}
         {(categoriaFilter || statusFilter) && (
-          <div className="mb-4 flex-shrink-0" data-test="applied-filters">
+          <div className="mb-4 shrink-0" data-test="applied-filters">
             <div className="flex flex-wrap items-center gap-2">
               {categoriaFilter && (
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
@@ -399,7 +399,7 @@ function RelatorioComponentesPageContent() {
         {/* Mensagem de Erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex-shrink-0"
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
@@ -437,17 +437,17 @@ function RelatorioComponentesPageContent() {
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
+                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
-                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b">
-                        <TableCell className="text-center px-8">
+                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b" style={{ minHeight: '69px', height: '69px' }}>
+                        <TableCell className="text-center px-8 py-4 align-middle">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
@@ -455,23 +455,23 @@ function RelatorioComponentesPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8">
+                        <TableCell className="hidden xl:table-cell font-medium text-left px-8 py-4">
                           <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8">
-                          <span className="truncate block max-w-[250px]" title={estoque.componente.nome}>
+                        <TableCell className="font-medium text-left px-8 py-4">
+                          <span className="truncate block max-w-[200px]" title={estoque.componente.nome}>
                             {estoque.componente.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 font-medium">
+                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 font-medium">
                           {estoque.quantidade}
                         </TableCell>
-                        <TableCell className="text-center px-8 whitespace-nowrap">
+                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
-                              className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${
+                              className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
                                 estoque.componente.status === 'Em Estoque'
                                   ? 'bg-green-100 text-green-800'
                                   : estoque.componente.status === 'Baixo Estoque'
@@ -484,7 +484,7 @@ function RelatorioComponentesPageContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-left px-8 font-medium">
+                        <TableCell className="hidden 2xl:table-cell text-left px-8 py-4 font-medium">
                           <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
                             {estoque.localizacao.nome}
                           </span>

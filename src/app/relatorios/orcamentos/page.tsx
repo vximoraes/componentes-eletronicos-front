@@ -265,11 +265,14 @@ function RelatorioOrcamentosPageContent() {
 
   return (
     <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-orcamentos-page">
-      <Cabecalho pagina="Relatórios" descricao="Orçamentos" />
+      <Cabecalho 
+        pagina="Relatórios" 
+        acao="Orçamentos"
+      />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
+        {/* Stats Cards - Fixo no topo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] shrink-0" data-test="stats-grid">
             <StatCard
               title="Total de"
               subtitle="orçamentos"
@@ -336,116 +339,120 @@ function RelatorioOrcamentosPageContent() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
-            <div className="relative flex-1" data-test="search-container">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Pesquisar orçamentos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-                data-test="search-input"
-              />
-            </div>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 cursor-pointer"
-              data-test="filtros-button"
-              onClick={handleOpenFiltrosModal}
-            >
-              <Filter className="w-4 h-4" />
-              Filtros
-            </Button>
-            <Button
-              disabled={selectedItems.size === 0}
-              className={`flex items-center gap-2 text-white transition-all ${
-                selectedItems.size > 0
-                  ? 'hover:opacity-90 cursor-pointer'
-                  : 'opacity-50 cursor-not-allowed bg-gray-400'
-              }`}
-              style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
-              data-test="exportar-button"
-              onClick={handleOpenExportarModal}
-              title={selectedItems.size === 0 ? 'Selecione orçamentos para exportar' : `Exportar ${selectedItems.size} orçamento(s)`}
-            >
-              <img src="../gerar-pdf.svg" alt="" className="w-5" />
-              Exportar
-            </Button>
+        {/* Barra de Pesquisa e Botões */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0" data-test="search-actions-bar">
+          <div className="relative flex-1" data-test="search-container">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Pesquisar orçamentos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+              data-test="search-input"
+            />
           </div>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 cursor-pointer"
+            data-test="filtros-button"
+            onClick={handleOpenFiltrosModal}
+          >
+            <Filter className="w-4 h-4" />
+            Filtros
+          </Button>
+          <Button
+            disabled={selectedItems.size === 0}
+            className={`flex items-center gap-2 text-white transition-all ${
+              selectedItems.size > 0
+                ? 'hover:opacity-90 cursor-pointer'
+                : 'opacity-50 cursor-not-allowed bg-gray-400'
+            }`}
+            style={selectedItems.size > 0 ? { backgroundColor: '#306FCC' } : {}}
+            data-test="exportar-button"
+            onClick={handleOpenExportarModal}
+            title={selectedItems.size === 0 ? 'Selecione orçamentos para exportar' : `Exportar ${selectedItems.size} orçamento(s)`}
+          >
+            <img src="../gerar-pdf.svg" alt="" className="w-5" />
+            Exportar
+          </Button>
+        </div>
 
-          {/* Filtros aplicados */}
-          {(valorMinFilter || valorMaxFilter || dataInicioFilter || dataFimFilter) && (
-            <div className="mb-4" data-test="applied-filters">
-              <div className="flex flex-wrap items-center gap-2">
-                {valorMinFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">Valor mín:</span>
-                    <span>R$ {parseFloat(valorMinFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <button
-                      onClick={() => setValorMinFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de valor mínimo"
-                    >
-                      <span className="text-xs">✕</span>
-                    </button>
-                  </div>
-                )}
-                {valorMaxFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">Valor máx:</span>
-                    <span>R$ {parseFloat(valorMaxFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <button
-                      onClick={() => setValorMaxFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de valor máximo"
-                    >
-                      <span className="text-xs">✕</span>
-                    </button>
-                  </div>
-                )}
-                {dataInicioFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">De:</span>
-                    <span>{new Date(dataInicioFilter).toLocaleDateString('pt-BR')}</span>
-                    <button
-                      onClick={() => setDataInicioFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de data inicial"
-                    >
-                      <span className="text-xs">✕</span>
-                    </button>
-                  </div>
-                )}
-                {dataFimFilter && (
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
-                    <span className="font-medium">Até:</span>
-                    <span>{new Date(dataFimFilter).toLocaleDateString('pt-BR')}</span>
-                    <button
-                      onClick={() => setDataFimFilter('')}
-                      className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
-                      title="Remover filtro de data final"
-                    >
-                      <span className="text-xs">✕</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+        {/* Filtros aplicados */}
+        {(valorMinFilter || valorMaxFilter || dataInicioFilter || dataFimFilter) && (
+          <div className="mb-4 shrink-0" data-test="applied-filters">
+            <div className="flex flex-wrap items-center gap-2">
+                              {valorMinFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">Valor mín:</span>
+                  <span>R$ {parseFloat(valorMinFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <button
+                    onClick={() => setValorMinFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de valor mínimo"
+                  >
+                    <span className="text-xs">✕</span>
+                  </button>
+                </div>
+              )}
+              {valorMaxFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">Valor máx:</span>
+                  <span>R$ {parseFloat(valorMaxFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <button
+                    onClick={() => setValorMaxFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de valor máximo"
+                  >
+                    <span className="text-xs">✕</span>
+                  </button>
+                </div>
+              )}
+              {dataInicioFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">De:</span>
+                  <span>{new Date(dataInicioFilter).toLocaleDateString('pt-BR')}</span>
+                  <button
+                    onClick={() => setDataInicioFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de data inicial"
+                  >
+                    <span className="text-xs">✕</span>
+                  </button>
+                </div>
+              )}
+              {dataFimFilter && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                  <span className="font-medium">Até:</span>
+                  <span>{new Date(dataFimFilter).toLocaleDateString('pt-BR')}</span>
+                  <button
+                    onClick={() => setDataFimFilter('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                    title="Remover filtro de data final"
+                  >
+                    <span className="text-xs">✕</span>
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          {error && (
-            <div
-              className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
-              data-test="error-message"
-              title={`Erro completo: ${error.message}`}
-            >
-              Erro ao carregar orçamentos: {error.message}
-            </div>
-          )}
+        {/* Mensagem de Erro */}
+        {error && (
+          <div
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
+            data-test="error-message"
+            title={`Erro completo: ${error.message}`}
+          >
+            Erro ao carregar orçamentos: {error.message}
+          </div>
+        )}
 
+        {/* Área da Tabela com Scroll */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+            <div className="flex flex-col items-center justify-center flex-1" data-test="loading-spinner">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -453,7 +460,7 @@ function RelatorioOrcamentosPageContent() {
               <p className="mt-4 text-gray-600 font-medium">Carregando orçamentos...</p>
             </div>
           ) : orcamentosFiltrados.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
@@ -472,18 +479,18 @@ function RelatorioOrcamentosPageContent() {
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">ITENS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">VALOR TOTAL</TableHead>
+                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">ITENS</TableHead>
+                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">VALOR TOTAL</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">DATA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orcamentosFiltrados.map((orcamento) => (
-                      <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b">
-                        <TableCell className="text-center px-8">
+                      <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b" style={{ minHeight: '69px', height: '69px' }}>
+                        <TableCell className="text-center px-8 py-4 align-middle">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(orcamento._id)}
@@ -491,29 +498,29 @@ function RelatorioOrcamentosPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8">
-                          <span className="inline-block max-w-[150px] truncate align-middle" title={orcamento._id}>
+                        <TableCell className="hidden xl:table-cell font-medium text-left px-8 py-4">
+                          <span className="truncate block max-w-[200px]" title={orcamento._id}>
                             {orcamento._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8">
-                          <span className="inline-block max-w-[200px] truncate align-middle font-medium" title={orcamento.nome}>
+                        <TableCell className="text-left px-8 py-4">
+                          <span className="truncate block max-w-[200px] font-medium" title={orcamento.nome}>
                             {orcamento.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8">
-                          <span className="inline-block max-w-[250px] truncate align-middle" title={orcamento.descricao || '-'}>
+                        <TableCell className="hidden 2xl:table-cell text-left px-8 py-4">
+                          <span className="truncate block max-w-[200px]" title={orcamento.descricao || '-'}>
                             {orcamento.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 font-medium">
+                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 font-medium">
                           {orcamento.componentes?.length || 0}
                         </TableCell>
-                        <TableCell className="text-center px-8 font-medium text-green-700">
+                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 font-medium text-green-700 whitespace-nowrap">
                           R$ {orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-center px-8 font-medium">
-                          <span className="inline-block max-w-[150px] truncate align-middle" title={orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleString('pt-BR') : '-'}>
+                        <TableCell className="text-center px-8 py-4 font-medium whitespace-nowrap">
+                          <span className="truncate block max-w-[150px]" title={orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleString('pt-BR') : '-'}>
                             {orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleDateString('pt-BR') : '-'}
                           </span>
                         </TableCell>
@@ -531,11 +538,15 @@ function RelatorioOrcamentosPageContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-8" data-test="empty-state">
-              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">
-                {searchTerm ? 'Nenhum orçamento encontrado para sua pesquisa.' : 'Não há orçamentos cadastrados...'}
-              </p>
+            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-lg">
+                  {searchTerm ? 'Nenhum orçamento encontrado para sua pesquisa.' : 'Não há orçamentos cadastrados...'}
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -559,7 +570,7 @@ function RelatorioOrcamentosPageContent() {
         onExport={handleExport}
       />
     </div>
-  );
+  );  
 }
 
 export default function RelatorioOrcamentosPage() {
