@@ -127,4 +127,16 @@ export default function RelatoriosMovimentacoes() {
         </CardContent>
       </Card>
 
+       {/* BARRA DE PESQUISA */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-2.5 text-gray-400 w-4 h-4" />
+          <Input
+            placeholder="Pesquisar componentes..."
+            className="pl-8"
+            value={filtro}
+            onChange={(e) => setFiltro(e.target.value)}
+          />
+        </div>
+
 }
