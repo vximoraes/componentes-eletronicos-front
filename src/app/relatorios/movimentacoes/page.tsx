@@ -20,8 +20,8 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { PulseLoader } from "react-spinners";
 import { toast, Slide } from "react-toastify";
 import { useSession } from "@/hooks/use-session";
-import { generateComponentesPDF } from "@/utils/pdfGenerator"; // Reutilizado até criar o de movimentações
-import { generateComponentesCSV } from "@/utils/csvGenerator"; // Reutilizado até criar o de movimentações
+import { generateComponentesPDF } from "@/utils/pdfGenerator"; 
+import { generateComponentesCSV } from "@/utils/csvGenerator"; 
 
 interface MovimentacoesApiResponse {
   data: {
@@ -70,7 +70,6 @@ function RelatorioMovimentacoesPageContent() {
     refetchOnWindowFocus: false,
   });
 
-  // Infinite scroll
   useEffect(() => {
     if (!observerTarget.current) return;
 
@@ -105,7 +104,7 @@ function RelatorioMovimentacoesPageContent() {
     return matchSearch && matchTipo;
   });
 
-  // Estatísticas
+  // Estatísticas (ver depois)
   const totalMov = movimentacoesFiltradas.length;
   const entradas = movimentacoesFiltradas.filter(
     (m) => m.tipo === "Entrada"
@@ -183,17 +182,11 @@ function RelatorioMovimentacoesPageContent() {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-x-hidden">
-      <Cabecalho pagina="Relatórios" acao="Movimentações" />
+  <div className="w-full h-screen flex flex-col overflow-x-hidden">
+  <Cabecalho pagina="Relatórios" descricao="Movimentações" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        {/* Cabeçalho lado a lado */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Relatório</h1>
-            <p className="text-gray-500 text-lg">Movimentações</p>
-          </div>
-        </div>
+        
 
         {/* Cards de Estatísticas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
