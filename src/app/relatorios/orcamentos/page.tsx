@@ -489,8 +489,8 @@ function RelatorioOrcamentosPageContent() {
                   </TableHeader>
                   <TableBody>
                     {orcamentosFiltrados.map((orcamento) => (
-                      <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b" style={{ minHeight: '69px', height: '69px' }}>
-                        <TableCell className="text-center px-8 py-4 align-middle">
+                      <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                        <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(orcamento._id)}
@@ -498,28 +498,28 @@ function RelatorioOrcamentosPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-4">
+                        <TableCell className="font-medium text-left px-8 py-3">
                           <span className="truncate block max-w-[200px]" title={orcamento._id}>
                             {orcamento._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-3">
                           <span className="truncate block max-w-[200px] font-medium" title={orcamento.nome}>
                             {orcamento.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-3">
                           <span className="truncate block max-w-[200px]" title={orcamento.descricao || '-'}>
                             {orcamento.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 font-medium">
+                        <TableCell className="text-center px-8 py-3 font-medium">
                           {orcamento.componentes?.length || 0}
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 font-medium text-green-700 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-3 font-medium text-green-700 whitespace-nowrap">
                           R$ {orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 font-medium whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-3 font-medium whitespace-nowrap">
                           <span className="truncate block max-w-[150px]" title={orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleString('pt-BR') : '-'}>
                             {orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleDateString('pt-BR') : '-'}
                           </span>

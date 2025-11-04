@@ -446,8 +446,8 @@ function RelatorioComponentesPageContent() {
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
-                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b" style={{ minHeight: '69px', height: '69px' }}>
-                        <TableCell className="text-center px-8 py-4 align-middle">
+                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                        <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
@@ -455,20 +455,20 @@ function RelatorioComponentesPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-4">
+                        <TableCell className="font-medium text-left px-8 py-3">
                           <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-4">
+                        <TableCell className="font-medium text-left px-8 py-3">
                           <span className="truncate block max-w-[200px]" title={estoque.componente.nome}>
                             {estoque.componente.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 font-medium">
+                        <TableCell className="text-center px-8 py-3 font-medium">
                           {estoque.quantidade}
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-3 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
                               className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
@@ -484,7 +484,7 @@ function RelatorioComponentesPageContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-4 font-medium">
+                        <TableCell className="text-left px-8 py-3 font-medium">
                           <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
                             {estoque.localizacao.nome}
                           </span>

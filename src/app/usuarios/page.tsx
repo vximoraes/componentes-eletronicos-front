@@ -260,18 +260,18 @@ function PageUsuariosContent() {
                   </TableHeader>
                   <TableBody>
                     {usuarios.map((usuario) => (
-                      <TableRow key={usuario._id} className="hover:bg-gray-50 border-b relative">
-                        <TableCell className="font-medium text-left px-8 py-4">
+                      <TableRow key={usuario._id} className="hover:bg-gray-50 border-b relative" style={{ height: '60px' }}>
+                        <TableCell className="font-medium text-left px-8 py-2">
                           <span className="truncate block max-w-[200px]" title={usuario.nome}>
                             {usuario.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-2">
                           <span className="truncate block max-w-[250px]" title={usuario.email}>
                             {usuario.email}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
                               className={`inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-medium text-center whitespace-nowrap ${usuario.ativo
@@ -284,7 +284,7 @@ function PageUsuariosContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(usuario._id)}

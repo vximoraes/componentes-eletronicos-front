@@ -232,7 +232,7 @@ function PageFornecedoresContent() {
                   </TableHeader>
                   <TableBody>
                     {fornecedores.map((fornecedor) => (
-                      <TableRow key={fornecedor._id} className="hover:bg-gray-50 border-b relative">
+                      <TableRow key={fornecedor._id} className="hover:bg-gray-50 border-b relative" style={{ height: '60px' }}>
                         {atualizandoFornecedorId === fornecedor._id && isFetching && (
                           <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
                             <div className="flex flex-col items-center">
@@ -244,12 +244,12 @@ function PageFornecedoresContent() {
                             </div>
                           </div>
                         )}
-                        <TableCell className="font-medium text-left px-8 py-4">
+                        <TableCell className="font-medium text-left px-8 py-2">
                           <span className="truncate block max-w-[200px]" title={fornecedor.nome}>
                             {fornecedor.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-2">
                           {fornecedor.url ? (
                             <a
                               href={fornecedor.url}
@@ -264,17 +264,17 @@ function PageFornecedoresContent() {
                             <span className="text-gray-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-2">
                           <span className="truncate block max-w-[150px]" title={fornecedor.contato || '-'}>
                             {fornecedor.contato || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-2">
                           <span className="truncate block max-w-[200px]" title={fornecedor.descricao || '-'}>
                             {fornecedor.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-4 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(fornecedor._id)}
