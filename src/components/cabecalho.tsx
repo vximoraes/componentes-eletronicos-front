@@ -15,12 +15,13 @@ type NotificationItem = {
 
 export interface CabecalhoProps {
   pagina: string
+  acao?: string
   descricao?: string,
   showBackButton?: boolean,
   onBackClick?: () => void
 }
 
-export default function Cabecalho({ pagina, descricao, showBackButton, onBackClick }: CabecalhoProps) {
+export default function Cabecalho({ pagina, acao, descricao, showBackButton, onBackClick }: CabecalhoProps) {
   const router = useRouter()
   const { user } = useSession()
   const { toggleSidebar } = useSidebarContext()
@@ -78,7 +79,10 @@ export default function Cabecalho({ pagina, descricao, showBackButton, onBackCli
         )}
         
 
-        <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">{pagina}</h1>
+        <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">
+          {pagina}
+          {acao && <span className="text-[#6b7280] font-medium ml-2">• {acao}</span>}
+        </h1>
         {descricao && (
           <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">
             {descricao}

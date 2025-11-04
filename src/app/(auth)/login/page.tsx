@@ -1,31 +1,37 @@
 "use client"
 
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import LogoEi from "@/components/logo-ei";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginSchema, type LoginFormData } from "@/schemas";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
     setError("");
-    setLoading(true);
 
     try {
       const result = await signIn("credentials", {
-        email,
-        senha,
+        email: data.email,
+        senha: data.senha,
         redirect: false,
       });
 
@@ -36,8 +42,6 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError("Erro ao fazer login. Tente novamente.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -49,7 +53,7 @@ export default function LoginPage() {
           <div className="text-center mb-6 md:mb-10">
             <h2 className="text-2xl md:text-3xl font-semibold mb-2">Bem-vindo ao Estoque Inteligente!</h2>
           </div>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div>
               <Label className="pb-2 text-sm md:text-base" htmlFor="email">
                 E-mail<span className="text-red-500">*</span>
@@ -59,11 +63,12 @@ export default function LoginPage() {
                 type="email"
                 id="email"
                 placeholder="Insira seu endereço de e-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
+                {...register("email")}
+                disabled={isSubmitting}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              )}
             </div>
             <div className="pt-3 md:pt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
@@ -75,17 +80,15 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   id="senha"
                   placeholder="Insira sua senha"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  required
-                  disabled={loading}
+                  {...register("senha")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
                   aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   onClick={() => setShowPassword(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                  disabled={loading}
+                  disabled={isSubmitting}
                 >
                   {showPassword ? (
                     <img src="eye.png" alt="" className="w-5 h-5 opacity-60" />
@@ -94,6 +97,9 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              {errors.senha && (
+                <p className="text-red-500 text-sm mt-1">{errors.senha.message}</p>
+              )}
             </div>
             <Link href="/esqueci-senha" className="mt-2 md:mt-3 text-zinc-600 text-sm md:text-base underline cursor-pointer inline-block hover:text-zinc-800 transition-colors">
               Esqueci minha senha
@@ -107,9 +113,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                disabled={loading}
+                disabled={isSubmitting}
               >
-                {loading ? "Entrando..." : "Entrar"}
+                {isSubmitting ? "Entrando..." : "Entrar"}
               </Button>
             </div>
           </form>
