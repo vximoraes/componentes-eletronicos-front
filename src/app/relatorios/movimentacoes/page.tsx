@@ -75,25 +75,6 @@ export default function RelatoriosMovimentacoes() {
         ))}
       </div>
 
-      {/* GRÁFICO DE MOVIMENTAÇÕES */}
-      <Card className="mb-6 shadow-sm">
-        <CardContent className="p-4">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Movimentações por Mês</h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dadosGrafico}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="mes" tick={{ fill: "#6B7280" }} />
-                <YAxis tick={{ fill: "#6B7280" }} />
-                <Tooltip />
-                <Bar dataKey="entradas" fill="#22C55E" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="saidas" fill="#EF4444" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* BARRA DE PESQUISA */}
       <div className="flex items-center gap-2 mb-4">
         <div className="relative flex-1">
