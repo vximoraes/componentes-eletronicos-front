@@ -1,68 +1,25 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Filter, FileText } from "lucide-react"
+import { Search, Filter, FileText, Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts"
-import { Package, CheckCircle, AlertTriangle, XCircle } from "lucide-react"
 
-
-export default function RelatoriosMovimentacoes() {
-  const [movimentacoes, setMovimentacoes] = useState([])
-  const [filtro, setFiltro] = useState("")
-
-  // Carrega as movimentações 
-  useEffect(() => {
-    console.log("Carregar movimentações da API...")
-  }, [])
-
-  return (
-    <div className="flex-1 p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold mb-1">Relatório</h1>
-      <p className="text-gray-500 mb-6">Movimentações</p>
-
-      {/* grafico vai ser implementado*/}
-      <div className="mb-6">[Gráfico aqui futuramente]</div>
-    
-    {/* Barra de pesquisa e botões */}
-      <div className="flex items-center gap-2 mb-4"></div>
-    
-  <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Pesquisar componentes..."
-            className="pl-8"
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
-          />
-  </div>
-
-      <div>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Filter size={16} /> Filtros
-        </Button>
-
-        <Button className="flex items-center gap-2"></Button>
-
-       <Button><FileText size={16} /> Gerar relatório</Button>
-
-      </div>
-
-      {/* Tabela  */}
-      <div>[Tabela]</div>
-    </div>
-  )
-
-  const dadosGrafico = [
+// ============================
+// (Cards e Gráfico)
+// ============================
+const dadosGrafico = [
   { mes: "Jan", entradas: 20, saidas: 10 },
   { mes: "Fev", entradas: 25, saidas: 18 },
   { mes: "Mar", entradas: 30, saidas: 12 },
   { mes: "Abr", entradas: 22, saidas: 16 },
   { mes: "Mai", entradas: 28, saidas: 20 },
   { mes: "Jun", entradas: 32, saidas: 25 },
-  ]
+]
 
-  const cards = [
+const cards = [
   {
     titulo: "Total de movimentações",
     valor: 127,
@@ -85,15 +42,25 @@ export default function RelatoriosMovimentacoes() {
   },
 ]
 
+// ============================
+// COMPONENTE PRINCIPAL
+// ============================
 export default function RelatoriosMovimentacoes() {
   const [movimentacoes, setMovimentacoes] = useState([])
   const [filtro, setFiltro] = useState("")
 
+  // Simula carregamento de dados
   useEffect(() => {
     console.log("Carregar movimentações da API...")
   }, [])
 
-  {/*CARDS*/}
+  return (
+    <div className="flex-1 p-6 bg-gray-50 min-h-screen">
+      {/* Título */}
+      <h1 className="text-2xl font-bold mb-1">Relatório</h1>
+      <p className="text-gray-500 mb-6">Movimentações</p>
+
+      {/* === CARDS DE RESUMO === */}
       <div className="grid grid-cols-4 gap-4 mb-8">
         {cards.map((card, index) => (
           <Card key={index} className="shadow-sm hover:shadow-md transition-all">
@@ -108,7 +75,7 @@ export default function RelatoriosMovimentacoes() {
         ))}
       </div>
 
-        {/*GRÁFICO */}
+      {/* GRÁFICO DE MOVIMENTAÇÕES */}
       <Card className="mb-6 shadow-sm">
         <CardContent className="p-4">
           <h2 className="text-lg font-semibold mb-4 text-gray-700">Movimentações por Mês</h2>
@@ -127,7 +94,7 @@ export default function RelatoriosMovimentacoes() {
         </CardContent>
       </Card>
 
-       {/* BARRA DE PESQUISA */}
+      {/* BARRA DE PESQUISA */}
       <div className="flex items-center gap-2 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 text-gray-400 w-4 h-4" />
@@ -147,10 +114,8 @@ export default function RelatoriosMovimentacoes() {
         </Button>
       </div>
 
-      {/* Tabela*/}
+      {/* === TABELA (em breve) === */}
       <div>[Tabela aqui futuramente]</div>
     </div>
   )
-}
-
 }
