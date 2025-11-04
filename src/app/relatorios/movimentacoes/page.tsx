@@ -93,7 +93,20 @@ export default function RelatoriosMovimentacoes() {
     console.log("Carregar movimentações da API...")
   }, [])
 
+  {/*CARDS*/}
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        {cards.map((card, index) => (
+          <Card key={index} className="shadow-sm hover:shadow-md transition-all">
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-gray-500">{card.titulo}</p>
+                <h2 className="text-xl font-semibold">{card.valor}</h2>
+              </div>
+              {card.icone}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
 
 }
-
-  
