@@ -77,7 +77,7 @@ export default function AdicionarFornecedorPage() {
 
   return (
     <div className="w-full min-h-screen flex flex-col">
-      <Cabecalho pagina="Fornecedores" />
+      <Cabecalho pagina="Fornecedores" acao="Adicionar"/>
 
       <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">

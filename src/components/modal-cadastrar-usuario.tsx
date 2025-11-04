@@ -140,8 +140,11 @@ export default function ModalCadastrarUsuario({
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Cadastrar Usuário
+              Cadastrar usuário
             </h2>
+            <p className="text-sm text-gray-600 mt-2">
+              Um e-mail será enviado para o usuário definir sua senha.
+            </p>
           </div>
 
           {/* Campo Nome */}

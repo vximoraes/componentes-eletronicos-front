@@ -225,7 +225,7 @@ function PageUsuariosContent() {
             onClick={() => setIsCadastrarModalOpen(true)}
           >
             <Plus className="w-4 h-4" />
-            Cadastrar Usuário
+            Cadastrar usuário
           </Button>
         </div>
 

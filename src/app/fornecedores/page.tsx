@@ -179,7 +179,7 @@ function PageFornecedoresContent() {
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
         {/* Barra de Pesquisa e Botão Adicionar - Fixo no topo */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
