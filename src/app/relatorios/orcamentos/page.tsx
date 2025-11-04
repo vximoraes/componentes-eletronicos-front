@@ -270,9 +270,10 @@ function RelatorioOrcamentosPageContent() {
         acao="Orçamentos"
       />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
-        {/* Stats Cards - Fixo no topo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] shrink-0" data-test="stats-grid">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0 max-w-full">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
+          {/* Stats Cards - Fixo no topo */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" data-test="stats-grid">
             <StatCard
               title="Total de"
               subtitle="orçamentos"
@@ -441,7 +442,7 @@ function RelatorioOrcamentosPageContent() {
         {/* Mensagem de Erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
@@ -449,42 +450,41 @@ function RelatorioOrcamentosPageContent() {
           </div>
         )}
 
-        {/* Área da Tabela com Scroll */}
-        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center flex-1" data-test="loading-spinner">
-              <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
-              </div>
-              <p className="mt-4 text-gray-600 font-medium">Carregando orçamentos...</p>
+        {/* Área da Tabela */}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12" data-test="loading-spinner">
+            <div className="relative w-12 h-12">
+              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
             </div>
-          ) : orcamentosFiltrados.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
-              <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm">
-                  <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
-                    <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
-                        <input
-                          type="checkbox"
-                          checked={isAllSelected}
-                          ref={(input) => {
-                            if (input) {
-                              input.indeterminate = isSomeSelected;
-                            }
-                          }}
-                          onChange={handleSelectAll}
-                          className="w-4 h-4 cursor-pointer"
-                          title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
-                        />
-                      </TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">ITENS</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-center px-8">VALOR TOTAL</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">DATA</TableHead>
+            <p className="mt-4 text-gray-600 font-medium">Carregando orçamentos...</p>
+          </div>
+        ) : orcamentosFiltrados.length > 0 ? (
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
+                <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
+                  <TableRow className="bg-gray-50 border-b">
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        ref={(input) => {
+                          if (input) {
+                            input.indeterminate = isSomeSelected;
+                          }
+                        }}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 cursor-pointer"
+                        title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
+                      />
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">ITENS</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">VALOR TOTAL</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">DATA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -498,7 +498,7 @@ function RelatorioOrcamentosPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell font-medium text-left px-8 py-4">
+                        <TableCell className="font-medium text-left px-8 py-4">
                           <span className="truncate block max-w-[200px]" title={orcamento._id}>
                             {orcamento._id.slice(-8)}
                           </span>
@@ -508,15 +508,15 @@ function RelatorioOrcamentosPageContent() {
                             {orcamento.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden 2xl:table-cell text-left px-8 py-4">
+                        <TableCell className="text-left px-8 py-4">
                           <span className="truncate block max-w-[200px]" title={orcamento.descricao || '-'}>
                             {orcamento.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 font-medium">
+                        <TableCell className="text-center px-8 py-4 font-medium">
                           {orcamento.componentes?.length || 0}
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-center px-8 py-4 font-medium text-green-700 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-4 font-medium text-green-700 whitespace-nowrap">
                           R$ {orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
                         <TableCell className="text-center px-8 py-4 font-medium whitespace-nowrap">
@@ -538,7 +538,7 @@ function RelatorioOrcamentosPageContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
+            <div className="text-center py-12 bg-white rounded-lg border" data-test="empty-state">
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <FileText className="w-8 h-8 text-gray-400" />

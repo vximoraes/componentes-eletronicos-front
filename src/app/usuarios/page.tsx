@@ -206,7 +206,7 @@ function PageUsuariosContent() {
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
       <Cabecalho pagina="Usuários" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0 max-w-full">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         {/* Barra de Pesquisa e Botão Adicionar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0">
           <div className="relative flex-1">
