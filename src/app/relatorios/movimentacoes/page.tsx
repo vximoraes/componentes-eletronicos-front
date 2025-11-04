@@ -281,11 +281,12 @@ function RelatorioMovimentacoesPageContent() {
                           onChange={handleSelectAll}
                         />
                       </TableHead>
-                      <TableHead className="text-left px-8">Descrição</TableHead>
-                      <TableHead className="text-center px-8">Tipo</TableHead>
+                      <TableHead className="text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="text-center px-8">PRODUTO</TableHead>
                       <TableHead className="text-center px-8">Quantidade</TableHead>
-                      <TableHead className="text-center px-8">Status</TableHead>
-                      <TableHead className="text-left px-8">Data</TableHead>
+                      <TableHead className="text-center px-8">TIPO DE MOVIMENTAÇÃO</TableHead>
+                      <TableHead className="text-center px-8">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="text-left px-8">DATA/HORA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -360,3 +361,5 @@ export default function RelatorioMovimentacoesPage() {
     </Suspense>
   );
 }
+
+{/* ALTERAR OS FILTROS E PDFS */}
