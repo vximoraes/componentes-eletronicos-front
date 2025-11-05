@@ -61,6 +61,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [loadingNotificacaoId, setLoadingNotificacaoId] = useState<string | null>(null)
+  const [loadingAction, setLoadingAction] = useState<'visualizar' | 'excluir' | null>(null)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
   const [imagemPreview, setImagemPreview] = useState<string | null>(null)
   const [novaFoto, setNovaFoto] = useState<File | null>(null)
@@ -281,8 +282,10 @@ export default function HomePage() {
 
   async function marcarComoVisualizada(notificacaoId: string) {
     setLoadingNotificacaoId(notificacaoId)
+    setLoadingAction('visualizar')
     try {
       await patch(`/notificacoes/${notificacaoId}/visualizar`, {})
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] })
       toast.success("Notificação marcada como lida!", {
         position: "bottom-right",
         autoClose: 2000,
@@ -295,6 +298,30 @@ export default function HomePage() {
       })
     } finally {
       setLoadingNotificacaoId(null)
+      setLoadingAction(null)
+    }
+  }
+
+  async function excluirNotificacao(notificacaoId: string, event: React.MouseEvent) {
+    event.stopPropagation()
+    setLoadingNotificacaoId(notificacaoId)
+    setLoadingAction('excluir')
+    try {
+      await patch(`/notificacoes/${notificacaoId}/inativar`, {})
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] })
+      toast.success("Notificação excluída!", {
+        position: "bottom-right",
+        autoClose: 2000,
+      })
+    } catch (error) {
+      console.error("Erro ao excluir notificação:", error)
+      toast.error("Erro ao excluir notificação", {
+        position: "bottom-right",
+        autoClose: 3000,
+      })
+    } finally {
+      setLoadingNotificacaoId(null)
+      setLoadingAction(null)
     }
   }
 
@@ -317,6 +344,7 @@ export default function HomePage() {
         )
       )
       
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] })
       toast.success(`${naoVisualizadas.length} notificação${naoVisualizadas.length > 1 ? 'ões' : ''} marcada${naoVisualizadas.length > 1 ? 's' : ''} como lida${naoVisualizadas.length > 1 ? 's' : ''}`, {
         position: "bottom-right",
         autoClose: 2000,
@@ -624,19 +652,24 @@ export default function HomePage() {
                   <div className="divide-y divide-gray-200 w-full">
                     {notificacoes.map((notificacao) => {
                       const isLoadingThis = loadingNotificacaoId === notificacao._id
+                      const loadingMessage = isLoadingThis 
+                        ? (loadingAction === 'excluir' ? 'Excluindo...' : 'Marcando como lida...') 
+                        : notificacao.mensagem
                       return (
                         <div 
                           key={notificacao._id} 
-                          className={`px-3 py-3 ${notificacao.visualizada ? 'bg-white' : 'bg-gray-50 cursor-pointer'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-gray-100`}
-                          onClick={() => !notificacao.visualizada && !isLoadingThis && marcarComoVisualizada(notificacao._id)}
+                          className={`px-3 py-3 ${notificacao.visualizada ? 'bg-white' : 'bg-gray-50'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-gray-100 group`}
                         >
                           <div className="flex items-start gap-2">
                             {!notificacao.visualizada && (
                               <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"></div>
                             )}
-                            <div className="flex-1">
+                            <div 
+                              className="flex-1 cursor-pointer"
+                              onClick={() => !notificacao.visualizada && !isLoadingThis && marcarComoVisualizada(notificacao._id)}
+                            >
                               <p className={`text-sm text-gray-700 ${notificacao.visualizada ? '' : 'font-medium'}`}>
-                                {isLoadingThis ? 'Marcando como lida...' : notificacao.mensagem}
+                                {loadingMessage}
                                 {!isLoadingThis && (
                                   <span className="text-sm text-gray-500 font-normal ml-2">
                                     - {formatTempoRelativo(notificacao.data_hora)}
@@ -644,6 +677,15 @@ export default function HomePage() {
                                 )}
                               </p>
                             </div>
+                            {!isLoadingThis && (
+                              <button
+                                onClick={(e) => excluirNotificacao(notificacao._id, e)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded-md cursor-pointer"
+                                title="Excluir notificação"
+                              >
+                                <X className="w-4 h-4 text-gray-500 hover:text-gray-700" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       )
