@@ -532,8 +532,8 @@ export default function HomePage() {
               </div>
 
               <div className="text-center mt-4 w-full px-2">
-                <h2 className="text-xl font-semibold truncate w-full">{userData.nome}</h2>
-                <p className="text-sm text-gray-500 mt-1 truncate w-full">{userData.email}</p>
+                <h2 className="text-xl font-semibold truncate w-full" title={userData.nome}>{userData.nome}</h2>
+                <p className="text-sm text-gray-500 mt-1 truncate w-full" title={userData.email}>{userData.email}</p>
               </div>
 
               <button
@@ -564,17 +564,17 @@ export default function HomePage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
                   <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600">{stats.totalComponentes}</p>
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalComponentes.toString()}>{stats.totalComponentes}</p>
                     <p className="text-sm text-gray-500 mt-3">Componentes cadastrados</p>
                   </div>
 
                   <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600">{stats.totalMovimentacoes}</p>
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalMovimentacoes.toString()}>{stats.totalMovimentacoes}</p>
                     <p className="text-sm text-gray-500 mt-3">Movimentações</p>
                   </div>
 
                   <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600">{stats.totalOrcamentos}</p>
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalOrcamentos.toString()}>{stats.totalOrcamentos}</p>
                     <p className="text-sm text-gray-500 mt-3">Orçamentos</p>
                   </div>
                 </div>
@@ -582,7 +582,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Notificações - Ocupa toda largura */}
+          {/* Notificações */}
           <div className="col-span-1 lg:col-span-3 flex">
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 w-full">
               <div className="flex items-center justify-between mb-3">
@@ -611,7 +611,7 @@ export default function HomePage() {
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="px-3 py-3 animate-pulse">
                         <div className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-gray-300 rounded-full flex-shrink-0 mt-1.5"></div>
+                          <div className="w-1.5 h-1.5 bg-gray-300 rounded-full shrink-0 mt-1.5"></div>
                           <div className="flex-1 space-y-2">
                             <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                             <div className="h-3 bg-gray-200 rounded w-1/4"></div>
@@ -632,14 +632,14 @@ export default function HomePage() {
                         >
                           <div className="flex items-start gap-2">
                             {!notificacao.visualizada && (
-                              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full flex-shrink-0 mt-1.5"></div>
+                              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"></div>
                             )}
                             <div className="flex-1">
                               <p className={`text-sm text-gray-700 ${notificacao.visualizada ? '' : 'font-medium'}`}>
                                 {isLoadingThis ? 'Marcando como lida...' : notificacao.mensagem}
                                 {!isLoadingThis && (
                                   <span className="text-sm text-gray-500 font-normal ml-2">
-                                    {formatTempoRelativo(notificacao.data_hora)}
+                                    - {formatTempoRelativo(notificacao.data_hora)}
                                   </span>
                                 )}
                               </p>
