@@ -277,7 +277,7 @@ function RelatorioOrcamentosPageContent() {
           {/* Botão para mobile */}
           <button
             onClick={() => setIsStatsOpen(!isStatsOpen)}
-            className="lg:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
@@ -291,7 +291,7 @@ function RelatorioOrcamentosPageContent() {
           </button>
 
           {/* Cards - Sempre visível no desktop, colapsável no mobile */}
-          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} lg:grid lg:mt-0`} data-test="stats-grid">
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
             <StatCard
               title="Total de"
               subtitle="orçamentos"

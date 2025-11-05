@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { ApiResponse, EstoqueApiResponse } from '@/types/componentes';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import { useQueryState } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -32,6 +32,7 @@ function ComponentesPageContent() {
   const [selectedComponenteId, setSelectedComponenteId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isEntradaModalOpen, setIsEntradaModalOpen] = useState(false);
   const [entradaComponenteId, setEntradaComponenteId] = useState<string | null>(null);
   const [isSaidaModalOpen, setIsSaidaModalOpen] = useState(false);
@@ -313,7 +314,26 @@ function ComponentesPageContent() {
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
         <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px]" data-test="stats-grid">
+          {/* Stats Cards - Colapsável no mobile */}
+          <div className="mb-6">
+            {/* Botão para mobile */}
+            <button
+              onClick={() => setIsStatsOpen(!isStatsOpen)}
+              className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-blue-600" />
+                <span className="font-semibold text-gray-700">Estatísticas</span>
+              </div>
+              {isStatsOpen ? (
+                <ChevronUp className="w-5 h-5 text-gray-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-600" />
+              )}
+            </button>
+
+            {/* Cards - Sempre visível no desktop, colapsável no mobile */}
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[120px] ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
             <StatCard
               title="Total de"
               subtitle="componentes"
@@ -354,6 +374,7 @@ function ComponentesPageContent() {
               data-test="stat-indisponiveis"
               hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
             />
+          </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-6" data-test="search-actions-bar">
