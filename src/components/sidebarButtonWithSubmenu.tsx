@@ -126,7 +126,7 @@ export default function SidebarButtonWithSubmenu({
 
       {/* Sub-menu expandido */}
       {isOpen && (
-        <div className="overflow-hidden transition-all duration-300 max-h-[500px] opacity-100 mt-0.5 pr-4">
+        <div className="transition-all duration-300 mt-0.5 pr-4">
           <div className="ml-[34px] space-y-1">
             {subItems.map((item) => (
               <button
