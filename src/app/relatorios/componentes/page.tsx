@@ -15,7 +15,7 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/componentes';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
+import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateComponentesPDF } from '@/utils/pdfGenerator';
@@ -36,6 +36,7 @@ function RelatorioComponentesPageContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -278,10 +279,27 @@ function RelatorioComponentesPageContent() {
         acao="Componentes"
       />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0 max-w-full">
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          {/* Stats Cards - Fixo no topo */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" data-test="stats-grid">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+        {/* Stats Cards - Colapsável no mobile */}
+        <div className="shrink-0 mb-6">
+          {/* Botão para mobile */}
+          <button
+            onClick={() => setIsStatsOpen(!isStatsOpen)}
+            className="lg:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-blue-600" />
+              <span className="font-semibold text-gray-700">Estatísticas</span>
+            </div>
+            {isStatsOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-600" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
+
+          {/* Cards - Sempre visível no desktop, colapsável no mobile */}
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} lg:grid lg:mt-0`} data-test="stats-grid">
           <StatCard
             title="Total de"
             subtitle="componentes"
@@ -322,6 +340,7 @@ function RelatorioComponentesPageContent() {
             data-test="stat-indisponiveis"
             hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
           />
+        </div>
         </div>
 
         {/* Barra de Pesquisa e Botões */}
@@ -400,7 +419,7 @@ function RelatorioComponentesPageContent() {
         {/* Mensagem de Erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded"
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
@@ -408,9 +427,10 @@ function RelatorioComponentesPageContent() {
           </div>
         )}
 
-        {/* Área da Tabela */}
+        {/* Área da Tabela com Scroll */}
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12">
+          <div className="flex flex-col items-center justify-center flex-1">
             <div className="relative w-12 h-12">
               <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
               <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -418,8 +438,8 @@ function RelatorioComponentesPageContent() {
             <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
           </div>
         ) : estoquesFiltrados.length > 0 ? (
-          <div className="border rounded-lg bg-white overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="overflow-x-auto overflow-y-auto flex-1 relative">
               <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
@@ -503,7 +523,7 @@ function RelatorioComponentesPageContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-12 bg-white rounded-lg border" data-test="empty-state">
+          <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <Package className="w-8 h-8 text-gray-400" />
