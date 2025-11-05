@@ -174,12 +174,12 @@ function PageFornecedoresContent() {
   const fornecedores = data?.pages.flatMap((page) => page.data.docs) || []
 
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
       <Cabecalho pagina="Fornecedores" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         {/* Barra de Pesquisa e Botão Adicionar - Fixo no topo */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
@@ -220,19 +220,19 @@ function PageFornecedoresContent() {
           ) : fornecedores.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm">
+                <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">URL</TableHead>
-                      <TableHead className="hidden xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">CONTATO</TableHead>
-                      <TableHead className="hidden 2xl:table-cell font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">URL</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CONTATO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8 whitespace-nowrap">AÇÕES</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {fornecedores.map((fornecedor) => (
-                      <TableRow key={fornecedor._id} className="hover:bg-gray-50 border-b relative">
+                      <TableRow key={fornecedor._id} className="hover:bg-gray-50 border-b relative" style={{ height: '60px' }}>
                         {atualizandoFornecedorId === fornecedor._id && isFetching && (
                           <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-10">
                             <div className="flex flex-col items-center">
@@ -244,12 +244,12 @@ function PageFornecedoresContent() {
                             </div>
                           </div>
                         )}
-                        <TableCell className="font-medium text-left px-8">
+                        <TableCell className="font-medium text-left px-8 py-2">
                           <span className="truncate block max-w-[200px]" title={fornecedor.nome}>
                             {fornecedor.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-left px-8">
+                        <TableCell className="text-left px-8 py-2">
                           {fornecedor.url ? (
                             <a
                               href={fornecedor.url}
@@ -264,17 +264,17 @@ function PageFornecedoresContent() {
                             <span className="text-gray-400">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="hidden xl:table-cell text-left px-8">
+                        <TableCell className="text-left px-8 py-2">
                           <span className="truncate block max-w-[150px]" title={fornecedor.contato || '-'}>
                             {fornecedor.contato || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="hidden 2xl:table-cell text-left px-8">
+                        <TableCell className="text-left px-8 py-2">
                           <span className="truncate block max-w-[200px]" title={fornecedor.descricao || '-'}>
                             {fornecedor.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => handleViewDetails(fornecedor._id)}

@@ -43,6 +43,7 @@ interface LoginResponse {
       ativo: boolean;
       permissoes: any[];
       grupos: string[];
+      fotoPerfil?: string;
       __v?: number;
     };
   };
@@ -63,6 +64,7 @@ interface RefreshResponse {
       ativo: boolean;
       permissoes: any[];
       grupos: string[];
+      fotoPerfil?: string;
       __v?: number;
     };
   };
@@ -105,6 +107,7 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       ativo: userData.ativo ?? token.ativo,
       permissoes: userData.permissoes ?? token.permissoes,
       grupos: userData.grupos ?? token.grupos,
+      fotoPerfil: userData.fotoPerfil ?? token.fotoPerfil,
     };
   } catch (err) {
     console.error("Erro ao renovar token:", err);
@@ -157,6 +160,7 @@ export const authOptions: AuthOptions = {
               ativo: data.user.ativo,
               permissoes: data.user.permissoes,
               grupos: data.user.grupos,
+              fotoPerfil: data.user.fotoPerfil,
             };
             return user;
           }
@@ -184,6 +188,7 @@ export const authOptions: AuthOptions = {
           ativo: (user as any).ativo,
           permissoes: (user as any).permissoes,
           grupos: (user as any).grupos,
+          fotoPerfil: (user as any).fotoPerfil,
           accessTokenExpires: expiresAt,
         };
       }
@@ -219,6 +224,7 @@ export const authOptions: AuthOptions = {
           ativo: token.ativo as boolean,
           permissoes: token.permissoes as any[],
           grupos: token.grupos as string[],
+          fotoPerfil: token.fotoPerfil as string | undefined,
         };
       }
 

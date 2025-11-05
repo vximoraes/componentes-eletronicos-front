@@ -210,7 +210,7 @@ export default function ModalFiltrosOrcamentos({
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-300"
+        className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botão de fechar */}
@@ -229,7 +229,7 @@ export default function ModalFiltrosOrcamentos({
           {/* Filtro por Valor */}
           <div className="space-y-2 pt-4">
             <label className="block text-base font-medium text-gray-700">
-              Faixa de Valor
+              Faixa de valor
             </label>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -304,7 +304,7 @@ export default function ModalFiltrosOrcamentos({
           {/* Datas personalizadas */}
           {(mostrarDatasPersonalizadas || periodoSelecionado === 'personalizado') && (
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-base font-medium text-gray-700">
                 Selecione o período
               </label>
               <div className="grid grid-cols-2 gap-3">

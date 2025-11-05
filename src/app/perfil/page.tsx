@@ -1,14 +1,15 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
-import { Pencil, X } from "lucide-react"
+import { Pencil, X, Camera, User } from "lucide-react"
 import Cabecalho from "@/components/cabecalho"
 import { useSession } from "@/hooks/use-session"
 import { get, patch } from "@/lib/fetchData"
 import { toast, ToastContainer, Slide } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getSession, useSession as useNextAuthSession } from 'next-auth/react'
+import { Button } from "@/components/ui/button"
 
 interface UsuarioData {
   _id: string
@@ -17,7 +18,7 @@ interface UsuarioData {
   ativo: boolean
   convidadoEm?: string
   ativadoEm?: string
-  foto?: string
+  fotoPerfil?: string
   ultimoAcesso?: string
 }
 
@@ -52,13 +53,22 @@ interface NotificacoesApiResponse {
 
 export default function HomePage() {
   const { user } = useSession()
+  const { update: updateSession } = useNextAuthSession()
   const [isEditing, setIsEditing] = useState(false)
+  const [isEditingFoto, setIsEditingFoto] = useState(false)
   const [userData, setUserData] = useState<UsuarioData | null>(null)
+  const [editedNome, setEditedNome] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [loadingNotificacaoId, setLoadingNotificacaoId] = useState<string | null>(null)
+  const [loadingAction, setLoadingAction] = useState<'visualizar' | 'excluir' | null>(null)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
+  const [imagemPreview, setImagemPreview] = useState<string | null>(null)
+  const [novaFoto, setNovaFoto] = useState<File | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
+  const queryClient = useQueryClient()
   const [stats, setStats] = useState({
     totalComponentes: 0,
     totalMovimentacoes: 0,
@@ -73,6 +83,9 @@ export default function HomePage() {
         setIsLoading(true)
         const response = await get<UsuarioApiResponse>(`/usuarios/${user.id}`)
         setUserData(response.data)
+        if (response.data.fotoPerfil) {
+          setImagemPreview(response.data.fotoPerfil)
+        }
       } catch (error) {
         console.error("Erro ao carregar dados do usuário:", error)
       } finally {
@@ -82,6 +95,91 @@ export default function HomePage() {
 
     fetchUserData()
   }, [user?.id])
+
+  const uploadFotoMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      const session = await getSession()
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/${user?.id}/foto`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${session?.user?.accessToken}`
+        },
+        body: formData
+      })
+      return await response.json()
+    },
+    onSuccess: async (data: any) => {
+      if (data?.data?.fotoPerfil) {
+        setImagemPreview(data.data.fotoPerfil)
+        if (userData) {
+          setUserData({ ...userData, fotoPerfil: data.data.fotoPerfil })
+        }
+        // Atualiza a sessão do NextAuth para refletir a nova foto na sidebar
+        await updateSession({
+          ...user,
+          fotoPerfil: data.data.fotoPerfil
+        })
+      }
+      queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] })
+      toast.success('Foto atualizada com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 3000,
+        transition: Slide,
+      })
+      setIsEditingFoto(false)
+      setNovaFoto(null)
+    },
+    onError: (error: any) => {
+      console.error('Erro ao enviar foto:', error)
+      toast.error('Erro ao atualizar foto do perfil', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        transition: Slide,
+      })
+    }
+  })
+
+  const deleteFotoMutation = useMutation({
+    mutationFn: async () => {
+      const session = await getSession()
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/${user?.id}/foto`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.user?.accessToken}`
+        }
+      })
+      return await response.json()
+    },
+    onSuccess: async () => {
+      setImagemPreview(null)
+      if (userData) {
+        setUserData({ ...userData, fotoPerfil: undefined })
+      }
+      // Atualiza a sessão do NextAuth para remover a foto da sidebar
+      await updateSession({
+        ...user,
+        fotoPerfil: undefined
+      })
+      queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] })
+      toast.success('Foto removida com sucesso!', {
+        position: 'bottom-right',
+        autoClose: 3000,
+        transition: Slide,
+      })
+      setIsEditingFoto(false)
+      setNovaFoto(null)
+    },
+    onError: (error: any) => {
+      console.error('Erro ao deletar foto:', error)
+      toast.error('Erro ao remover foto do perfil', {
+        position: 'bottom-right',
+        autoClose: 5000,
+        transition: Slide,
+      })
+    }
+  })
 
   useEffect(() => {
     async function fetchStats() {
@@ -184,8 +282,10 @@ export default function HomePage() {
 
   async function marcarComoVisualizada(notificacaoId: string) {
     setLoadingNotificacaoId(notificacaoId)
+    setLoadingAction('visualizar')
     try {
       await patch(`/notificacoes/${notificacaoId}/visualizar`, {})
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] })
       toast.success("Notificação marcada como lida!", {
         position: "bottom-right",
         autoClose: 2000,
@@ -198,6 +298,30 @@ export default function HomePage() {
       })
     } finally {
       setLoadingNotificacaoId(null)
+      setLoadingAction(null)
+    }
+  }
+
+  async function excluirNotificacao(notificacaoId: string, event: React.MouseEvent) {
+    event.stopPropagation()
+    setLoadingNotificacaoId(notificacaoId)
+    setLoadingAction('excluir')
+    try {
+      await patch(`/notificacoes/${notificacaoId}/inativar`, {})
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] })
+      toast.success("Notificação excluída!", {
+        position: "bottom-right",
+        autoClose: 2000,
+      })
+    } catch (error) {
+      console.error("Erro ao excluir notificação:", error)
+      toast.error("Erro ao excluir notificação", {
+        position: "bottom-right",
+        autoClose: 3000,
+      })
+    } finally {
+      setLoadingNotificacaoId(null)
+      setLoadingAction(null)
     }
   }
 
@@ -220,6 +344,7 @@ export default function HomePage() {
         )
       )
       
+      queryClient.invalidateQueries({ queryKey: ['notificacoes', user?.id] })
       toast.success(`${naoVisualizadas.length} notificação${naoVisualizadas.length > 1 ? 'ões' : ''} marcada${naoVisualizadas.length > 1 ? 's' : ''} como lida${naoVisualizadas.length > 1 ? 's' : ''}`, {
         position: "bottom-right",
         autoClose: 2000,
@@ -250,45 +375,6 @@ export default function HomePage() {
     return `Há ${Math.floor(diferencaDias / 30)} mês${Math.floor(diferencaDias / 30) > 1 ? 'es' : ''}`
   }
 
-
-  async function handleSaveEdit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!userData || !user?.id) return
-
-    setIsSaving(true)
-    try {
-      const response = await patch<UsuarioApiResponse>(`/usuarios/${user.id}`, {
-        nome: userData.nome,
-      })
-
-      setUserData(response.data)
-      setIsEditing(false)
-
-      toast.success("Perfil atualizado com sucesso!", {
-        position: "bottom-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
-    } catch (error: any) {
-      console.error("Erro ao atualizar perfil:", error)
-      toast.error(error?.message || "Erro ao atualizar perfil", {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
   function formatDate(dateString?: string) {
     if (!dateString) return "N/A"
     return new Date(dateString).toLocaleDateString("pt-BR")
@@ -304,6 +390,113 @@ export default function HomePage() {
       return `Hoje, ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
     }
     return date.toLocaleDateString("pt-BR")
+  }
+
+  const handleFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setNovaFoto(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagemPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+      const file = files[0]
+      if (file.type.startsWith('image/')) {
+        setNovaFoto(file)
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          setImagemPreview(reader.result as string)
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+  }
+
+  const handleSalvarFoto = () => {
+    if (novaFoto) {
+      uploadFotoMutation.mutate(novaFoto)
+    }
+  }
+
+  const handleRemoverFoto = () => {
+    deleteFotoMutation.mutate()
+  }
+
+  const handleCancelarEdicaoFoto = () => {
+    setIsEditingFoto(false)
+    setNovaFoto(null)
+    if (userData?.fotoPerfil) {
+      setImagemPreview(userData.fotoPerfil)
+    } else {
+      setImagemPreview(null)
+    }
+  }
+
+  const handleOpenEdit = () => {
+    if (userData) {
+      setEditedNome(userData.nome)
+    }
+    setIsEditing(true)
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setEditedNome("")
+  }
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!userData) return
+
+    setIsSaving(true)
+    try {
+      await patch<UsuarioApiResponse>(`/usuarios/${userData._id}`, {
+        nome: editedNome
+      })
+
+      // Atualiza o estado local
+      setUserData({ ...userData, nome: editedNome })
+
+      toast.success("Perfil atualizado com sucesso!", {
+        position: 'bottom-right',
+        autoClose: 3000,
+        transition: Slide,
+      })
+      setIsEditing(false)
+      setEditedNome("")
+    } catch (error) {
+      console.error("Erro ao salvar:", error)
+      toast.error("Erro ao atualizar perfil", {
+        position: 'bottom-right',
+        autoClose: 5000,
+        transition: Slide,
+      })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   if (isLoading) {
@@ -345,26 +538,39 @@ export default function HomePage() {
           {/* Lado esquerdo - Avatar e Info */}
           <aside className="col-span-1 flex">
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col items-center justify-center w-full">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                  {userData.foto ? (
-                    <Image src={userData.foto} alt="avatar" width={128} height={128} className="object-cover" />
+              <div className="relative w-32 h-32 group">
+                <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                  {imagemPreview ? (
+                    <img 
+                      src={imagemPreview.startsWith('data:') ? imagemPreview : `${imagemPreview}${imagemPreview.includes('?') ? '&' : '?'}t=${Date.now()}`} 
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
-                    <Image src="/avatar.png" alt="avatar" width={128} height={128} className="object-cover" />
+                    <User className="w-16 h-16 text-gray-500" />
                   )}
                 </div>
-
-                <div className="text-center mt-4">
-                  <h2 className="text-xl font-semibold">{userData.nome}</h2>
-                  <p className="text-sm text-gray-500 mt-1">{userData.email}</p>
-                </div>
-
                 <button
-                  onClick={() => setIsEditing(true)}
-                  className="mt-4 flex items-center gap-2 justify-center text-blue-600 hover:underline transition-all cursor-pointer"
+                  onClick={() => setIsEditingFoto(true)}
+                  className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-lg"
+                  title="Editar foto"
                 >
-                  <Pencil className="w-4 h-4" />
-                  <span>Editar perfil</span>
+                  <Camera className="w-5 h-5" />
                 </button>
+              </div>
+
+              <div className="text-center mt-4 w-full px-2">
+                <h2 className="text-xl font-semibold truncate w-full" title={userData.nome}>{userData.nome}</h2>
+                <p className="text-sm text-gray-500 mt-1 truncate w-full" title={userData.email}>{userData.email}</p>
+              </div>
+
+              <button
+                onClick={handleOpenEdit}
+                className="mt-4 flex items-center gap-2 justify-center text-blue-600 hover:underline transition-all cursor-pointer"
+              >
+                <Pencil className="w-4 h-4" />
+                <span>Editar perfil</span>
+              </button>
             </div>
           </aside>
 
@@ -386,17 +592,17 @@ export default function HomePage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
                   <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600">{stats.totalComponentes}</p>
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalComponentes.toString()}>{stats.totalComponentes}</p>
                     <p className="text-sm text-gray-500 mt-3">Componentes cadastrados</p>
                   </div>
 
                   <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600">{stats.totalMovimentacoes}</p>
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalMovimentacoes.toString()}>{stats.totalMovimentacoes}</p>
                     <p className="text-sm text-gray-500 mt-3">Movimentações</p>
                   </div>
 
                   <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600">{stats.totalOrcamentos}</p>
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalOrcamentos.toString()}>{stats.totalOrcamentos}</p>
                     <p className="text-sm text-gray-500 mt-3">Orçamentos</p>
                   </div>
                 </div>
@@ -404,7 +610,7 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Notificações - Ocupa toda largura */}
+          {/* Notificações */}
           <div className="col-span-1 lg:col-span-3 flex">
             <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 w-full">
               <div className="flex items-center justify-between mb-3">
@@ -433,7 +639,7 @@ export default function HomePage() {
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="px-3 py-3 animate-pulse">
                         <div className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 bg-gray-300 rounded-full flex-shrink-0 mt-1.5"></div>
+                          <div className="w-1.5 h-1.5 bg-gray-300 rounded-full shrink-0 mt-1.5"></div>
                           <div className="flex-1 space-y-2">
                             <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                             <div className="h-3 bg-gray-200 rounded w-1/4"></div>
@@ -446,26 +652,40 @@ export default function HomePage() {
                   <div className="divide-y divide-gray-200 w-full">
                     {notificacoes.map((notificacao) => {
                       const isLoadingThis = loadingNotificacaoId === notificacao._id
+                      const loadingMessage = isLoadingThis 
+                        ? (loadingAction === 'excluir' ? 'Excluindo...' : 'Marcando como lida...') 
+                        : notificacao.mensagem
                       return (
                         <div 
                           key={notificacao._id} 
-                          className={`px-3 py-3 ${notificacao.visualizada ? 'bg-white' : 'bg-gray-50 cursor-pointer'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-gray-100`}
-                          onClick={() => !notificacao.visualizada && !isLoadingThis && marcarComoVisualizada(notificacao._id)}
+                          className={`px-3 py-3 ${notificacao.visualizada ? 'bg-white' : 'bg-gray-50'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-gray-100 group`}
                         >
                           <div className="flex items-start gap-2">
                             {!notificacao.visualizada && (
-                              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full flex-shrink-0 mt-1.5"></div>
+                              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"></div>
                             )}
-                            <div className="flex-1">
+                            <div 
+                              className="flex-1 cursor-pointer"
+                              onClick={() => !notificacao.visualizada && !isLoadingThis && marcarComoVisualizada(notificacao._id)}
+                            >
                               <p className={`text-sm text-gray-700 ${notificacao.visualizada ? '' : 'font-medium'}`}>
-                                {isLoadingThis ? 'Marcando como lida...' : notificacao.mensagem}
+                                {loadingMessage}
                                 {!isLoadingThis && (
                                   <span className="text-sm text-gray-500 font-normal ml-2">
-                                    {formatTempoRelativo(notificacao.data_hora)}
+                                    - {formatTempoRelativo(notificacao.data_hora)}
                                   </span>
                                 )}
                               </p>
                             </div>
+                            {!isLoadingThis && (
+                              <button
+                                onClick={(e) => excluirNotificacao(notificacao._id, e)}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded-md cursor-pointer"
+                                title="Excluir notificação"
+                              >
+                                <X className="w-4 h-4 text-gray-500 hover:text-gray-700" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       )
@@ -491,7 +711,7 @@ export default function HomePage() {
       {/* painel de edição */}
       {isEditing && (
         <div 
-          className="fixed inset-0 flex items-center justify-center"
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
           style={{
             zIndex: 99999,
             backgroundColor: 'rgba(0, 0, 0, 0.5)'
@@ -499,13 +719,13 @@ export default function HomePage() {
           onClick={() => setIsEditing(false)}
         >
           <div 
-            className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de fechar */}
             <div className="relative p-6 pb-0">
               <button
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancelEdit}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                 title="Fechar"
               >
@@ -516,35 +736,184 @@ export default function HomePage() {
             {/* Conteúdo do Modal */}
             <div className="px-6 pb-6 space-y-6">
               <div className="text-center pt-4 px-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-1">
-                  Editar Perfil
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Editar perfil
                 </h2>
               </div>
 
-              <form onSubmit={handleSaveEdit} className="space-y-6">
+              <form onSubmit={handleSaveEdit} id="edit-profile-form" className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="nome" className="block text-base font-medium text-gray-700">
-                    Nome <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label htmlFor="nome" className="block text-sm sm:text-base font-medium text-gray-700">
+                      Nome <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      {editedNome.length}/100
+                    </span>
+                  </div>
                   <input
                     id="nome"
                     type="text"
-                    value={userData?.nome || ""}
-                    onChange={e => setUserData(prev => prev ? { ...prev, nome: e.target.value } : null)}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    value={editedNome}
+                    onChange={e => setEditedNome(e.target.value)}
+                    maxLength={100}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                     disabled={isSaving}
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isSaving}
-                >
-                  {isSaving ? "Salvando..." : "Salvar alterações"}
-                </button>
+                <div className="space-y-2">
+                  <label htmlFor="email" className="block text-sm sm:text-base font-medium text-gray-700">
+                    E-mail
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={userData?.email || ''}
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 border border-gray-300 rounded-md text-sm sm:text-base text-gray-500 cursor-not-allowed"
+                    disabled
+                  />
+                </div>
               </form>
+            </div>
+
+            {/* Footer com ações */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  disabled={isSaving}
+                  className="flex-1 cursor-pointer"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  form="edit-profile-form"
+                  disabled={isSaving}
+                  className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                  style={{ backgroundColor: '#306FCC' }}
+                >
+                  {isSaving ? "Salvando..." : "Salvar"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de edição de foto */}
+      {isEditingFoto && (
+        <div 
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
+          style={{
+            zIndex: 99999,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}
+          onClick={handleCancelarEdicaoFoto}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botão de fechar */}
+            <div className="relative p-6 pb-0">
+              <button
+                onClick={handleCancelarEdicaoFoto}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+                title="Fechar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Conteúdo do Modal */}
+            <div className="px-6 pb-6 space-y-6">
+              <div className="text-center pt-4 px-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Editar foto do perfil
+                </h2>
+              </div>
+
+              {/* Preview da foto */}
+              <div className="flex justify-center">
+                <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                  {imagemPreview ? (
+                    <img 
+                      src={imagemPreview.startsWith('data:') ? imagemPreview : `${imagemPreview}${imagemPreview.includes('?') ? '&' : '?'}t=${Date.now()}`} 
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-20 h-20 text-gray-500" />
+                  )}
+                </div>
+              </div>
+
+              {/* Upload de nova foto */}
+              <div>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`relative border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                    isDragging
+                      ? 'border-blue-600 bg-blue-50'
+                      : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
+                  }`}
+                >
+                  <Camera className="w-8 h-8 text-gray-400 mb-2" />
+                  <p className="text-center text-sm">
+                    <span className="font-semibold text-blue-600">Selecione uma nova foto</span>{' '}
+                    <span className="text-gray-600">ou arraste aqui</span>
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG ou JPEG até 5MB</p>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFotoChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Footer com ações */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelarEdicaoFoto}
+                  disabled={uploadFotoMutation.isPending || deleteFotoMutation.isPending}
+                  className="flex-1 cursor-pointer"
+                >
+                  Cancelar
+                </Button>
+                {imagemPreview && !novaFoto && (
+                  <Button
+                    onClick={handleRemoverFoto}
+                    disabled={deleteFotoMutation.isPending}
+                    className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                    style={{ backgroundColor: '#DC2626' }}
+                  >
+                    {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover foto'}
+                  </Button>
+                )}
+                {novaFoto && (
+                  <Button
+                    onClick={handleSalvarFoto}
+                    disabled={uploadFotoMutation.isPending}
+                    className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                    style={{ backgroundColor: '#306FCC' }}
+                  >
+                    {uploadFotoMutation.isPending ? 'Salvando...' : 'Salvar'}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>

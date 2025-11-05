@@ -126,13 +126,13 @@ export default function SidebarButtonWithSubmenu({
 
       {/* Sub-menu expandido */}
       {isOpen && (
-        <div className="overflow-hidden transition-all duration-300 max-h-[500px] opacity-100 mt-0.5">
+        <div className="transition-all duration-300 mt-0.5 pr-4">
           <div className="ml-[34px] space-y-1">
             {subItems.map((item) => (
               <button
                 key={item.route}
                 onClick={() => handleSubItemClick(item.route)}
-                className={`w-[216px] text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${
+                className={`w-full text-left px-4 py-2 text-[15px] rounded-lg transition-all duration-200 cursor-pointer ${
                   path === item.route
                     ? "bg-[rgba(255,255,255,0.12)] text-white font-medium"
                     : "text-[#B4BAC5] hover:bg-[rgba(255,255,255,0.06)] hover:text-white"

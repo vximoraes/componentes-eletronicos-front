@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer, Slide } from "react-toastify";
@@ -11,6 +13,7 @@ import LogoEi from "@/components/logo-ei";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cadastroSchema, type CadastroFormData } from "@/schemas";
 
 interface PasswordRequirement {
   text: string;
@@ -28,68 +31,32 @@ const passwordRequirements: PasswordRequirement[] = [
 export default function CadastroPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmarSenha, setConfirmarSenha] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const router = useRouter();
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<CadastroFormData>({
+    resolver: zodResolver(cadastroSchema),
+  });
+
+  const senhaAtual = watch("senha", "");
+
   const checkPasswordRequirement = (requirement: PasswordRequirement): boolean => {
-    return requirement.regex.test(senha);
+    return requirement.regex.test(senhaAtual);
   };
 
-  const isPasswordValid = (): boolean => {
-    return passwordRequirements.every((req) => checkPasswordRequirement(req));
-  };
-
-  const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!nome.trim()) {
-      newErrors.nome = "Nome é obrigatório";
-    }
-
-    if (!email.trim()) {
-      newErrors.email = "E-mail é obrigatório";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "E-mail inválido";
-    }
-
-    if (!senha) {
-      newErrors.senha = "Senha é obrigatória";
-    } else if (!isPasswordValid()) {
-      newErrors.senha = "A senha não atende aos requisitos";
-    }
-
-    if (!confirmarSenha) {
-      newErrors.confirmarSenha = "Confirmação de senha é obrigatória";
-    } else if (senha !== confirmarSenha) {
-      newErrors.confirmarSenha = "As senhas não coincidem";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
-    setErrors({});
-
+  const onSubmit = async (data: CadastroFormData) => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/signup`,
         {
-          nome,
-          email,
-          senha,
+          nome: data.nome,
+          email: data.email,
+          senha: data.senha,
         }
       );
 
@@ -113,11 +80,12 @@ export default function CadastroPage() {
         const errorData = error.response.data;
 
         if (errorData.errors && Array.isArray(errorData.errors)) {
-          const newErrors: { [key: string]: string } = {};
           errorData.errors.forEach((err: { path: string; message: string }) => {
-            newErrors[err.path] = err.message;
+            setError(err.path as keyof CadastroFormData, {
+              type: "server",
+              message: err.message,
+            });
           });
-          setErrors(newErrors);
         }
 
         toast.error(errorData.message || "Ocorreu um erro ao criar sua conta.", {
@@ -140,8 +108,6 @@ export default function CadastroPage() {
           transition: Slide,
         });
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -151,7 +117,7 @@ export default function CadastroPage() {
       <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md">
           <h2 className="mb-6 md:mb-10 text-center text-2xl md:text-3xl font-bold">Cadastre-se!</h2>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div>
               <Label className="pb-2 text-sm md:text-base" htmlFor="nome">
                 Nome <span className="text-red-500">*</span>
@@ -161,17 +127,11 @@ export default function CadastroPage() {
                 type="text"
                 id="nome"
                 placeholder="Insira seu nome completo"
-                value={nome}
-                onChange={(e) => {
-                  setNome(e.target.value);
-                  if (errors.nome) {
-                    setErrors((prev) => ({ ...prev, nome: "" }));
-                  }
-                }}
-                disabled={isLoading}
+                {...register("nome")}
+                disabled={isSubmitting}
               />
               {errors.nome && (
-                <p className="text-red-500 text-sm mt-1">{errors.nome}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>
               )}
             </div>
             <div className="pt-3 md:pt-4">
@@ -183,17 +143,11 @@ export default function CadastroPage() {
                 type="email"
                 id="email"
                 placeholder="Insira seu endereço de e-mail"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) {
-                    setErrors((prev) => ({ ...prev, email: "" }));
-                  }
-                }}
-                disabled={isLoading}
+                {...register("email")}
+                disabled={isSubmitting}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
               )}
             </div>
             <div className="pt-3 md:pt-4">
@@ -206,14 +160,8 @@ export default function CadastroPage() {
                   type={showPassword ? "text" : "password"}
                   id="senha"
                   placeholder="Insira sua senha"
-                  value={senha}
-                  onChange={(e) => {
-                    setSenha(e.target.value);
-                    if (errors.senha) {
-                      setErrors((prev) => ({ ...prev, senha: "" }));
-                    }
-                  }}
-                  disabled={isLoading}
+                  {...register("senha")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
@@ -229,11 +177,11 @@ export default function CadastroPage() {
                 </button>
               </div>
               {errors.senha && (
-                <p className="text-red-500 text-sm mt-1">{errors.senha}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.senha.message}</p>
               )}
               
               {/* Validação visual da senha em tempo real */}
-              {senha && (
+              {senhaAtual && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
                   <ul className="space-y-1.5">
                     {passwordRequirements.map((requirement, index) => {
@@ -268,14 +216,8 @@ export default function CadastroPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmarSenha"
                   placeholder="Confirme sua senha"
-                  value={confirmarSenha}
-                  onChange={(e) => {
-                    setConfirmarSenha(e.target.value);
-                    if (errors.confirmarSenha) {
-                      setErrors((prev) => ({ ...prev, confirmarSenha: "" }));
-                    }
-                  }}
-                  disabled={isLoading}
+                  {...register("confirmarSenha")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
@@ -291,16 +233,16 @@ export default function CadastroPage() {
                 </button>
               </div>
               {errors.confirmarSenha && (
-                <p className="text-red-500 text-sm mt-1">{errors.confirmarSenha}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.confirmarSenha.message}</p>
               )}
             </div>
             <div className="mt-4 md:mt-6">
               <Button
                 type="submit"
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
-                {isLoading ? "Cadastrando..." : "Cadastrar"}
+                {isSubmitting ? "Cadastrando..." : "Cadastrar"}
               </Button>
             </div>
           </form>

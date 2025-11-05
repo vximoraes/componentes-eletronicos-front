@@ -15,7 +15,7 @@ import {
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { get } from '@/lib/fetchData';
 import { EstoqueApiResponse } from '@/types/componentes';
-import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X } from 'lucide-react';
+import { Search, Filter, Plus, Package, CheckCircle, AlertTriangle, XCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useEffect, Suspense, useRef } from 'react';
 import { PulseLoader } from 'react-spinners';
 import { generateComponentesPDF } from '@/utils/pdfGenerator';
@@ -36,6 +36,7 @@ function RelatorioComponentesPageContent() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -272,15 +273,33 @@ function RelatorioComponentesPageContent() {
   const isSomeSelected = selectedItems.size > 0 && selectedItems.size < estoquesFiltrados.length;
 
   return (
-    <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-componentes-page">
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-componentes-page">
       <Cabecalho 
         pagina="Relatórios" 
         acao="Componentes"
       />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        {/* Stats Cards - Fixo no topo */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-h-[120px] flex-shrink-0" data-test="stats-grid">
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+        {/* Stats Cards - Colapsável no mobile */}
+        <div className="shrink-0 mb-6">
+          {/* Botão para mobile */}
+          <button
+            onClick={() => setIsStatsOpen(!isStatsOpen)}
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-blue-600" />
+              <span className="font-semibold text-gray-700">Estatísticas</span>
+            </div>
+            {isStatsOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-600" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
+
+          {/* Cards - Sempre visível no desktop, colapsável no mobile */}
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
           <StatCard
             title="Total de"
             subtitle="componentes"
@@ -322,9 +341,10 @@ function RelatorioComponentesPageContent() {
             hoverTitle={`Componentes indisponíveis: ${indisponiveis}`}
           />
         </div>
+        </div>
 
         {/* Barra de Pesquisa e Botões */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6 flex-shrink-0" data-test="search-actions-bar">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0" data-test="search-actions-bar">
             <div className="relative flex-1" data-test="search-container">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -364,7 +384,7 @@ function RelatorioComponentesPageContent() {
 
         {/* Filtros aplicados */}
         {(categoriaFilter || statusFilter) && (
-          <div className="mb-4 flex-shrink-0" data-test="applied-filters">
+          <div className="mb-4 shrink-0" data-test="applied-filters">
             <div className="flex flex-wrap items-center gap-2">
               {categoriaFilter && (
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
@@ -399,7 +419,7 @@ function RelatorioComponentesPageContent() {
         {/* Mensagem de Erro */}
         {error && (
           <div
-            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded flex-shrink-0"
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
             data-test="error-message"
             title={`Erro completo: ${error.message}`}
           >
@@ -409,18 +429,18 @@ function RelatorioComponentesPageContent() {
 
         {/* Área da Tabela com Scroll */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center flex-1">
-              <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
-              </div>
-              <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center flex-1">
+            <div className="relative w-12 h-12">
+              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
             </div>
-          ) : estoquesFiltrados.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
-              <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm">
+            <p className="mt-4 text-gray-600 font-medium">Carregando componentes...</p>
+          </div>
+        ) : estoquesFiltrados.length > 0 ? (
+          <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="overflow-x-auto overflow-y-auto flex-1 relative">
+              <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
@@ -446,8 +466,8 @@ function RelatorioComponentesPageContent() {
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
-                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b">
-                        <TableCell className="text-center px-8">
+                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                        <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
@@ -455,23 +475,23 @@ function RelatorioComponentesPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8">
+                        <TableCell className="font-medium text-left px-8 py-3">
                           <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8">
-                          <span className="truncate block max-w-[250px]" title={estoque.componente.nome}>
+                        <TableCell className="font-medium text-left px-8 py-3">
+                          <span className="truncate block max-w-[200px]" title={estoque.componente.nome}>
                             {estoque.componente.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 font-medium">
+                        <TableCell className="text-center px-8 py-3 font-medium">
                           {estoque.quantidade}
                         </TableCell>
-                        <TableCell className="text-center px-8 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-3 whitespace-nowrap">
                           <div className="flex justify-center">
                             <span
-                              className={`inline-flex items-center justify-center px-1.5 md:px-3 py-1 md:py-1.5 rounded-[5px] text-[10px] md:text-xs font-medium text-center whitespace-nowrap ${
+                              className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
                                 estoque.componente.status === 'Em Estoque'
                                   ? 'bg-green-100 text-green-800'
                                   : estoque.componente.status === 'Baixo Estoque'
@@ -484,7 +504,7 @@ function RelatorioComponentesPageContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-left px-8 font-medium">
+                        <TableCell className="text-left px-8 py-3 font-medium">
                           <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
                             {estoque.localizacao.nome}
                           </span>
@@ -503,7 +523,7 @@ function RelatorioComponentesPageContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
+          <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <Package className="w-8 h-8 text-gray-400" />

@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { post } from '@/lib/fetchData';
 import { Button } from '@/components/ui/button';
 import { toast } from 'react-toastify';
+import { usuarioSchema, type UsuarioFormData } from '@/schemas';
+import { useFormApiErrors } from '@/hooks/useFormApiErrors';
 
 interface ModalCadastrarUsuarioProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-}
-
-interface CadastrarUsuarioRequest {
-  nome: string;
-  email: string;
 }
 
 export default function ModalCadastrarUsuario({
@@ -23,12 +22,24 @@ export default function ModalCadastrarUsuario({
   onSuccess
 }: ModalCadastrarUsuarioProps) {
   const queryClient = useQueryClient();
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [errors, setErrors] = useState<{ nome?: string; email?: string }>({});
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setError,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<UsuarioFormData>({
+    resolver: zodResolver(usuarioSchema),
+  });
+
+  const { setApiErrors } = useFormApiErrors<UsuarioFormData>(setError);
+
+  const nomeValue = watch("nome", "");
 
   const cadastrarMutation = useMutation({
-    mutationFn: async (data: CadastrarUsuarioRequest) => {
+    mutationFn: async (data: UsuarioFormData) => {
       return await post('/usuarios/convidar', data);
     },
     onSuccess: () => {
@@ -41,9 +52,7 @@ export default function ModalCadastrarUsuario({
         autoClose: 3000,
       });
 
-      setNome('');
-      setEmail('');
-      setErrors({});
+      reset();
       onSuccess?.();
       onClose();
     },
@@ -52,18 +61,7 @@ export default function ModalCadastrarUsuario({
 
       if (error?.response?.data) {
         const errorData = error.response.data;
-
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const newErrors: { nome?: string; email?: string } = {};
-          errorData.errors.forEach((err: { path: string; message: string }) => {
-            if (err.path === 'nome') {
-              newErrors.nome = err.message;
-            } else if (err.path === 'email') {
-              newErrors.email = err.message;
-            }
-          });
-          setErrors(newErrors);
-        }
+        setApiErrors(errorData.errors);
       }
     },
   });
@@ -98,11 +96,9 @@ export default function ModalCadastrarUsuario({
 
   useEffect(() => {
     if (isOpen) {
-      setNome('');
-      setEmail('');
-      setErrors({});
+      reset();
     }
-  }, [isOpen]);
+  }, [isOpen, reset]);
 
   if (!isOpen) return null;
 
@@ -112,34 +108,8 @@ export default function ModalCadastrarUsuario({
     }
   };
 
-  const validateForm = () => {
-    const newErrors: { nome?: string; email?: string } = {};
-
-    if (!nome.trim()) {
-      newErrors.nome = 'Nome é obrigatório';
-    } else if (nome.trim().length < 3) {
-      newErrors.nome = 'Nome deve ter no mínimo 3 caracteres';
-    }
-
-    if (!email.trim()) {
-      newErrors.email = 'E-mail é obrigatório';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'E-mail inválido';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    cadastrarMutation.mutate({
-      nome: nome.trim(),
-      email: email.trim()
-    });
+  const onSubmit = (data: UsuarioFormData) => {
+    cadastrarMutation.mutate(data);
   };
 
   const modalContent = (
@@ -170,8 +140,11 @@ export default function ModalCadastrarUsuario({
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Cadastrar Usuário
+              Cadastrar usuário
             </h2>
+            <p className="text-sm text-gray-600 mt-2">
+              Um e-mail será enviado para o usuário definir sua senha.
+            </p>
           </div>
 
           {/* Campo Nome */}
@@ -181,27 +154,21 @@ export default function ModalCadastrarUsuario({
                 Nome <span className="text-red-500">*</span>
               </label>
               <span className="text-sm text-gray-500">
-                {nome.length}/100
+                {nomeValue.length}/100
               </span>
             </div>
             <input
               id="nome"
               type="text"
               placeholder="Nome do usuário"
-              value={nome}
-              onChange={(e) => {
-                setNome(e.target.value);
-                if (errors.nome) {
-                  setErrors(prev => ({ ...prev, nome: undefined }));
-                }
-              }}
               maxLength={100}
+              {...register("nome")}
               className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.nome ? 'border-red-500' : 'border-gray-300'
                 }`}
-              disabled={cadastrarMutation.isPending}
+              disabled={isSubmitting || cadastrarMutation.isPending}
             />
             {errors.nome && (
-              <p className="text-red-500 text-sm mt-1">{errors.nome}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>
             )}
           </div>
 
@@ -214,19 +181,13 @@ export default function ModalCadastrarUsuario({
               id="email"
               type="email"
               placeholder="E-mail do usuário"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (errors.email) {
-                  setErrors(prev => ({ ...prev, email: undefined }));
-                }
-              }}
+              {...register("email")}
               className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
-              disabled={cadastrarMutation.isPending}
+              disabled={isSubmitting || cadastrarMutation.isPending}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
             )}
           </div>
 
@@ -249,18 +210,18 @@ export default function ModalCadastrarUsuario({
             <Button
               variant="outline"
               onClick={onClose}
-              disabled={cadastrarMutation.isPending}
+              disabled={isSubmitting || cadastrarMutation.isPending}
               className="flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
-              onClick={handleSubmit}
-              disabled={cadastrarMutation.isPending}
+              onClick={handleSubmit(onSubmit)}
+              disabled={isSubmitting || cadastrarMutation.isPending}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
-              {cadastrarMutation.isPending ? 'Cadastrando...' : 'Cadastrar'}
+              {isSubmitting || cadastrarMutation.isPending ? 'Cadastrando...' : 'Cadastrar'}
             </Button>
           </div>
         </div>

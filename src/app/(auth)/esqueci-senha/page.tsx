@@ -1,7 +1,9 @@
 "use client"
 
-import { useState, FormEvent } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import axios from "axios"
 import { toast, ToastContainer, Slide } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -10,38 +12,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { esqueciSenhaSchema, type EsqueciSenhaFormData } from "@/schemas"
 
 export default function EsqueciSenhaPage() {
-  const [email, setEmail] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [emailEnviado, setEmailEnviado] = useState(false)
+  const [emailUsuario, setEmailUsuario] = useState("")
   const router = useRouter()
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<EsqueciSenhaFormData>({
+    resolver: zodResolver(esqueciSenhaSchema),
+  })
 
-    if (!email) {
-      toast.error("Por favor, insira seu e-mail.", {
-        position: "bottom-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
-      return
-    }
-
-    setIsLoading(true)
-
+  const onSubmit = async (data: EsqueciSenhaFormData) => {
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/recover`,
-        { email }
+        { email: data.email }
       )
 
       if (response.data.error === false) {
+        setEmailUsuario(data.email)
         setEmailEnviado(true)
         toast.success("E-mail de recuperação enviado com sucesso!", {
           position: "bottom-right",
@@ -77,8 +71,6 @@ export default function EsqueciSenhaPage() {
           transition: Slide,
         })
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -101,7 +93,7 @@ export default function EsqueciSenhaPage() {
           </div>
 
           {!emailEnviado ? (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div>
                 <Label className="pb-2 text-sm md:text-base" htmlFor="email">
                   E-mail<span className="text-red-500">*</span>
@@ -111,20 +103,21 @@ export default function EsqueciSenhaPage() {
                   type="email"
                   id="email"
                   placeholder="Insira seu endereço de e-mail"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
+                  {...register("email")}
+                  disabled={isSubmitting}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="mt-4 md:mt-6">
                 <Button
                   type="submit"
                   className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
-                  {isLoading ? "Enviando..." : "Enviar"}
+                  {isSubmitting ? "Enviando..." : "Enviar"}
                 </Button>
               </div>
             </form>
@@ -132,7 +125,7 @@ export default function EsqueciSenhaPage() {
             <div className="space-y-4">
               <div className="px-4 py-3">
                 <p className="text-zinc-600 text-sm md:text-base text-center">
-                  Um e-mail foi enviado para <strong>{email}</strong> com instruções para redefinir sua senha.
+                  Um e-mail foi enviado para <strong>{emailUsuario}</strong> com instruções para redefinir sua senha.
                 </p>
               </div>
 
@@ -143,7 +136,7 @@ export default function EsqueciSenhaPage() {
                 <Button
                   onClick={() => {
                     setEmailEnviado(false)
-                    setEmail("")
+                    setEmailUsuario("")
                   }}
                   variant="outline"
                   className="text-sm md:text-base cursor-pointer"

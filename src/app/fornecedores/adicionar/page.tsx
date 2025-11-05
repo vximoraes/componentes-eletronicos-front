@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,18 +11,34 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { post } from '@/lib/fetchData'
 import { ToastContainer, toast, Slide } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { fornecedorSchema, type FornecedorFormData } from "@/schemas"
 
 export default function AdicionarFornecedorPage() {
   const router = useRouter()
-  const [nome, setNome] = useState('')
-  const [url, setUrl] = useState('')
-  const [contato, setContato] = useState('')
-  const [descricao, setDescricao] = useState('')
-  const [errors, setErrors] = useState<{ nome?: string; contato?: string; url?: string }>({})
   const queryClient = useQueryClient()
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<FornecedorFormData>({
+    resolver: zodResolver(fornecedorSchema),
+    defaultValues: {
+      nome: '',
+      url: '',
+      contato: '',
+      descricao: '',
+    }
+  })
+
+  const nomeValue = watch("nome", "")
+  const contatoValue = watch("contato", "")
+  const descricaoValue = watch("descricao", "")
+
   const createFornecedorMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: FornecedorFormData) => {
       return await post('/fornecedores', data)
     },
     onSuccess: (data: any) => {
@@ -30,6 +47,14 @@ export default function AdicionarFornecedorPage() {
       router.push(`/fornecedores?success=created&id=${fornecedorId}`)
     },
     onError: (error: any) => {
+      if (error?.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        error.response.data.errors.forEach((err: { path: string; message: string }) => {
+          setError(err.path as keyof FornecedorFormData, {
+            type: "server",
+            message: err.message,
+          });
+        });
+      }
       toast.error(`Erro ao criar fornecedor: ${error?.response?.data?.message || error.message}`, {
         position: 'bottom-right',
         autoClose: 5000,
@@ -42,50 +67,8 @@ export default function AdicionarFornecedorPage() {
     }
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const newErrors: { nome?: string; contato?: string; url?: string } = {}
-
-    if (!nome.trim()) {
-      newErrors.nome = 'Nome é obrigatório'
-    }
-
-    if (url.trim() && !isValidUrl(url)) {
-      newErrors.url = 'URL inválida'
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
-    const fornecedorData: any = {
-      nome: nome.trim(),
-    }
-
-    if (contato.trim()) {
-      fornecedorData.contato = contato.trim()
-    }
-
-    if (url.trim()) {
-      fornecedorData.url = url.trim()
-    }
-
-    if (descricao.trim()) {
-      fornecedorData.descricao = descricao.trim()
-    }
-
-    createFornecedorMutation.mutate(fornecedorData)
-  }
-
-  const isValidUrl = (urlString: string) => {
-    try {
-      new URL(urlString)
-      return true
-    } catch {
-      return false
-    }
+  const onSubmit = (data: FornecedorFormData) => {
+    createFornecedorMutation.mutate(data)
   }
 
   const handleCancel = () => {
@@ -94,12 +77,12 @@ export default function AdicionarFornecedorPage() {
 
   return (
     <div className="w-full min-h-screen flex flex-col">
-      <Cabecalho pagina="Fornecedores" acao="Adicionar" />
+      <Cabecalho pagina="Fornecedores" acao="Adicionar"/>
 
       <div className="flex-1 px-3 pb-3 sm:px-4 sm:pb-4 md:px-6 md:pb-6 flex flex-col overflow-hidden">
         <div className="bg-white rounded-lg shadow-sm flex-1 flex flex-col overflow-hidden">
-          <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 sm:gap-4 md:gap-6 overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-3 md:gap-6 overflow-y-auto">
               {/* Grid de 2 colunas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Nome */}
@@ -109,25 +92,19 @@ export default function AdicionarFornecedorPage() {
                       Nome <span className="text-red-500">*</span>
                     </Label>
                     <span className="text-xs sm:text-sm text-gray-500">
-                      {nome.length}/100
+                      {nomeValue.length}/100
                     </span>
                   </div>
                   <Input
                     id="nome"
                     type="text"
                     placeholder="Nome do fornecedor"
-                    value={nome}
                     maxLength={100}
-                    onChange={(e) => {
-                      setNome(e.target.value)
-                      if (errors.nome) {
-                        setErrors(prev => ({ ...prev, nome: undefined }))
-                      }
-                    }}
+                    {...register("nome")}
                     className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
                   />
                   {errors.nome && (
-                    <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.nome}</p>
+                    <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.nome.message}</p>
                   )}
                 </div>
 
@@ -140,17 +117,11 @@ export default function AdicionarFornecedorPage() {
                     id="url"
                     type="url"
                     placeholder="https://exemplo.com"
-                    value={url}
-                    onChange={(e) => {
-                      setUrl(e.target.value)
-                      if (errors.url) {
-                        setErrors(prev => ({ ...prev, url: undefined }))
-                      }
-                    }}
+                    {...register("url")}
                     className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.url ? '!border-red-500' : ''}`}
                   />
                   {errors.url && (
-                    <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.url}</p>
+                    <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.url.message}</p>
                   )}
                 </div>
               </div>
@@ -162,25 +133,19 @@ export default function AdicionarFornecedorPage() {
                     Contato
                   </Label>
                   <span className="text-xs sm:text-sm text-gray-500">
-                    {contato.length}/100
+                    {contatoValue?.length || 0}/100
                   </span>
                 </div>
                 <Input
                   id="contato"
                   type="text"
                   placeholder="email@exemplo.com ou telefone"
-                  value={contato}
                   maxLength={100}
-                  onChange={(e) => {
-                    setContato(e.target.value)
-                    if (errors.contato) {
-                      setErrors(prev => ({ ...prev, contato: undefined }))
-                    }
-                  }}
+                  {...register("contato")}
                   className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.contato ? '!border-red-500' : ''}`}
                 />
                 {errors.contato && (
-                  <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.contato}</p>
+                  <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.contato.message}</p>
                 )}
               </div>
 
@@ -191,15 +156,14 @@ export default function AdicionarFornecedorPage() {
                     Descrição
                   </Label>
                   <span className="text-xs sm:text-sm text-gray-500">
-                    {descricao.length}/200
+                    {descricaoValue?.length || 0}/200
                   </span>
                 </div>
                 <textarea
                   id="descricao"
                   placeholder="Breve descrição do fornecedor..."
-                  value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
                   maxLength={200}
+                  {...register("descricao")}
                   className="w-full flex-1 px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[120px]"
                 />
               </div>
@@ -219,9 +183,9 @@ export default function AdicionarFornecedorPage() {
                 type="submit"
                 className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
-                disabled={createFornecedorMutation.isPending}
+                disabled={isSubmitting || createFornecedorMutation.isPending}
               >
-                {createFornecedorMutation.isPending ? 'Salvando...' : 'Salvar'}
+                {isSubmitting || createFornecedorMutation.isPending ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           </form>

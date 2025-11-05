@@ -13,7 +13,7 @@ import SidebarButtonMenu from "./sidebarButton"
 import SidebarButtonWithSubmenu from "./sidebarButtonWithSubmenu"
 import { signOut } from "next-auth/react"
 import { useSidebarContext } from "@/contexts/SidebarContext"
-import { X } from "lucide-react"
+import { X, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useSession } from "@/hooks/use-session"
 
@@ -88,7 +88,7 @@ function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick, subIt
 
       {/* Sub-itens */}
       {subItems && subItems.length > 0 && isOpen && (
-        <div className="overflow-hidden transition-all duration-300 max-h-[500px] opacity-100 mt-0.5">
+        <div className="transition-all duration-300 mt-0.5">
           <div className="ml-[34px] space-y-1">
             {subItems.map((item) => {
               const isSubItemActive = window.location.pathname === item.route
@@ -162,11 +162,17 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   onClick={handleProfileClick}
                   className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 cursor-pointer ${collapsed ? 'justify-center' : ''}`}
                 >
-                  <img
-                    src={user?.fotoPerfil || "/foto-default.svg"}
-                    alt="Foto de perfil"
-                    className="w-[40px] h-[40px] rounded-full object-cover"
-                  />
+                  {user?.fotoPerfil ? (
+                    <img
+                      src={`${user.fotoPerfil}?t=${new Date().getTime()}`}
+                      alt="Foto de perfil"
+                      className="w-[40px] h-[40px] rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-[40px] h-[40px] rounded-full bg-gray-200 flex items-center justify-center">
+                      <User className="w-6 h-6 text-gray-500" />
+                    </div>
+                  )}
 
                   {!collapsed && (
                     <div className="flex-1 min-w-0 text-left">
@@ -230,8 +236,8 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   />
                   {hasPermission('usuarios', 'buscar') && (
                     <SidebarButtonMenu
-                      src="/usuarios.svg"
-                      srcHover="/usuarios-hover.svg"
+                      src="/usuarios-menu.svg"
+                      srcHover="/usuarios-menu-hover.svg"
                       name="Usuários"
                       route="/usuarios"
                       data-test="sidebar-btn-usuarios"
@@ -289,11 +295,17 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               onClick={handleProfileClick}
               className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 cursor-pointer"
             >
-              <img
-                src={user?.fotoPerfil || "/foto-default.svg"}
-                alt="Foto de perfil"
-                className="w-[40px] h-[40px] rounded-full object-cover"
-              />
+              {user?.fotoPerfil ? (
+                <img
+                  src={`${user.fotoPerfil}?t=${new Date().getTime()}`}
+                  alt="Foto de perfil"
+                  className="w-[40px] h-[40px] rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-[40px] h-[40px] rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="w-6 h-6 text-gray-500" />
+                </div>
+              )}
 
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-white text-sm font-medium truncate" title={user?.name}>
@@ -357,8 +369,8 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               />
               {hasPermission('usuarios', 'buscar') && (
                 <MobileMenuItem
-                  icon="/usuarios.svg"
-                  iconHover="/usuarios-hover.svg"
+                  icon="/usuarios-menu.svg"
+                  iconHover="/usuarios-menu-hover.svg"
                   name="Usuários"
                   route="/usuarios"
                   isActive={path?.startsWith("/usuarios")}
