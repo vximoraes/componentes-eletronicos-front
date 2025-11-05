@@ -631,7 +631,7 @@ export default function HomePage() {
                   </button>
                 )}
               </div>
-              <div className="w-full border-t border-gray-200 mb-4"></div>
+              <div className="w-full border-t border-gray-200"></div>
 
               <div className="max-h-60 overflow-y-auto">
                 {isLoadingNotificacoes ? (
