@@ -65,7 +65,6 @@ export default function LoginPage() {
                 placeholder="Insira seu endereço de e-mail"
                 {...register("email")}
                 disabled={isSubmitting}
-                defaultValue={process.env.NEXTAUTH_USER}
               />
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
@@ -83,7 +82,6 @@ export default function LoginPage() {
                   placeholder="Insira sua senha"
                   {...register("senha")}
                   disabled={isSubmitting}
-                  defaultValue={process.env.NEXTAUTH_PASSWORD}
                 />
                 <button
                   type="button"
