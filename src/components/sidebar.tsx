@@ -115,7 +115,7 @@ function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick, subIt
 export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
   const { isOpen, closeSidebar } = useSidebarContext()
-  const { user, hasPermission } = useSession()
+  const { user } = useSession()
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -234,18 +234,16 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
-                  {hasPermission('usuarios', 'buscar') && (
-                    <SidebarButtonMenu
-                      src="/usuarios-menu.svg"
-                      srcHover="/usuarios-menu-hover.svg"
-                      name="Usuários"
-                      route="/usuarios"
-                      data-test="sidebar-btn-usuarios"
-                      path={path}
-                      onItemClick={handleItemClick}
-                      collapsed={collapsed}
-                    />
-                  )}
+                  <SidebarButtonMenu
+                    src="/usuarios-menu.svg"
+                    srcHover="/usuarios-menu-hover.svg"
+                    name="Usuários"
+                    route="/usuarios"
+                    data-test="sidebar-btn-usuarios"
+                    path={path}
+                    onItemClick={handleItemClick}
+                    collapsed={collapsed}
+                  />
                 </SidebarMenuItem>
               </SidebarMenu>
 
@@ -367,18 +365,16 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick()
                 }}
               />
-              {hasPermission('usuarios', 'buscar') && (
-                <MobileMenuItem
-                  icon="/usuarios-menu.svg"
-                  iconHover="/usuarios-menu-hover.svg"
-                  name="Usuários"
-                  route="/usuarios"
-                  isActive={path?.startsWith("/usuarios")}
-                  onClick={() => {
-                    handleItemClick()
-                  }}
-                />
-              )}
+              <MobileMenuItem
+                icon="/usuarios-menu.svg"
+                iconHover="/usuarios-menu-hover.svg"
+                name="Usuários"
+                route="/usuarios"
+                isActive={path?.startsWith("/usuarios")}
+                onClick={() => {
+                  handleItemClick()
+                }}
+              />
             </div>
 
             {/* Botão de Sair Mobile */}

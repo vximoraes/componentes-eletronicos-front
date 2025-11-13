@@ -47,7 +47,7 @@ interface UsuarioApiResponse {
 
 function PageUsuariosContent() {
   const router = useRouter()
-  const { hasPermission, user } = useSession()
+  const { user } = useSession()
   const [searchTerm, setSearchTerm] = useState('')
   const [isExcluirModalOpen, setIsExcluirModalOpen] = useState(false)
   const [excluirUsuarioId, setExcluirUsuarioId] = useState<string | null>(null)
@@ -58,21 +58,6 @@ function PageUsuariosContent() {
   const [isDetalhesModalOpen, setIsDetalhesModalOpen] = useState(false)
   const [detalhesUsuarioId, setDetalhesUsuarioId] = useState<string | null>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!hasPermission('usuarios', 'buscar')) {
-      toast.error('Você não tem permissão para acessar esta página.', {
-        position: 'bottom-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: false,
-        transition: Slide,
-      })
-      router.push('/componentes')
-    }
-  }, [hasPermission, router])
 
   const {
     data,
