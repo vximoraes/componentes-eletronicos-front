@@ -16,6 +16,7 @@ import { useSidebarContext } from "@/contexts/SidebarContext"
 import { X, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useSession } from "@/hooks/use-session"
+import { usePermissions } from "@/hooks/use-permissions"
 
 interface CustomSidebarProps {
   children?: React.ReactNode;
@@ -116,9 +117,13 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
   const { isOpen, closeSidebar } = useSidebarContext()
   const { user } = useSession()
+  const { canManageUsers } = usePermissions()
   const router = useRouter()
 
   const handleLogout = async () => {
+    localStorage.removeItem('user_permissions')
+    localStorage.removeItem('user_groups')
+    
     await signOut({ redirect: false })
     window.location.href = "/login"
   }
@@ -234,16 +239,18 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
-                  <SidebarButtonMenu
-                    src="/usuarios-menu.svg"
-                    srcHover="/usuarios-menu-hover.svg"
-                    name="Usuários"
-                    route="/usuarios"
-                    data-test="sidebar-btn-usuarios"
-                    path={path}
-                    onItemClick={handleItemClick}
-                    collapsed={collapsed}
-                  />
+                  {canManageUsers() && (
+                    <SidebarButtonMenu
+                      src="/usuarios-menu.svg"
+                      srcHover="/usuarios-menu-hover.svg"
+                      name="Usuários"
+                      route="/usuarios"
+                      data-test="sidebar-btn-usuarios"
+                      path={path}
+                      onItemClick={handleItemClick}
+                      collapsed={collapsed}
+                    />
+                  )}
                 </SidebarMenuItem>
               </SidebarMenu>
 
@@ -365,16 +372,18 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick()
                 }}
               />
-              <MobileMenuItem
-                icon="/usuarios-menu.svg"
-                iconHover="/usuarios-menu-hover.svg"
-                name="Usuários"
-                route="/usuarios"
-                isActive={path?.startsWith("/usuarios")}
-                onClick={() => {
-                  handleItemClick()
-                }}
-              />
+              {canManageUsers() && (
+                <MobileMenuItem
+                  icon="/usuarios-menu.svg"
+                  iconHover="/usuarios-menu-hover.svg"
+                  name="Usuários"
+                  route="/usuarios"
+                  isActive={path?.startsWith("/usuarios")}
+                  onClick={() => {
+                    handleItemClick()
+                  }}
+                />
+              )}
             </div>
 
             {/* Botão de Sair Mobile */}
