@@ -1,14 +1,17 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { patch } from '@/lib/fetchData'
 import { toast } from 'react-toastify'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { categoriaSchema, type CategoriaFormData } from '@/schemas'
 
 interface ModalEditarCategoriaProps {
   isOpen: boolean
@@ -25,14 +28,26 @@ export default function ModalEditarCategoria({
   categoriaNome,
   onSuccess
 }: ModalEditarCategoriaProps) {
-  const [nome, setNome] = useState(categoriaNome)
-  const [errors, setErrors] = useState<{ nome?: string }>({})
   const queryClient = useQueryClient()
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CategoriaFormData>({
+    resolver: zodResolver(categoriaSchema),
+    defaultValues: {
+      nome: categoriaNome
+    }
+  })
+
+  const nomeValue = watch("nome", "")
+
   useEffect(() => {
-    setNome(categoriaNome)
-    setErrors({})
-  }, [categoriaNome, isOpen])
+    reset({ nome: categoriaNome })
+  }, [categoriaNome, isOpen, reset])
 
   useEffect(() => {
     if (isOpen) {
@@ -63,8 +78,8 @@ export default function ModalEditarCategoria({
   }, [isOpen])
 
   const updateCategoriaMutation = useMutation({
-    mutationFn: async (nomeCategoria: string) => {
-      return await patch(`/categorias/${categoriaId}`, { nome: nomeCategoria })
+    mutationFn: async (data: CategoriaFormData) => {
+      return await patch(`/categorias/${categoriaId}`, data)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] })
@@ -95,8 +110,7 @@ export default function ModalEditarCategoria({
 
   const handleClose = () => {
     if (!updateCategoriaMutation.isPending) {
-      setNome(categoriaNome)
-      setErrors({})
+      reset({ nome: categoriaNome })
       onClose()
     }
   }
@@ -107,22 +121,8 @@ export default function ModalEditarCategoria({
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const newErrors: { nome?: string } = {}
-
-    const trimmedNome = nome.trim()
-    if (!trimmedNome) {
-      newErrors.nome = 'O nome da categoria é obrigatório'
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
-    updateCategoriaMutation.mutate(trimmedNome)
+  const onSubmit = (data: CategoriaFormData) => {
+    updateCategoriaMutation.mutate(data)
   }
 
   if (!isOpen) return null
@@ -153,7 +153,7 @@ export default function ModalEditarCategoria({
         </div>
 
         {/* Conteúdo do Modal */}
-        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Editar categoria
@@ -169,26 +169,20 @@ export default function ModalEditarCategoria({
                 Nome da categoria <span className="text-red-500">*</span>
               </Label>
               <span className="text-sm text-gray-500">
-                {nome.length}/100
+                {nomeValue.length}/100
               </span>
             </div>
             <Input
               id="nome"
               type="text"
               placeholder="Digite o nome da categoria"
-              value={nome}
-              onChange={(e) => {
-                setNome(e.target.value)
-                if (errors.nome) {
-                  setErrors(prev => ({ ...prev, nome: undefined }))
-                }
-              }}
+              {...register("nome")}
               maxLength={100}
               className={errors.nome ? 'border-red-500' : ''}
-              disabled={updateCategoriaMutation.isPending}
+              disabled={isSubmitting || updateCategoriaMutation.isPending}
             />
             {errors.nome && (
-              <p className="text-red-500 text-sm mt-1">{errors.nome}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>
             )}
           </div>
 
@@ -208,18 +202,18 @@ export default function ModalEditarCategoria({
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={updateCategoriaMutation.isPending}
+              disabled={isSubmitting || updateCategoriaMutation.isPending}
               className="flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              disabled={updateCategoriaMutation.isPending}
+              disabled={isSubmitting || updateCategoriaMutation.isPending}
               className="flex-1 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
-              {updateCategoriaMutation.isPending ? 'Salvando...' : 'Salvar'}
+              {(isSubmitting || updateCategoriaMutation.isPending) ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         </form>

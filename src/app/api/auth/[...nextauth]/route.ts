@@ -41,8 +41,8 @@ interface LoginResponse {
       email: string;
       senha: string;
       ativo: boolean;
-      permissoes: any[];
-      grupos: string[];
+      // permissoes: any[];
+      // grupos: string[];
       fotoPerfil?: string;
       __v?: number;
     };
@@ -62,8 +62,8 @@ interface RefreshResponse {
       nome: string;
       email: string;
       ativo: boolean;
-      permissoes: any[];
-      grupos: string[];
+      // permissoes: any[];
+      // grupos: string[];
       fotoPerfil?: string;
       __v?: number;
     };
@@ -105,8 +105,8 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       name: userData.nome ?? token.name,
       email: userData.email ?? token.email,
       ativo: userData.ativo ?? token.ativo,
-      permissoes: userData.permissoes ?? token.permissoes,
-      grupos: userData.grupos ?? token.grupos,
+      // permissoes: userData.permissoes ?? token.permissoes,
+      // grupos: userData.grupos ?? token.grupos,
       fotoPerfil: userData.fotoPerfil ?? token.fotoPerfil,
     };
   } catch (err) {
@@ -158,8 +158,8 @@ export const authOptions: AuthOptions = {
               accessToken: data.user.accesstoken,
               refreshToken: data.user.refreshtoken,
               ativo: data.user.ativo,
-              permissoes: data.user.permissoes,
-              grupos: data.user.grupos,
+              // permissoes: data.user.permissoes,
+              // grupos: data.user.grupos,
               fotoPerfil: data.user.fotoPerfil,
             };
             return user;
@@ -186,8 +186,8 @@ export const authOptions: AuthOptions = {
           accessToken: (user as any).accessToken,
           refreshToken: (user as any).refreshToken,
           ativo: (user as any).ativo,
-          permissoes: (user as any).permissoes,
-          grupos: (user as any).grupos,
+          // permissoes: (user as any).permissoes,
+          // grupos: (user as any).grupos,
           fotoPerfil: (user as any).fotoPerfil,
           accessTokenExpires: expiresAt,
         };
@@ -222,8 +222,8 @@ export const authOptions: AuthOptions = {
           accessToken: token.accessToken as string,
           refreshToken: token.refreshToken as string,
           ativo: token.ativo as boolean,
-          permissoes: token.permissoes as any[],
-          grupos: token.grupos as string[],
+          // permissoes: token.permissoes as any[],
+          // grupos: token.grupos as string[],
           fotoPerfil: token.fotoPerfil as string | undefined,
         };
       }

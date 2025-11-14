@@ -1,14 +1,17 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { patch } from '@/lib/fetchData'
 import { toast } from 'react-toastify'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { localizacaoSchema, type LocalizacaoFormData } from '@/schemas'
 
 interface ModalEditarLocalizacaoProps {
   isOpen: boolean
@@ -25,14 +28,26 @@ export default function ModalEditarLocalizacao({
   localizacaoNome,
   onSuccess
 }: ModalEditarLocalizacaoProps) {
-  const [nome, setNome] = useState(localizacaoNome)
-  const [errors, setErrors] = useState<{ nome?: string }>({})
   const queryClient = useQueryClient()
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<LocalizacaoFormData>({
+    resolver: zodResolver(localizacaoSchema),
+    defaultValues: {
+      nome: localizacaoNome
+    }
+  })
+
+  const nomeValue = watch("nome", "")
+
   useEffect(() => {
-    setNome(localizacaoNome)
-    setErrors({})
-  }, [localizacaoNome, isOpen])
+    reset({ nome: localizacaoNome })
+  }, [localizacaoNome, isOpen, reset])
 
   useEffect(() => {
     if (isOpen) {
@@ -63,8 +78,8 @@ export default function ModalEditarLocalizacao({
   }, [isOpen])
 
   const updateLocalizacaoMutation = useMutation({
-    mutationFn: async (nomeLocalizacao: string) => {
-      return await patch(`/localizacoes/${localizacaoId}`, { nome: nomeLocalizacao })
+    mutationFn: async (data: LocalizacaoFormData) => {
+      return await patch(`/localizacoes/${localizacaoId}`, data)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['localizacoes'] })
@@ -95,8 +110,7 @@ export default function ModalEditarLocalizacao({
 
   const handleClose = () => {
     if (!updateLocalizacaoMutation.isPending) {
-      setNome(localizacaoNome)
-      setErrors({})
+      reset({ nome: localizacaoNome })
       onClose()
     }
   }
@@ -107,22 +121,8 @@ export default function ModalEditarLocalizacao({
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const newErrors: { nome?: string } = {}
-
-    const trimmedNome = nome.trim()
-    if (!trimmedNome) {
-      newErrors.nome = 'O nome da localização é obrigatório'
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
-
-    updateLocalizacaoMutation.mutate(trimmedNome)
+  const onSubmit = (data: LocalizacaoFormData) => {
+    updateLocalizacaoMutation.mutate(data)
   }
 
   if (!isOpen) return null
@@ -153,7 +153,7 @@ export default function ModalEditarLocalizacao({
         </div>
 
         {/* Conteúdo do Modal */}
-        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Editar localização
@@ -169,26 +169,20 @@ export default function ModalEditarLocalizacao({
                 Nome da localização <span className="text-red-500">*</span>
               </Label>
               <span className="text-sm text-gray-500">
-                {nome.length}/100
+                {nomeValue.length}/100
               </span>
             </div>
             <Input
               id="nome"
               type="text"
               placeholder="Digite o nome da localização"
-              value={nome}
-              onChange={(e) => {
-                setNome(e.target.value)
-                if (errors.nome) {
-                  setErrors(prev => ({ ...prev, nome: undefined }))
-                }
-              }}
+              {...register("nome")}
               maxLength={100}
               className={errors.nome ? 'border-red-500' : ''}
-              disabled={updateLocalizacaoMutation.isPending}
+              disabled={isSubmitting || updateLocalizacaoMutation.isPending}
             />
             {errors.nome && (
-              <p className="text-red-500 text-sm mt-1">{errors.nome}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.nome.message}</p>
             )}
           </div>
 
@@ -208,18 +202,18 @@ export default function ModalEditarLocalizacao({
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={updateLocalizacaoMutation.isPending}
+              disabled={isSubmitting || updateLocalizacaoMutation.isPending}
               className="flex-1 cursor-pointer"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              disabled={updateLocalizacaoMutation.isPending}
+              disabled={isSubmitting || updateLocalizacaoMutation.isPending}
               className="flex-1 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
             >
-              {updateLocalizacaoMutation.isPending ? 'Salvando...' : 'Salvar'}
+              {(isSubmitting || updateLocalizacaoMutation.isPending) ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         </form>

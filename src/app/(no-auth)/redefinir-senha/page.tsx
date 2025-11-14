@@ -2,6 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import axios from "axios"
 import { toast, ToastContainer, Slide } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
@@ -11,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PulseLoader } from "react-spinners"
+import { redefinirSenhaSchema, type RedefinirSenhaFormData } from "@/schemas"
 
 interface PasswordRequirement {
   text: string
@@ -28,14 +31,21 @@ const passwordRequirements: PasswordRequirement[] = [
 function RedefinirSenhaContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [senha, setSenha] = useState("")
-  const [confirmarSenha, setConfirmarSenha] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [tokenValido, setTokenValido] = useState<boolean | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<RedefinirSenhaFormData>({
+    resolver: zodResolver(redefinirSenhaSchema),
+  })
+
+  const senhaAtual = watch("senha", "")
 
   useEffect(() => {
     if (!token) {
@@ -55,39 +65,10 @@ function RedefinirSenhaContent() {
   }, [token])
 
   const checkPasswordRequirement = (requirement: PasswordRequirement): boolean => {
-    return requirement.regex.test(senha)
+    return requirement.regex.test(senhaAtual)
   }
 
-  const isPasswordValid = (): boolean => {
-    return passwordRequirements.every((req) => checkPasswordRequirement(req))
-  }
-
-  const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {}
-
-    if (!senha) {
-      newErrors.senha = "Senha é obrigatória"
-    } else if (!isPasswordValid()) {
-      newErrors.senha = "A senha não atende aos requisitos"
-    }
-
-    if (!confirmarSenha) {
-      newErrors.confirmarSenha = "Confirmação de senha é obrigatória"
-    } else if (senha !== confirmarSenha) {
-      newErrors.confirmarSenha = "As senhas não coincidem"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
+  const onSubmit = async (data: RedefinirSenhaFormData) => {
     if (!token) {
       toast.error("Token de recuperação inválido.", {
         position: "bottom-right",
@@ -101,14 +82,11 @@ function RedefinirSenhaContent() {
       return
     }
 
-    setIsLoading(true)
-    setErrors({})
-
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/redefinir-senha?token=${token}`,
         {
-          senha,
+          senha: data.senha,
         }
       )
 
@@ -131,14 +109,6 @@ function RedefinirSenhaContent() {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data
 
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const newErrors: { [key: string]: string } = {}
-          errorData.errors.forEach((err: { path: string; message: string }) => {
-            newErrors[err.path] = err.message
-          })
-          setErrors(newErrors)
-        }
-
         toast.error(errorData.message || "Ocorreu um erro ao redefinir sua senha.", {
           position: "bottom-right",
           autoClose: 5000,
@@ -159,8 +129,6 @@ function RedefinirSenhaContent() {
           transition: Slide,
         })
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -208,7 +176,7 @@ function RedefinirSenhaContent() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div>
               <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
                 Nova senha<span className="text-red-500">*</span>
@@ -219,17 +187,15 @@ function RedefinirSenhaContent() {
                   type={showPassword ? "text" : "password"}
                   id="senha"
                   placeholder="Digite sua nova senha"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  required
-                  disabled={isLoading}
+                  {...register("senha")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
                   aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
                   {showPassword ? (
                     <img src="/eye.png" alt="" className="w-5 h-5 opacity-60" />
@@ -239,11 +205,11 @@ function RedefinirSenhaContent() {
                 </button>
               </div>
               {errors.senha && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">{errors.senha}</p>
+                <p className="text-red-500 text-xs md:text-sm mt-1">{errors.senha.message}</p>
               )}
 
               {/* Validação visual da senha em tempo real */}
-              {senha && (
+              {senhaAtual && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
                   <ul className="space-y-1.5">
                     {passwordRequirements.map((requirement, index) => {
@@ -279,17 +245,15 @@ function RedefinirSenhaContent() {
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmarSenha"
                   placeholder="Confirme sua nova senha"
-                  value={confirmarSenha}
-                  onChange={(e) => setConfirmarSenha(e.target.value)}
-                  required
-                  disabled={isLoading}
+                  {...register("confirmarSenha")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
                   aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                   onClick={() => setShowConfirmPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 cursor-pointer"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
                   {showConfirmPassword ? (
                     <img src="/eye.png" alt="" className="w-5 h-5 opacity-60" />
@@ -299,7 +263,7 @@ function RedefinirSenhaContent() {
                 </button>
               </div>
               {errors.confirmarSenha && (
-                <p className="text-red-500 text-xs md:text-sm mt-1">{errors.confirmarSenha}</p>
+                <p className="text-red-500 text-xs md:text-sm mt-1">{errors.confirmarSenha.message}</p>
               )}
             </div>
 
@@ -307,9 +271,9 @@ function RedefinirSenhaContent() {
               <Button
                 type="submit"
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
-                {isLoading ? "Redefinindo..." : "Redefinir Senha"}
+                {isSubmitting ? "Redefinindo..." : "Redefinir Senha"}
               </Button>
             </div>
           </form>
