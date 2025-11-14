@@ -311,7 +311,7 @@ export default function ModalSaidaComponente({
     }
 
     if (!localizacaoSelecionada) {
-      newErrors.localizacao = 'Selecione uma localização';
+      newErrors.localizacao = 'Selecionar localização';
     }
 
     setErrors(newErrors);
@@ -425,7 +425,7 @@ export default function ModalSaidaComponente({
                   <span className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}>
                     {isLoadingLocalizacoes
                       ? 'Carregando...'
-                      : localizacaoSelecionadaObj?.nome || 'Selecione uma localização'
+                      : localizacaoSelecionadaObj?.nome || 'Selecionar localização'
                     }
                   </span>
                   {localizacaoSelecionada && (
