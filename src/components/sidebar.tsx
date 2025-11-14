@@ -319,7 +319,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
-            <div className="flex flex-col gap-2 flex-1">
+            <div className="flex flex-col gap-2 flex-1 mb-6">
               <MobileMenuItem
                 icon="/componentes.svg"
                 iconHover="/componentes-hover.svg"
