@@ -16,6 +16,7 @@ import { useSidebarContext } from "@/contexts/SidebarContext"
 import { X, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useSession } from "@/hooks/use-session"
+import { usePermissions } from "@/hooks/use-permissions"
 
 interface CustomSidebarProps {
   children?: React.ReactNode;
@@ -115,10 +116,14 @@ function MobileMenuItem({ icon, iconHover, name, route, isActive, onClick, subIt
 export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
   const { isOpen, closeSidebar } = useSidebarContext()
-  const { user, hasPermission } = useSession()
+  const { user } = useSession()
+  const { canManageUsers } = usePermissions()
   const router = useRouter()
 
   const handleLogout = async () => {
+    localStorage.removeItem('user_permissions')
+    localStorage.removeItem('user_groups')
+    
     await signOut({ redirect: false })
     window.location.href = "/login"
   }
@@ -234,7 +239,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                     onItemClick={handleItemClick}
                     collapsed={collapsed}
                   />
-                  {hasPermission('usuarios', 'buscar') && (
+                  {canManageUsers() && (
                     <SidebarButtonMenu
                       src="/usuarios-menu.svg"
                       srcHover="/usuarios-menu-hover.svg"
@@ -321,7 +326,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
 
           {/* Conteúdo do menu */}
           <div className="px-5 flex flex-col flex-1">
-            <div className="flex flex-col gap-2 flex-1">
+            <div className="flex flex-col gap-2 flex-1 mb-6">
               <MobileMenuItem
                 icon="/componentes.svg"
                 iconHover="/componentes-hover.svg"
@@ -367,7 +372,7 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   handleItemClick()
                 }}
               />
-              {hasPermission('usuarios', 'buscar') && (
+              {canManageUsers() && (
                 <MobileMenuItem
                   icon="/usuarios-menu.svg"
                   iconHover="/usuarios-menu-hover.svg"

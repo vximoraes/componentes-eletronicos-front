@@ -499,7 +499,7 @@ function ComponentesPageContent() {
 
         {/* Controles de Paginação */}
         {componentes.length > 0 && paginationInfo.totalPages > 1 && (
-          <div className="bg-white py-4 px-6 flex justify-center items-center flex-shrink-0" data-test="pagination-controls">
+          <div className="bg-white py-4 px-6 flex justify-center items-center shrink-0" data-test="pagination-controls">
             <div className="flex items-center gap-1">
               {/* Botão Anterior */}
               <button

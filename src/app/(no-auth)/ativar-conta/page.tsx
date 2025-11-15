@@ -2,6 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import axios from "axios"
 import { toast } from "react-toastify"
 import { ToastContainer, Slide } from "react-toastify"
@@ -13,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PulseLoader } from "react-spinners"
 import Link from "next/link"
+import { ativarContaSchema, type AtivarContaFormData } from "@/schemas"
 
 interface PasswordRequirement {
   text: string
@@ -30,14 +33,21 @@ const passwordRequirements: PasswordRequirement[] = [
 function AtivarContaContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [senha, setSenha] = useState("")
-  const [confirmarSenha, setConfirmarSenha] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [tokenValido, setTokenValido] = useState<boolean | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<AtivarContaFormData>({
+    resolver: zodResolver(ativarContaSchema),
+  })
+
+  const senhaAtual = watch("senha", "")
 
   useEffect(() => {
     if (!token) {
@@ -57,39 +67,10 @@ function AtivarContaContent() {
   }, [token])
 
   const checkPasswordRequirement = (requirement: PasswordRequirement): boolean => {
-    return requirement.regex.test(senha)
+    return requirement.regex.test(senhaAtual)
   }
 
-  const isPasswordValid = (): boolean => {
-    return passwordRequirements.every((req) => checkPasswordRequirement(req))
-  }
-
-  const validateForm = (): boolean => {
-    const newErrors: { [key: string]: string } = {}
-
-    if (!senha) {
-      newErrors.senha = "Senha é obrigatória"
-    } else if (!isPasswordValid()) {
-      newErrors.senha = "A senha não atende aos requisitos"
-    }
-
-    if (!confirmarSenha) {
-      newErrors.confirmarSenha = "Confirmação de senha é obrigatória"
-    } else if (senha !== confirmarSenha) {
-      newErrors.confirmarSenha = "As senhas não coincidem"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
-
+  const onSubmit = async (data: AtivarContaFormData) => {
     if (!token) {
       toast.error("Token de convite inválido.", {
         position: "bottom-right",
@@ -103,14 +84,11 @@ function AtivarContaContent() {
       return
     }
 
-    setIsLoading(true)
-    setErrors({})
-
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/ativar-conta?token=${token}`,
         {
-          senha,
+          senha: data.senha,
         }
       )
 
@@ -133,14 +111,6 @@ function AtivarContaContent() {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data
 
-        if (errorData.errors && Array.isArray(errorData.errors)) {
-          const newErrors: { [key: string]: string } = {}
-          errorData.errors.forEach((err: { path: string; message: string }) => {
-            newErrors[err.path] = err.message
-          })
-          setErrors(newErrors)
-        }
-
         toast.error(errorData.message || "Ocorreu um erro ao ativar sua conta.", {
           position: "bottom-right",
           autoClose: 5000,
@@ -161,8 +131,6 @@ function AtivarContaContent() {
           transition: Slide,
         })
       }
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -207,7 +175,7 @@ function AtivarContaContent() {
               Crie uma senha segura para ativar sua conta e começar a utilizar o sistema.
             </p>
           </div>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="pt-3 md:pt-4">
               <Label className="pb-2 text-sm md:text-base" htmlFor="senha">
                 Senha <span className="text-red-500">*</span>
@@ -220,14 +188,8 @@ function AtivarContaContent() {
                   type={showPassword ? "text" : "password"}
                   id="senha"
                   placeholder="Insira sua senha"
-                  value={senha}
-                  onChange={(e) => {
-                    setSenha(e.target.value)
-                    if (errors.senha) {
-                      setErrors((prev) => ({ ...prev, senha: "" }))
-                    }
-                  }}
-                  disabled={isLoading}
+                  {...register("senha")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
@@ -243,11 +205,11 @@ function AtivarContaContent() {
                 </button>
               </div>
               {errors.senha && (
-                <p className="text-red-500 text-sm mt-1">{errors.senha}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.senha.message}</p>
               )}
 
               {/* Validação visual da senha em tempo real */}
-              {senha && (
+              {senhaAtual && (
                 <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200">
                   <ul className="space-y-1.5">
                     {passwordRequirements.map((requirement, index) => {
@@ -285,14 +247,8 @@ function AtivarContaContent() {
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmarSenha"
                   placeholder="Confirme sua senha"
-                  value={confirmarSenha}
-                  onChange={(e) => {
-                    setConfirmarSenha(e.target.value)
-                    if (errors.confirmarSenha) {
-                      setErrors((prev) => ({ ...prev, confirmarSenha: "" }))
-                    }
-                  }}
-                  disabled={isLoading}
+                  {...register("confirmarSenha")}
+                  disabled={isSubmitting}
                 />
                 <button
                   type="button"
@@ -308,7 +264,7 @@ function AtivarContaContent() {
                 </button>
               </div>
               {errors.confirmarSenha && (
-                <p className="text-red-500 text-sm mt-1">{errors.confirmarSenha}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.confirmarSenha.message}</p>
               )}
             </div>
             
@@ -316,9 +272,9 @@ function AtivarContaContent() {
               <Button
                 type="submit"
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
-                {isLoading ? "Ativando conta..." : "Ativar conta"}
+                {isSubmitting ? "Ativando conta..." : "Ativar conta"}
               </Button>
             </div>
           </form>
