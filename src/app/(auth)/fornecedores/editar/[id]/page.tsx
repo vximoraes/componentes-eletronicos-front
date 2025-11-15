@@ -161,7 +161,7 @@ export default function EditarFornecedorPage() {
                       Nome <span className="text-red-500">*</span>
                     </Label>
                     <span className="text-xs sm:text-sm text-gray-500">
-                      {nomeValue.length}/100
+                      {nomeValue?.length}/100
                     </span>
                   </div>
                   <Input
@@ -204,7 +204,7 @@ export default function EditarFornecedorPage() {
                     Contato
                   </Label>
                   <span className="text-xs sm:text-sm text-gray-500">
-                    {contatoValue.length}/100
+                    {contatoValue?.length}/100
                   </span>
                 </div>
                 <Input
@@ -228,7 +228,7 @@ export default function EditarFornecedorPage() {
                     Descrição
                   </Label>
                   <span className="text-xs sm:text-sm text-gray-500">
-                    {descricaoValue.length}/200
+                    {descricaoValue?.length}/200
                   </span>
                 </div>
                 <textarea
