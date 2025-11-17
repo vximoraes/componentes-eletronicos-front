@@ -276,4 +276,16 @@ export const generateMovimentacoesCSV = ({
   lines.push(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`);
   lines.push('');
 
+  // Estatísticas simples
+  if (includeStats && movimentacoes.length > 0) {
+    const entradas = movimentacoes.filter(m => m.tipo === 'Entrada').length;
+    const saidas = movimentacoes.filter(m => m.tipo === 'Saída' || m.tipo === 'Saida').length;
+    const total = movimentacoes.length;
+
+    lines.push('RESUMO ESTATÍSTICO');
+    lines.push(`Total de Movimentações,${total}`);
+    lines.push(`Entradas,${entradas}`);
+    lines.push(`Saídas,${saidas}`);
+    lines.push('');
+  }
 
