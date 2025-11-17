@@ -256,3 +256,20 @@ export const generateOrcamentosCSV = ({
   }
 };
 
+// ==================== GERADOR DE CSV PARA MOVIMENTAÇÕES ====================
+
+interface MovimentacaoCSVGeneratorOptions {
+  movimentacoes: any[];
+  fileName?: string;
+  includeStats?: boolean;
+}
+
+export const generateMovimentacoesCSV = ({
+  movimentacoes,
+  fileName = 'relatorio-movimentacoes',
+  includeStats = true,
+}: MovimentacaoCSVGeneratorOptions) => {
+  const lines: string[] = [];
+
+
+
