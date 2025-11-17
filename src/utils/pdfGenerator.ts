@@ -456,6 +456,7 @@ export const generateOrcamentosPDF = async ({
 };
 
 // ==================== GERADOR DE PDF PARA MOVIMENTAÇÕES ====================
+
 interface Movimentacao {
   _id: string;
   componente?: { _id?: string; nome?: string };

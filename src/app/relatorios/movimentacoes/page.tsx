@@ -20,8 +20,8 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { PulseLoader } from "react-spinners";
 import { toast, Slide } from "react-toastify";
 import { useSession } from "@/hooks/use-session";
-import { generateComponentesPDF } from "@/utils/pdfGenerator"; 
-import { generateComponentesCSV } from "@/utils/csvGenerator"; 
+import { generateMovimentacoesPDF } from "@/utils/pdfGenerator"; 
+import { generateMovimentacoesCSV } from "@/utils/csvGenerator"; 
 
 interface MovimentacoesApiResponse {
   data: {
@@ -99,7 +99,7 @@ function RelatorioMovimentacoesPageContent() {
 
   const matchSearch =
     !searchTerm ||
-    mov.componente?.codigo?.toLowerCase().includes(texto) ||
+    mov.componente?._id?.toLowerCase().includes(texto) ||
     mov.componente?.nome?.toLowerCase().includes(texto) ||
     mov.localizacao?.nome?.toLowerCase().includes(texto) ||
     mov.tipo?.toLowerCase().includes(texto) ||
@@ -157,8 +157,8 @@ function RelatorioMovimentacoesPageContent() {
       );
 
       if (format === "PDF") {
-        await generateComponentesPDF({
-          estoques: selecionadas,
+        await generateMovimentacoesPDF({
+          movimentacoes: selecionadas,
           fileName: fileName.trim(),
           title: "RELATÓRIO DE MOVIMENTAÇÕES",
           includeStats: true,
@@ -170,8 +170,8 @@ function RelatorioMovimentacoesPageContent() {
           transition: Slide,
         });
       } else {
-        generateComponentesCSV({
-          estoques: selecionadas,
+        generateMovimentacoesCSV({
+          movimentacoes: selecionadas,
           fileName: fileName.trim(),
           includeStats: true,
         });
@@ -314,7 +314,7 @@ function RelatorioMovimentacoesPageContent() {
 
                               {/* CÓDIGO */}
                               <TableCell className="px-8 font-medium text-gray-800">
-                                {mov.componente?.codigo || mov.codigo || mov._id?.slice(0,8) || "—"}
+                                {mov.componente?._id?.slice(0, 8) || mov._id?.slice(0, 8) || "—"}
                               </TableCell>
 
                               {/* PRODUTO */}
