@@ -314,3 +314,25 @@ export const generateMovimentacoesCSV = ({
     lines.push(row.join(','));
   });
 
+  // Rodapé
+  lines.push('');
+  lines.push(`Total de registros exportados: ${movimentacoes.length}`);
+  lines.push('Estoque Inteligente - Sistema de Gerenciamento');
+
+  const csvContent = lines.join('\n');
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
+    const timestamp = new Date().toISOString().split('T')[0];
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+};
