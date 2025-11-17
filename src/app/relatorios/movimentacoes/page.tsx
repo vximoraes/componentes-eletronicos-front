@@ -302,12 +302,12 @@ function RelatorioMovimentacoesPageContent() {
                           onChange={handleSelectAll}
                         />
                       </TableHead>
-                      <TableHead className="text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="text-center px-8">CÓDIGO</TableHead>
                       <TableHead className="text-center px-8">PRODUTO</TableHead>
                       <TableHead className="text-center px-8">Quantidade</TableHead>
                       <TableHead className="text-center px-8">TIPO DE MOVIMENTAÇÃO</TableHead>
                       <TableHead className="text-center px-8">LOCALIZAÇÃO</TableHead>
-                      <TableHead className="text-left px-8">DATA/HORA</TableHead>
+                      <TableHead className="text-center px-8">DATA/HORA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -324,7 +324,7 @@ function RelatorioMovimentacoesPageContent() {
                               </TableCell>
 
                               {/* CÓDIGO */}
-                              <TableCell className="px-8 font-medium text-gray-800">
+                              <TableCell className="text-center px-8 font-medium text-gray-800">
                                 {mov.componente?._id?.slice(0, 8) || mov._id?.slice(0, 8) || "—"}
                               </TableCell>
 
@@ -365,7 +365,7 @@ function RelatorioMovimentacoesPageContent() {
                               </TableCell>
 
                               {/* DATA/HORA */}
-                              <TableCell className="text-left px-8">
+                              <TableCell className="text-center px-8">
                                 {new Date(mov.data_hora).toLocaleString("pt-BR")}
                               </TableCell>
 
