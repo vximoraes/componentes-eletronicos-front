@@ -94,15 +94,25 @@ function RelatorioMovimentacoesPageContent() {
   const todasMovimentacoes =
     data?.pages.flatMap((page) => page.data.docs) || [];
 
-  // Filtros locais
   const movimentacoesFiltradas = todasMovimentacoes.filter((mov) => {
-    const matchSearch =
-      !searchTerm ||
-      mov.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mov.tipo?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
-    return matchSearch && matchTipo;
-  });
+  const texto = searchTerm.toLowerCase();
+
+  const matchSearch =
+    !searchTerm ||
+    mov.componente?.codigo?.toLowerCase().includes(texto) ||
+    mov.componente?.nome?.toLowerCase().includes(texto) ||
+    mov.localizacao?.nome?.toLowerCase().includes(texto) ||
+    mov.tipo?.toLowerCase().includes(texto) ||
+    String(mov.quantidade).includes(searchTerm) ||
+    new Date(mov.data_hora)
+      .toLocaleString("pt-BR")
+      .toLowerCase()
+      .includes(texto);
+
+  const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
+
+  return matchSearch && matchTipo;
+});
 
   // Estatísticas (ver depois)
   const totalMov = movimentacoesFiltradas.length;
