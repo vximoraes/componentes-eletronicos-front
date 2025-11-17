@@ -94,6 +94,13 @@ function RelatorioMovimentacoesPageContent() {
   const todasMovimentacoes =
     data?.pages.flatMap((page) => page.data.docs) || [];
 
+  // Debug: Log dos valores únicos de tipo
+  if (todasMovimentacoes.length > 0) {
+    const tiposUnicos = [...new Set(todasMovimentacoes.map(m => m.tipo))];
+    console.log("Tipos únicos de movimentações:", tiposUnicos);
+    console.log("Filtro atual:", tipoFilter);
+  }
+
   const movimentacoesFiltradas = todasMovimentacoes.filter((mov) => {
   const texto = searchTerm.toLowerCase();
 
@@ -109,19 +116,26 @@ function RelatorioMovimentacoesPageContent() {
       .toLowerCase()
       .includes(texto);
 
-  // Comparação normalizada de tipo
-  const tipoMovRaw = String(mov.tipo ?? "").toLowerCase().trim();
-  const filterRaw = String(tipoFilter).toLowerCase().trim();
+
+  const normalizeStr = (str: string) => {
+    return String(str ?? "")
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+  };
+
+  const tipoMovNormalized = normalizeStr(mov.tipo);
+  const filterNormalized = normalizeStr(tipoFilter);
   
-  // Se não há filtro, deixa passar; se há filtro, verifica correspondência exata
-  const matchTipo = !filterRaw || tipoMovRaw === filterRaw || 
-    // Alternativa: verifica se contém (útil se dados vêm com "Entrada de Estoque" por exemplo)
-    tipoMovRaw.includes(filterRaw);
+  const matchTipo = !filterNormalized || 
+    tipoMovNormalized === filterNormalized ||
+    tipoMovNormalized.includes(filterNormalized);
 
   return matchSearch && matchTipo;
 });
 
-  // Estatísticas (ver depois)
+  // Estatísticas 
   const totalMov = movimentacoesFiltradas.length;
   const entradas = movimentacoesFiltradas.filter(
     (m) => m.tipo === "Entrada"
@@ -429,5 +443,3 @@ export default function RelatorioMovimentacoesPage() {
     </Suspense>
   );
 }
-
-{/* ALTERAR OS FILTROS E PDFS */}
