@@ -109,7 +109,14 @@ function RelatorioMovimentacoesPageContent() {
       .toLowerCase()
       .includes(texto);
 
-  const matchTipo = !tipoFilter || mov.tipo === tipoFilter;
+  // Comparação normalizada de tipo
+  const tipoMovRaw = String(mov.tipo ?? "").toLowerCase().trim();
+  const filterRaw = String(tipoFilter).toLowerCase().trim();
+  
+  // Se não há filtro, deixa passar; se há filtro, verifica correspondência exata
+  const matchTipo = !filterRaw || tipoMovRaw === filterRaw || 
+    // Alternativa: verifica se contém (útil se dados vêm com "Entrada de Estoque" por exemplo)
+    tipoMovRaw.includes(filterRaw);
 
   return matchSearch && matchTipo;
 });
@@ -388,9 +395,15 @@ function RelatorioMovimentacoesPageContent() {
       <ModalFiltros
         isOpen={isFiltrosModalOpen}
         onClose={() => setIsFiltrosModalOpen(false)}
-        categoriaFilter={tipoFilter}
-        statusFilter={""}
-        onFiltersChange={(categoria) => setTipoFilter(categoria)}
+        categoriaFilter=""
+        statusFilter={tipoFilter}
+        onFiltersChange={(_, status) => setTipoFilter(status)}
+        statusOptions={[
+          { value: '', label: 'Todos' },
+          { value: 'Entrada', label: 'Entrada' },
+          { value: 'Saída', label: 'Saída' }
+        ]}
+        showCategoria={false}
       />
 
       <ModalExportarRelatorio

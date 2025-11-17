@@ -275,7 +275,7 @@ function RelatorioComponentesPageContent() {
     <div className="w-full h-screen flex flex-col overflow-x-hidden" data-test="relatorio-componentes-page">
       <Cabecalho 
         pagina="Relatórios" 
-        acao="Componentes"
+        descricao="Componentes"
       />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
