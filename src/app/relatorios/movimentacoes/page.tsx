@@ -329,22 +329,28 @@ function RelatorioMovimentacoesPageContent() {
 
                               {/* TIPO DE MOVIMENTAÇÃO */}
                               <TableCell className="text-center px-8">
-                                <span
-                                  className={`px-2 py-1 rounded text-xs font-medium ${
-                                    mov.tipo === "Entrada"
-                                      ? "bg-green-100 text-green-800 border border-green-200"
-                                      : mov.tipo === "Saída"
-                                      ? "bg-red-100 text-red-800 border border-red-200"
-                                      : "bg-gray-100 text-gray-800"
-                                  }`}
-                                >
-                                  {mov.tipo}
-                                </span>
+                                {(() => {
+                                  const tipoRaw = String(mov.tipo ?? "").toLowerCase();
+                                  const isEntrada = tipoRaw.includes("entrada");
+                                  const isSaida = tipoRaw.includes("saída") || tipoRaw.includes("saida");
+
+                                  const classes = isEntrada
+                                    ? "bg-green-100 text-green-600"
+                                    : isSaida
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-gray-100 text-gray-800";
+
+                                  return (
+                                    <span className={`px-3 py-1 rounded-md text-xs font-medium ${classes}`}>
+                                      {String(mov.tipo ?? "").trim() || "-"}
+                                    </span>
+                                  );
+                                })()}
                               </TableCell>
 
                               {/* LOCALIZAÇÃO */}
                               <TableCell className="text-center px-8">
-                                {mov.localizacao?.nome || "Não informada"}
+                                {mov.localizacao?.nome}
                               </TableCell>
 
                               {/* DATA/HORA */}
