@@ -455,3 +455,154 @@ export const generateOrcamentosPDF = async ({
   return doc;
 };
 
+// ==================== GERADOR DE PDF PARA MOVIMENTAÇÕES ====================
+interface Movimentacao {
+  _id: string;
+  componente?: { _id?: string; nome?: string };
+  quantidade?: number;
+  tipo?: string;
+  localizacao?: { nome?: string };
+  data_hora?: string;
+}
+
+interface MovimentacoesPDFOptions {
+  movimentacoes: Movimentacao[];
+  fileName?: string;
+  title?: string;
+  includeStats?: boolean;
+  userName?: string;
+}
+
+export const generateMovimentacoesPDF = async ({
+  movimentacoes,
+  fileName = 'relatorio-movimentacoes',
+  title = 'RELATÓRIO DE MOVIMENTAÇÕES',
+  includeStats = true,
+  userName = 'Administrador'
+}: MovimentacoesPDFOptions) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 18;
+  let yPosition = 20;
+
+  const checkPageBreak = (requiredSpace: number = 10) => {
+    if (yPosition + requiredSpace > pageHeight - 20) {
+      doc.addPage();
+      yPosition = 20;
+      return true;
+    }
+    return false;
+  };
+
+  // Header
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text(title, pageWidth / 2, yPosition, { align: 'center' });
+  yPosition += 10;
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}`, pageWidth / 2, yPosition, { align: 'center' });
+  doc.text(`Gerado por: ${userName}`, pageWidth / 2, yPosition + 6, { align: 'center' });
+  yPosition += 12;
+
+  // Separator
+  doc.setLineWidth(0.4);
+  doc.line(margin, yPosition, pageWidth - margin, yPosition);
+  yPosition += 8;
+
+  // Stats
+  if (includeStats) {
+    const total = movimentacoes.length;
+    const entradas = movimentacoes.filter(m => String(m.tipo).toLowerCase().includes('entrada')).length;
+    const saidas = movimentacoes.filter(m => String(m.tipo).toLowerCase().includes('saída') || String(m.tipo).toLowerCase().includes('saida')).length;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RESUMO', margin, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Total de movimentações: ${total}`, margin + 4, yPosition);
+    yPosition += 6;
+    doc.text(`Entradas: ${entradas}`, margin + 4, yPosition);
+    yPosition += 6;
+    doc.text(`Saídas: ${saidas}`, margin + 4, yPosition);
+    yPosition += 8;
+
+    doc.setLineWidth(0.2);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 8;
+  }
+
+  // Table header
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  const colWidths = { codigo: 30, produto: 70, quantidade: 20, tipo: 30, local: 40, data: 40 };
+  let x = margin;
+  doc.text('CÓDIGO', x, yPosition);
+  x += colWidths.codigo;
+  doc.text('PRODUTO', x, yPosition);
+  x += colWidths.produto;
+  doc.text('QTD', x, yPosition);
+  x += colWidths.quantidade;
+  doc.text('TIPO', x, yPosition);
+  x += colWidths.tipo;
+  doc.text('LOCALIZAÇÃO', x, yPosition);
+  x += colWidths.local;
+  doc.text('DATA/HORA', x, yPosition);
+  yPosition += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+
+  movimentacoes.forEach((mov, idx) => {
+    checkPageBreak(10);
+    x = margin;
+  const codigo = mov.componente?._id?.slice(-8) || mov._id?.slice(-8) || '-';
+    doc.text(String(codigo), x, yPosition);
+    x += colWidths.codigo;
+
+    const nome = mov.componente?.nome || '-';
+    const nomeTrunc = nome.length > 30 ? nome.substring(0, 27) + '...' : nome;
+    doc.text(nomeTrunc, x, yPosition);
+    x += colWidths.produto;
+
+    doc.text(String(mov.quantidade ?? '-'), x, yPosition);
+    x += colWidths.quantidade;
+
+    doc.text(String(mov.tipo ?? '-'), x, yPosition);
+    x += colWidths.tipo;
+
+    doc.text(String(mov.localizacao?.nome ?? '-'), x, yPosition);
+    x += colWidths.local;
+
+    const dataStr = mov.data_hora ? new Date(mov.data_hora).toLocaleString('pt-BR') : '-';
+    doc.text(dataStr, x, yPosition);
+
+    yPosition += 8;
+    // subtle separator
+    doc.setDrawColor(230, 230, 230);
+    doc.setLineWidth(0.1);
+    doc.line(margin, yPosition - 4, pageWidth - margin, yPosition - 4);
+  });
+
+  // Footer
+  const totalPages = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Página ${i} de ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+  }
+
+  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
+  const timestamp = new Date().toISOString().split('T')[0];
+  doc.save(`${sanitizedFileName}-${timestamp}.pdf`);
+
+  return doc;
+};
+
