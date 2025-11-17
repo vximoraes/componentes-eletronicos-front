@@ -313,8 +313,8 @@ function RelatorioMovimentacoesPageContent() {
                               </TableCell>
 
                               {/* CÓDIGO */}
-                              <TableCell className="px-8 font-medium">
-                                {mov.componente?.codigo || "---"}
+                              <TableCell className="px-8 font-medium text-gray-800">
+                                {mov.componente?.codigo || mov.codigo || mov._id?.slice(0,8) || "—"}
                               </TableCell>
 
                               {/* PRODUTO */}
@@ -330,12 +330,12 @@ function RelatorioMovimentacoesPageContent() {
                               {/* TIPO DE MOVIMENTAÇÃO */}
                               <TableCell className="text-center px-8">
                                 <span
-                                  className={`px-2 py-1 rounded text-white text-xs ${
+                                  className={`px-2 py-1 rounded text-xs font-medium ${
                                     mov.tipo === "Entrada"
-                                      ? "bg-green-600"
+                                      ? "bg-green-100 text-green-800 border border-green-200"
                                       : mov.tipo === "Saída"
-                                      ? "bg-red-600"
-                                      : "bg-gray-600"
+                                      ? "bg-red-100 text-red-800 border border-red-200"
+                                      : "bg-gray-100 text-gray-800"
                                   }`}
                                 >
                                   {mov.tipo}
