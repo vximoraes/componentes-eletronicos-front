@@ -290,23 +290,62 @@ function RelatorioMovimentacoesPageContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {movimentacoesFiltradas.map((mov) => (
-                      <TableRow key={mov._id} className="hover:bg-gray-50 border-b">
-                        <TableCell className="text-center px-8">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.has(mov._id)}
-                            onChange={() => handleSelectItem(mov._id)}
-                          />
-                        </TableCell>
-                        <TableCell className="px-8 font-medium">{mov.descricao}</TableCell>
-                        <TableCell className="text-center px-8">{mov.tipo}</TableCell>
-                        <TableCell className="text-center px-8">{mov.quantidade}</TableCell>
-                        <TableCell className="text-center px-8">{mov.status}</TableCell>
-                        <TableCell className="text-left px-8">{mov.data}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                          {movimentacoesFiltradas.map((mov) => (
+                            <TableRow key={mov._id} className="hover:bg-gray-50 border-b">
+                              
+                              {/* Seleção */}
+                              <TableCell className="text-center px-8">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedItems.has(mov._id)}
+                                  onChange={() => handleSelectItem(mov._id)}
+                                />
+                              </TableCell>
+
+                              {/* CÓDIGO */}
+                              <TableCell className="px-8 font-medium">
+                                {mov.componente?.codigo || "---"}
+                              </TableCell>
+
+                              {/* PRODUTO */}
+                              <TableCell className="text-center px-8">
+                                {mov.componente?.nome || "Sem nome"}
+                              </TableCell>
+
+                              {/* QUANTIDADE */}
+                              <TableCell className="text-center px-8">
+                                {mov.quantidade}
+                              </TableCell>
+
+                              {/* TIPO DE MOVIMENTAÇÃO */}
+                              <TableCell className="text-center px-8">
+                                <span
+                                  className={`px-2 py-1 rounded text-white text-xs ${
+                                    mov.tipo === "Entrada"
+                                      ? "bg-green-600"
+                                      : mov.tipo === "Saída"
+                                      ? "bg-red-600"
+                                      : "bg-gray-600"
+                                  }`}
+                                >
+                                  {mov.tipo}
+                                </span>
+                              </TableCell>
+
+                              {/* LOCALIZAÇÃO */}
+                              <TableCell className="text-center px-8">
+                                {mov.localizacao?.nome || "Não informada"}
+                              </TableCell>
+
+                              {/* DATA/HORA */}
+                              <TableCell className="text-left px-8">
+                                {new Date(mov.data_hora).toLocaleString("pt-BR")}
+                              </TableCell>
+
+                            </TableRow>
+                          ))}
+                   </TableBody>
+
                 </table>
 
                 {/* Target do infinite scroll */}
