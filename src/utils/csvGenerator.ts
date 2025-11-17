@@ -271,5 +271,9 @@ export const generateMovimentacoesCSV = ({
 }: MovimentacaoCSVGeneratorOptions) => {
   const lines: string[] = [];
 
+ // Cabeçalho
+  lines.push('RELATÓRIO DE MOVIMENTAÇÕES');
+  lines.push(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`);
+  lines.push('');
 
 
