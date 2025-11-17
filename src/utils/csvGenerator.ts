@@ -289,3 +289,28 @@ export const generateMovimentacoesCSV = ({
     lines.push('');
   }
 
+    // Tabela
+  lines.push('MOVIMENTAÇÕES SELECIONADAS');
+  const headers = ['CÓDIGO', 'TIPO', 'PRODUTO', 'QUANTIDADE', 'LOCALIZAÇÃO', 'DATA'];
+  lines.push(headers.join(','));
+
+  movimentacoes.forEach((mov) => {
+    const codigo = mov.componente?._id || mov._id || '-';
+    const produto = mov.componente?.nome ? escapeCSV(mov.componente.nome) : '-';
+    const quantidade = (mov.quantidade ?? 0).toString();
+    const tipo = mov.tipo || '-';
+    const local = mov.localizacao?.nome ? escapeCSV(mov.localizacao.nome) : '-';
+    const data = mov.createdAt ? formatDate(mov.createdAt) : '-';
+
+    const row = [
+      `"${codigo}"`,
+      `"${tipo}"`,
+      `"${produto}"`,
+      quantidade,
+      `"${local}"`,
+      `"${data}"`
+    ];
+
+    lines.push(row.join(','));
+  });
+
