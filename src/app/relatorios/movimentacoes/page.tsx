@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { get } from "@/lib/fetchData";
-import { Search, Filter, CheckCircle, XCircle, ArrowDownUp, ArrowUpDown, FileText, X } from "lucide-react";
+import { Search, Filter, ArrowDownUp, ArrowUpDown, FileText, X } from "lucide-react";
 import { useState, useEffect, useRef, Suspense } from "react";
 import { PulseLoader } from "react-spinners";
 import { toast, Slide } from "react-toastify";
@@ -94,6 +94,15 @@ function RelatorioMovimentacoesPageContent() {
   const todasMovimentacoes =
     data?.pages.flatMap((page) => page.data.docs) || [];
 
+  // Função auxiliar para normalizar strings (remove acentos e converte para minúsculas)
+  const normalizeStr = (str: string) => {
+    return String(str ?? "")
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+  };
+
   // Debug: Log dos valores únicos de tipo
   if (todasMovimentacoes.length > 0) {
     const tiposUnicos = [...new Set(todasMovimentacoes.map(m => m.tipo))];
@@ -116,15 +125,6 @@ function RelatorioMovimentacoesPageContent() {
       .toLowerCase()
       .includes(texto);
 
-
-  const normalizeStr = (str: string) => {
-    return String(str ?? "")
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
-  };
-
   const tipoMovNormalized = normalizeStr(mov.tipo);
   const filterNormalized = normalizeStr(tipoFilter);
   
@@ -135,16 +135,13 @@ function RelatorioMovimentacoesPageContent() {
   return matchSearch && matchTipo;
 });
 
-  // Estatísticas 
+  // Estatísticas - usando normalização para garantir compatibilidade
   const totalMov = movimentacoesFiltradas.length;
   const entradas = movimentacoesFiltradas.filter(
-    (m) => m.tipo === "Entrada"
+    (m) => normalizeStr(m.tipo) === "entrada"
   ).length;
   const saidas = movimentacoesFiltradas.filter(
-    (m) => m.tipo === "Saída"
-  ).length;
-  const canceladas = movimentacoesFiltradas.filter(
-    (m) => m.status === "Cancelada"
+    (m) => normalizeStr(m.tipo) === "saida"
   ).length;
 
   // Seleção
@@ -220,7 +217,7 @@ function RelatorioMovimentacoesPageContent() {
         
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <StatCard
             title="Total de"
             subtitle="movimentações"
@@ -242,13 +239,6 @@ function RelatorioMovimentacoesPageContent() {
             icon={ArrowUpDown}
             iconColor="text-yellow-600"
             iconBgColor="bg-yellow-100"
-          />
-          <StatCard
-            title="Canceladas"
-            value={canceladas}
-            icon={XCircle}
-            iconColor="text-red-600"
-            iconBgColor="bg-red-100"
           />
         </div>
 
