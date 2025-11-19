@@ -29,7 +29,7 @@ export default function RootLayout({
         <SessionProvider>
           <SidebarProvider>
             <Header />
-            <main className="w-[100%]">
+            <main className="w-full max-w-full overflow-hidden">
               <NuqsAdapter>
                 <QueryProvider>
                   {children}

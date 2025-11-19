@@ -4,29 +4,58 @@ import { useRouter } from "next/navigation"
 import { useSession } from "@/hooks/use-session"
 import { useSidebarContext } from "@/contexts/SidebarContext"
 import { Bell, Menu, ChevronLeft } from "lucide-react"
+import { get, patch } from "@/lib/fetchData"
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 type NotificationItem = {
-  id: string
-  title: string
-  body?: string
-  createdAt?: string
-  read?: boolean
+  _id: string
+  mensagem: string
+  data_hora: string
+  visualizada: boolean
+  usuario: string
+}
+
+interface NotificacoesApiResponse {
+  error: boolean
+  message: string
+  data: {
+    docs: NotificationItem[]
+    totalDocs: number
+    page: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    nextPage: number | null
+    prevPage: number | null
+  }
 }
 
 export interface CabecalhoProps {
   pagina: string
+  acao?: string
   descricao?: string,
   showBackButton?: boolean,
   onBackClick?: () => void
 }
 
-export default function Cabecalho({ pagina, descricao, showBackButton, onBackClick }: CabecalhoProps) {
+export default function Cabecalho({ pagina, acao, descricao, showBackButton, onBackClick }: CabecalhoProps) {
   const router = useRouter()
   const { user } = useSession()
   const { toggleSidebar } = useSidebarContext()
   const [showNotifications, setShowNotifications] = useState(false)
-  const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const queryClient = useQueryClient()
+
+  const { data: notificacoesData } = useQuery<NotificacoesApiResponse>({
+    queryKey: ['notificacoes-header', user?.id],
+    queryFn: async () => await get<NotificacoesApiResponse>('/notificacoes?limite=5&page=1'),
+    enabled: !!user?.id,
+    staleTime: 0,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  })
+
+  const notifications = notificacoesData?.data?.docs || []
 
   const handleNotificationsClick = () => setShowNotifications(prev => !prev)
   const handleProfileClick = () => router.push("/perfil")
@@ -45,12 +74,43 @@ export default function Cabecalho({ pagina, descricao, showBackButton, onBackCli
 
 
   // Marcar notificações como lidas
-  function markAsRead(id?: string) {
+  async function markAsRead(id?: string) {
     if (id) {
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+      try {
+        await patch(`/notificacoes/${id}/visualizar`, {})
+        queryClient.invalidateQueries({ queryKey: ['notificacoes-header', user?.id] })
+      } catch (error) {
+        console.error("Erro ao marcar notificação como lida:", error)
+      }
     } else {
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      try {
+        const naoVisualizadas = notifications.filter(n => !n.visualizada)
+        await Promise.all(
+          naoVisualizadas.map(notif => 
+            patch(`/notificacoes/${notif._id}/visualizar`, {})
+          )
+        )
+        queryClient.invalidateQueries({ queryKey: ['notificacoes-header', user?.id] })
+      } catch (error) {
+        console.error("Erro ao marcar todas como lidas:", error)
+      }
     }
+  }
+
+  function formatTempoRelativo(data: string) {
+    const dataNotificacao = new Date(data)
+    const agora = new Date()
+    const diferencaMs = agora.getTime() - dataNotificacao.getTime()
+    const diferencaMinutos = Math.floor(diferencaMs / 60000)
+    const diferencaHoras = Math.floor(diferencaMinutos / 60)
+    const diferencaDias = Math.floor(diferencaHoras / 24)
+
+    if (diferencaMinutos < 1) return 'Agora'
+    if (diferencaMinutos < 60) return `Há ${diferencaMinutos} min`
+    if (diferencaHoras < 24) return `Há ${diferencaHoras}h`
+    if (diferencaDias === 1) return 'Ontem'
+    if (diferencaDias < 7) return `Há ${diferencaDias}d`
+    return new Date(data).toLocaleDateString("pt-BR")
   }
 
   return (
@@ -78,7 +138,10 @@ export default function Cabecalho({ pagina, descricao, showBackButton, onBackCli
         )}
         
 
-        <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">{pagina}</h1>
+        <h1 className="text-[18px] md:text-[22px] font-bold text-[#1f2937]">
+          {pagina}
+          {acao && <span className="text-[#6b7280] font-medium ml-2">• {acao}</span>}
+        </h1>
         {descricao && (
           <span className="text-[14px] md:text-[16px] text-[#6b7280] font-medium hidden sm:inline">
             {descricao}
@@ -95,9 +158,9 @@ export default function Cabecalho({ pagina, descricao, showBackButton, onBackCli
             aria-label="Notificações"
           >
             <Bell className="w-[22px] h-[22px] text-gray-700" strokeWidth={2.3} />
-            {notifications.some(n => !n.read) && (
+            {notifications.some(n => !n.visualizada) && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">
-                {notifications.filter(n => !n.read).length}
+                {notifications.filter(n => !n.visualizada).length}
               </span>
             )}
           </button>
@@ -107,7 +170,7 @@ export default function Cabecalho({ pagina, descricao, showBackButton, onBackCli
               <div className="p-3 flex items-center justify-between border-b border-gray-100">
                 <span className="font-medium">Notificações</span>
                 <button
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-blue-600 hover:underline cursor-pointer"
                   onClick={() => markAsRead(undefined)}
                 >
                   Marcar todas
@@ -118,22 +181,24 @@ export default function Cabecalho({ pagina, descricao, showBackButton, onBackCli
                 {notifications.length === 0 ? (
                   <div className="p-4 text-center text-sm text-gray-500">Sem notificações</div>
                 ) : (
-                  notifications.map(n => (
+                  notifications.slice(0, 5).map(n => (
                     <div
-                      key={n.id}
-                      className={`p-3 cursor-pointer hover:bg-gray-50 flex justify-between items-start ${
-                        n.read ? "" : "bg-gray-50"
+                      key={n._id}
+                      className={`p-3 cursor-pointer hover:bg-gray-100 flex justify-between items-start ${
+                        n.visualizada ? "bg-white" : "bg-gray-50"
                       }`}
-                      onClick={() => markAsRead(n.id)}
+                      onClick={() => !n.visualizada && markAsRead(n._id)}
                     >
-                      <div>
-                        <div className="text-sm font-medium text-gray-800">{n.title}</div>
-                        {n.body && <div className="text-xs text-gray-500 mt-1">{n.body}</div>}
+                      <div className="flex items-start gap-2 flex-1">
+                        {!n.visualizada && (
+                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"></div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className={`text-sm text-gray-800 truncate ${!n.visualizada ? 'font-medium' : ''}`}>{n.mensagem}</div>
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-400 ml-2">
-                        {n.createdAt
-                          ? new Date(n.createdAt).toLocaleDateString("pt-BR")
-                          : ""}
+                      <div className="text-xs text-gray-400 ml-2 shrink-0">
+                        {formatTempoRelativo(n.data_hora)}
                       </div>
                     </div>
                   ))
