@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { get } from "@/lib/fetchData";
-import { Search, Filter, ArrowDownUp, ArrowUpDown, FileText, X } from "lucide-react";
+import { Search, Filter, ArrowDownUp, ArrowUpDown, FileText, X, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect, useRef, Suspense } from "react";
 import { PulseLoader } from "react-spinners";
 import { toast, Slide } from "react-toastify";
@@ -37,10 +37,10 @@ function RelatorioMovimentacoesPageContent() {
   const [tipoFilter, setTipoFilter] = useState("");
   const [isFiltrosModalOpen, setIsFiltrosModalOpen] = useState(false);
   const [isExportarModalOpen, setIsExportarModalOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
-  // Query principal
   const {
     data,
     isLoading,
@@ -66,8 +66,14 @@ function RelatorioMovimentacoesPageContent() {
     },
     initialPageParam: 1,
     staleTime: 1000 * 60 * 5,
-    refetchOnMount: true,
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
+    retry: (failureCount, error: any) => {
+      if (error?.message?.includes('Falha na autenticação')) {
+        return false;
+      }
+      return failureCount < 3;
+    },
   });
 
   useEffect(() => {
@@ -75,11 +81,7 @@ function RelatorioMovimentacoesPageContent() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasNextPage &&
-          !isFetchingNextPage
-        ) {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
@@ -88,54 +90,51 @@ function RelatorioMovimentacoesPageContent() {
 
     observer.observe(observerTarget.current);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const todasMovimentacoes =
     data?.pages.flatMap((page) => page.data.docs) || [];
 
-  // Função auxiliar para normalizar strings (remove acentos e converte para minúsculas)
   const normalizeStr = (str: string) => {
     return String(str ?? "")
       .toLowerCase()
       .trim()
       .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+      .replace(/[\u0300-\u036f]/g, "");
   };
 
-  // Debug: Log dos valores únicos de tipo
-  if (todasMovimentacoes.length > 0) {
-    const tiposUnicos = [...new Set(todasMovimentacoes.map(m => m.tipo))];
-    console.log("Tipos únicos de movimentações:", tiposUnicos);
-    console.log("Filtro atual:", tipoFilter);
-  }
+  const movimentacoesFiltradas = todasMovimentacoes
+    .filter((mov) => {
+      const texto = searchTerm.toLowerCase();
 
-  const movimentacoesFiltradas = todasMovimentacoes.filter((mov) => {
-  const texto = searchTerm.toLowerCase();
+      const matchSearch =
+        !searchTerm ||
+        mov.componente?._id?.toLowerCase().includes(texto) ||
+        mov.componente?.nome?.toLowerCase().includes(texto) ||
+        mov.localizacao?.nome?.toLowerCase().includes(texto) ||
+        mov.tipo?.toLowerCase().includes(texto) ||
+        String(mov.quantidade).includes(searchTerm) ||
+        new Date(mov.data_hora)
+          .toLocaleString("pt-BR")
+          .toLowerCase()
+          .includes(texto);
 
-  const matchSearch =
-    !searchTerm ||
-    mov.componente?._id?.toLowerCase().includes(texto) ||
-    mov.componente?.nome?.toLowerCase().includes(texto) ||
-    mov.localizacao?.nome?.toLowerCase().includes(texto) ||
-    mov.tipo?.toLowerCase().includes(texto) ||
-    String(mov.quantidade).includes(searchTerm) ||
-    new Date(mov.data_hora)
-      .toLocaleString("pt-BR")
-      .toLowerCase()
-      .includes(texto);
+      const tipoMovNormalized = normalizeStr(mov.tipo);
+      const filterNormalized = normalizeStr(tipoFilter);
+      
+      const matchTipo = !filterNormalized || 
+        tipoMovNormalized === filterNormalized ||
+        tipoMovNormalized.includes(filterNormalized);
 
-  const tipoMovNormalized = normalizeStr(mov.tipo);
-  const filterNormalized = normalizeStr(tipoFilter);
-  
-  const matchTipo = !filterNormalized || 
-    tipoMovNormalized === filterNormalized ||
-    tipoMovNormalized.includes(filterNormalized);
+      return matchSearch && matchTipo;
+    })
+    .sort((a, b) => {
+      return new Date(b.data_hora).getTime() - new Date(a.data_hora).getTime();
+    });
 
-  return matchSearch && matchTipo;
-});
-
-  // Estatísticas - usando normalização para garantir compatibilidade
   const totalMov = movimentacoesFiltradas.length;
   const entradas = movimentacoesFiltradas.filter(
     (m) => normalizeStr(m.tipo) === "entrada"
@@ -144,7 +143,6 @@ function RelatorioMovimentacoesPageContent() {
     (m) => normalizeStr(m.tipo) === "saida"
   ).length;
 
-  // Seleção
   const handleSelectAll = () => {
     if (selectedItems.size === movimentacoesFiltradas.length) {
       setSelectedItems(new Set());
@@ -167,7 +165,6 @@ function RelatorioMovimentacoesPageContent() {
     selectedItems.size > 0 &&
     selectedItems.size < movimentacoesFiltradas.length;
 
-  // Exportar relatório
   const handleExport = async (fileName: string, format: string) => {
     try {
       const selecionadas = movimentacoesFiltradas.filter((m) =>
@@ -210,41 +207,61 @@ function RelatorioMovimentacoesPageContent() {
   };
 
   return (
-  <div className="w-full h-screen flex flex-col overflow-x-hidden">
-  <Cabecalho pagina="Relatórios" descricao="Movimentações" />
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-movimentacoes-page">
+      <Cabecalho pagina="Relatórios" descricao="Movimentações" />
 
-      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 pb-0">
-        
+      <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+        <div className="shrink-0 mb-6">
+          <button
+            onClick={() => setIsStatsOpen(!isStatsOpen)}
+            className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              <span className="font-semibold text-gray-700">Estatísticas</span>
+            </div>
+            {isStatsOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-600" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-600" />
+            )}
+          </button>
 
-        {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <StatCard
-            title="Total de"
-            subtitle="movimentações"
-            value={totalMov}
-            icon={FileText}
-            iconColor="text-blue-600"
-            iconBgColor="bg-blue-100"
-          />
-          <StatCard
-            title="Entradas"
-            value={entradas}
-            icon={ArrowDownUp}
-            iconColor="text-green-600"
-            iconBgColor="bg-green-100"
-          />
-          <StatCard
-            title="Saídas"
-            value={saidas}
-            icon={ArrowUpDown}
-            iconColor="text-yellow-600"
-            iconBgColor="bg-yellow-100"
-          />
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isStatsOpen ? 'block mt-4' : 'hidden'} xl:grid xl:mt-0`} data-test="stats-grid">
+            <StatCard
+              title="Total de"
+              subtitle="movimentações"
+              value={totalMov}
+              icon={FileText}
+              iconColor="text-blue-600"
+              iconBgColor="bg-blue-100"
+              data-test="stat-total-movimentacoes"
+              hoverTitle={`Total de movimentações cadastradas: ${totalMov}`}
+            />
+            <StatCard
+              title="Entradas"
+              value={entradas}
+              icon={ArrowDownUp}
+              iconColor="text-green-600"
+              iconBgColor="bg-green-100"
+              data-test="stat-entradas"
+              hoverTitle={`Total de entradas: ${entradas}`}
+            />
+            <StatCard
+              title="Saídas"
+              value={saidas}
+              icon={ArrowUpDown}
+              iconColor="text-yellow-600"
+              iconBgColor="bg-yellow-100"
+              data-test="stat-saidas"
+              hoverTitle={`Total de saídas: ${saidas}`}
+            />
+          </div>
         </div>
 
-        {/* Barra de pesquisa */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
+        {/* Barra de Pesquisa e Botões */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0" data-test="search-actions-bar">
+          <div className="relative flex-1" data-test="search-container">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               type="text"
@@ -252,11 +269,13 @@ function RelatorioMovimentacoesPageContent() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              data-test="search-input"
             />
           </div>
           <Button
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
+            data-test="filtros-button"
             onClick={() => setIsFiltrosModalOpen(true)}
           >
             <Filter className="w-4 h-4" />
@@ -272,27 +291,62 @@ function RelatorioMovimentacoesPageContent() {
             style={
               selectedItems.size > 0 ? { backgroundColor: "#306FCC" } : {}
             }
+            data-test="exportar-button"
             onClick={() => setIsExportarModalOpen(true)}
+            title={selectedItems.size === 0 ? 'Selecione movimentações para exportar' : `Exportar ${selectedItems.size} movimentação(ões)`}
           >
             <img src="../gerar-pdf.svg" alt="" className="w-5" />
             Exportar
           </Button>
         </div>
 
-        {/* Tabela */}
+        {/* Filtros aplicados */}
+        {tipoFilter && (
+          <div className="mb-4 shrink-0" data-test="applied-filters">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <span className="font-medium">Tipo:</span>
+                <span>{tipoFilter}</span>
+                <button
+                  onClick={() => setTipoFilter('')}
+                  className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
+                  title="Remover filtro de tipo"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mensagem de Erro */}
+        {error && (
+          <div
+            className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0"
+            data-test="error-message"
+            title={`Erro completo: ${error.message}`}
+          >
+            Erro ao carregar movimentações: {error.message}
+          </div>
+        )}
+
+        {/* Área da Tabela com Scroll */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center flex-1">
-              <PulseLoader color="#3b82f6" size={6} />
-              <p className="mt-4 text-gray-600">Carregando movimentações...</p>
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
+              </div>
+              <p className="mt-4 text-gray-600 font-medium">Carregando movimentações...</p>
             </div>
           ) : movimentacoesFiltradas.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full caption-bottom text-xs sm:text-sm">
+                <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="text-center w-[50px] px-8">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -300,73 +354,95 @@ function RelatorioMovimentacoesPageContent() {
                             if (input) input.indeterminate = isSomeSelected;
                           }}
                           onChange={handleSelectAll}
+                          className="w-4 h-4 cursor-pointer"
+                          title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
                         />
                       </TableHead>
-                      <TableHead className="text-center px-8">CÓDIGO</TableHead>
-                      <TableHead className="text-center px-8">PRODUTO</TableHead>
-                      <TableHead className="text-center px-8">Quantidade</TableHead>
-                      <TableHead className="text-center px-8">TIPO DE MOVIMENTAÇÃO</TableHead>
-                      <TableHead className="text-center px-8">LOCALIZAÇÃO</TableHead>
-                      <TableHead className="text-center px-8">DATA/HORA</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">TIPO DE MOVIMENTAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">DATA/HORA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                           {movimentacoesFiltradas.map((mov) => (
-                            <TableRow key={mov._id} className="hover:bg-gray-50 border-b">
+                            <TableRow key={mov._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
                               
                               {/* Seleção */}
-                              <TableCell className="text-center px-8">
+                              <TableCell className="text-center px-8 py-3 align-middle">
                                 <input
                                   type="checkbox"
                                   checked={selectedItems.has(mov._id)}
                                   onChange={() => handleSelectItem(mov._id)}
+                                  className="w-4 h-4 cursor-pointer"
                                 />
                               </TableCell>
 
                               {/* CÓDIGO */}
-                              <TableCell className="text-center px-8 font-medium text-gray-800">
-                                {mov.componente?._id?.slice(0, 8) || mov._id?.slice(0, 8) || "—"}
+                              <TableCell className="font-medium text-left px-8 py-3">
+                                <span className="truncate block max-w-[200px]" title={mov.componente?._id || mov._id}>
+                                  {mov.componente?._id?.slice(-8) || mov._id?.slice(-8) || "—"}
+                                </span>
                               </TableCell>
 
                               {/* PRODUTO */}
-                              <TableCell className="text-center px-8">
-                                {mov.componente?.nome || "Sem nome"}
+                              <TableCell className="font-medium text-left px-8 py-3">
+                                <span className="truncate block max-w-[200px]" title={mov.componente?.nome || "Sem nome"}>
+                                  {mov.componente?.nome || "Sem nome"}
+                                </span>
                               </TableCell>
 
                               {/* QUANTIDADE */}
-                              <TableCell className="text-center px-8">
+                              <TableCell className="text-center px-8 py-3 font-medium">
                                 {mov.quantidade}
                               </TableCell>
 
                               {/* TIPO DE MOVIMENTAÇÃO */}
-                              <TableCell className="text-center px-8">
-                                {(() => {
-                                  const tipoRaw = String(mov.tipo ?? "").toLowerCase();
-                                  const isEntrada = tipoRaw.includes("entrada");
-                                  const isSaida = tipoRaw.includes("saída") || tipoRaw.includes("saida");
+                              <TableCell className="text-center px-8 py-3 whitespace-nowrap">
+                                <div className="flex justify-center">
+                                  {(() => {
+                                    const tipoRaw = String(mov.tipo ?? "").toLowerCase();
+                                    const isEntrada = tipoRaw.includes("entrada");
+                                    const isSaida = tipoRaw.includes("saída") || tipoRaw.includes("saida");
 
-                                  const classes = isEntrada
-                                    ? "bg-green-100 text-green-600"
-                                    : isSaida
-                                    ? "bg-red-100 text-red-600"
-                                    : "bg-gray-100 text-gray-800";
+                                    const classes = isEntrada
+                                      ? "bg-green-100 text-green-800"
+                                      : isSaida
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-gray-100 text-gray-800";
 
-                                  return (
-                                    <span className={`px-3 py-1 rounded-md text-xs font-medium ${classes}`}>
-                                      {String(mov.tipo ?? "").trim() || "-"}
-                                    </span>
-                                  );
-                                })()}
+                                    const textoFormatado = isEntrada
+                                      ? "Entrada"
+                                      : isSaida
+                                      ? "Saída"
+                                      : String(mov.tipo ?? "").trim() || "-";
+
+                                    return (
+                                      <span
+                                        className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${classes}`}
+                                        title={textoFormatado}
+                                      >
+                                        {textoFormatado}
+                                      </span>
+                                    );
+                                  })()}
+                                </div>
                               </TableCell>
 
                               {/* LOCALIZAÇÃO */}
-                              <TableCell className="text-center px-8">
-                                {mov.localizacao?.nome}
+                              <TableCell className="text-left px-8 py-3 font-medium">
+                                <span className="truncate block max-w-[200px]" title={mov.localizacao?.nome || "-"}>
+                                  {mov.localizacao?.nome || "-"}
+                                </span>
                               </TableCell>
 
                               {/* DATA/HORA */}
-                              <TableCell className="text-center px-8">
-                                {new Date(mov.data_hora).toLocaleString("pt-BR")}
+                              <TableCell className="text-center px-8 py-3 font-medium whitespace-nowrap">
+                                <span className="truncate block max-w-[150px]" title={new Date(mov.data_hora).toLocaleString("pt-BR")}>
+                                  {new Date(mov.data_hora).toLocaleString("pt-BR")}
+                                </span>
                               </TableCell>
 
                             </TableRow>
@@ -384,11 +460,13 @@ function RelatorioMovimentacoesPageContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
+            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
               <div className="flex flex-col items-center">
-                <FileText className="w-10 h-10 text-gray-400 mb-4" />
-                <p className="text-gray-500">
-                  Nenhuma movimentação encontrada.
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-lg">
+                  {searchTerm ? 'Nenhuma movimentação encontrada para sua pesquisa.' : 'Não há movimentações cadastradas...'}
                 </p>
               </div>
             </div>
@@ -421,14 +499,15 @@ function RelatorioMovimentacoesPageContent() {
 
 export default function RelatorioMovimentacoesPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="w-full h-screen flex flex-col items-center justify-center">
-          <PulseLoader color="#3b82f6" size={8} />
-          <p className="mt-4 text-gray-600">Carregando...</p>
+    <Suspense fallback={
+      <div className="w-full h-screen flex flex-col items-center justify-center">
+        <div className="relative w-12 h-12">
+          <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
         </div>
-      }
-    >
+        <p className="mt-4 text-gray-600 font-medium">Carregando...</p>
+      </div>
+    }>
       <RelatorioMovimentacoesPageContent />
     </Suspense>
   );
