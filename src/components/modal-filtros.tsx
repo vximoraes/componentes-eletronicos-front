@@ -38,9 +38,11 @@ interface ModalFiltrosProps {
   categoriaFilter: string;
   statusFilter: string;
   onFiltersChange: (categoria: string, status: string) => void;
+  statusOptions?: Array<{ value: string; label: string }>;
+  showCategoria?: boolean;
 }
 
-const statusOptions = [
+const defaultStatusOptions = [
   { value: '', label: 'Todos os status' },
   { value: 'Em Estoque', label: 'Em Estoque' },
   { value: 'Baixo Estoque', label: 'Baixo Estoque' },
@@ -52,7 +54,9 @@ export default function ModalFiltros({
   onClose,
   categoriaFilter,
   statusFilter,
-  onFiltersChange
+  onFiltersChange,
+  statusOptions = defaultStatusOptions,
+  showCategoria = true
 }: ModalFiltrosProps) {
   const [selectedCategoria, setSelectedCategoria] = useState(categoriaFilter);
   const [selectedStatus, setSelectedStatus] = useState(statusFilter);
@@ -224,8 +228,9 @@ export default function ModalFiltros({
 
         {/* Conteúdo dos Filtros */}
         <div className="px-6 pb-6 space-y-6">
-          {/* Filtro por Categoria */}
-          <div className="space-y-2 pt-4">
+          {/* Filtro por Categoria - Condicional */}
+          {showCategoria && (
+            <div className="space-y-2 pt-4">
             <label className="block text-base font-medium text-gray-700">
               Categoria
             </label>
@@ -302,6 +307,7 @@ export default function ModalFiltros({
               )}
             </div>
           </div>
+          )}
 
           {/* Filtro por Status */}
           <div className="space-y-2 pb-4">
