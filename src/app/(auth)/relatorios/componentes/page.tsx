@@ -466,7 +466,7 @@ function RelatorioComponentesPageContent() {
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
-                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                      <TableRow data-test="componente-row" key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
                         <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
@@ -475,17 +475,17 @@ function RelatorioComponentesPageContent() {
                             className="w-4 h-4 cursor-pointer"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3">
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="componente-codigo">
                           <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3">
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="componente-nome">
                           <span className="truncate block max-w-[200px]" title={estoque.componente.nome}>
                             {estoque.componente.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium">
+                        <TableCell className="text-center px-8 py-3 font-medium" data-test="componente-quantidade">
                           {estoque.quantidade}
                         </TableCell>
                         <TableCell className="text-center px-8 py-3 whitespace-nowrap">
@@ -504,7 +504,7 @@ function RelatorioComponentesPageContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3 font-medium">
+                        <TableCell className="text-left px-8 py-3 font-medium" data-test="componente-localizacao">
                           <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
                             {estoque.localizacao.nome}
                           </span>
