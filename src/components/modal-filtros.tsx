@@ -230,7 +230,7 @@ export default function ModalFiltros({
         <div className="px-6 pb-6 space-y-6">
           {/* Filtro por Categoria - Condicional */}
           {showCategoria && (
-            <div className="space-y-2 pt-4">
+            <div className="space-y-2 pt-4" data-test="filtro-categoria-container">
             <label className="block text-base font-medium text-gray-700">
               Categoria
             </label>
@@ -246,6 +246,7 @@ export default function ModalFiltros({
                 }}
                 disabled={isLoadingCategorias}
                 className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                data-test="filtro-categoria-dropdown"
               >
                 <span className={selectedCategoria ? 'text-gray-900' : 'text-gray-500'}>
                   {isLoadingCategorias ? 'Carregando...' : getSelectedCategoriaLabel()}
@@ -310,7 +311,7 @@ export default function ModalFiltros({
           )}
 
           {/* Filtro por Status */}
-          <div className="space-y-2 pb-4">
+          <div className="space-y-2 pb-4" data-test="filtro-status-container">
             <label className="block text-base font-medium text-gray-700">
               Status
             </label>
@@ -321,6 +322,7 @@ export default function ModalFiltros({
                   setCategoriaDropdownOpen(false);
                 }}
                 className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer"
+                data-test="filtro-status-dropdown"
               >
                 <span className={selectedStatus ? 'text-gray-900' : 'text-gray-500'}>
                   {getSelectedStatusLabel()}
@@ -357,6 +359,7 @@ export default function ModalFiltros({
               variant="outline"
               onClick={handleClearFilters}
               className="flex-1 cursor-pointer"
+              data-test="limpar-filtros-button"
             >
               Limpar Filtros
             </Button>
@@ -364,6 +367,7 @@ export default function ModalFiltros({
               onClick={handleApplyFilters}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
+              data-test="aplicar-filtros-button"
             >
               Aplicar Filtros
             </Button>

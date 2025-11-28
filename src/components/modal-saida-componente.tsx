@@ -359,10 +359,13 @@ export default function ModalSaidaComponente({
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
+      data-test="modal-saida-backdrop"
     >
       <div
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        data-test="modal-saida"
       >
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
@@ -370,23 +373,24 @@ export default function ModalSaidaComponente({
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             title="Fechar"
+            data-test="modal-saida-close"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Conteúdo do Modal */}
-        <div className="px-6 pb-6 space-y-6">
+        <div className="px-6 pb-6 space-y-6" data-test="modal-saida-content">
           <div className="text-center pt-4 px-8">
             <div className="max-h-[100px] overflow-y-auto">
-              <h2 className="text-xl font-semibold text-gray-900 mb-1 break-words">
+              <h2 className="text-xl font-semibold text-gray-900 mb-1 break-words" data-test="modal-saida-titulo">
                 Registrar saída de {componenteNome}
               </h2>
             </div>
           </div>
 
           {/* Campo Quantidade */}
-          <div className="space-y-2">
+          <div className="space-y-2" data-test="modal-saida-quantidade-container">
             <div className="flex justify-between items-center">
               <label htmlFor="quantidade" className="block text-base font-medium text-gray-700">
                 Quantidade <span className="text-red-500">*</span>
@@ -397,6 +401,7 @@ export default function ModalSaidaComponente({
             </div>
             <input
               id="quantidade"
+              name="quantidade"
               type="text"
               placeholder="Digite a quantidade"
               value={quantidade}
@@ -405,14 +410,15 @@ export default function ModalSaidaComponente({
               className={`w-full px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${errors.quantidade ? 'border-red-500' : 'border-gray-300'
                 }`}
               disabled={saidaMutation.isPending}
+              data-test="modal-saida-quantidade-input"
             />
             {errors.quantidade && (
-              <p className="text-red-500 text-sm mt-1">{errors.quantidade}</p>
+              <p className="text-red-500 text-sm mt-1" data-test="modal-saida-quantidade-erro">{errors.quantidade}</p>
             )}
           </div>
 
           {/* Campo Localização */}
-          <div className="space-y-2">
+          <div className="space-y-2" data-test="modal-saida-localizacao-container">
             <label className="block text-base font-medium text-gray-700">
               Localização <span className="text-red-500">*</span>
             </label>
@@ -423,6 +429,7 @@ export default function ModalSaidaComponente({
                 className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${errors.localizacao ? 'border-red-500' : 'border-gray-300'
                   }`}
                 disabled={isLoadingLocalizacoes || saidaMutation.isPending}
+                data-test="modal-saida-localizacao-dropdown"
               >
                 <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0 overflow-hidden">
                   <span className={`truncate block ${localizacaoSelecionada ? 'max-w-[45px] sm:max-w-[120px]' : 'max-w-full'} ${localizacaoSelecionadaObj ? 'text-gray-900' : 'text-gray-500'}`}>
@@ -552,13 +559,14 @@ export default function ModalSaidaComponente({
         </div>
 
         {/* Footer com ações */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg" data-test="modal-saida-footer">
           <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={onClose}
               disabled={saidaMutation.isPending}
               className="flex-1 cursor-pointer"
+              data-test="modal-saida-cancelar"
             >
               Cancelar
             </Button>
@@ -567,6 +575,7 @@ export default function ModalSaidaComponente({
               disabled={saidaMutation.isPending}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
+              data-test="modal-saida-confirmar"
             >
               {saidaMutation.isPending ? 'Registrando...' : 'Registrar'}
             </Button>
