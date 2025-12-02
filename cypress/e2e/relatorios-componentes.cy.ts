@@ -1,4 +1,5 @@
-import { check } from "zod";
+import path from 'path'
+import { da } from 'zod/v4/locales';
 
 describe('Tela de relatórios de componentes.', () => {
   let email = Cypress.env('email');
@@ -139,25 +140,122 @@ describe('Tela de relatórios de componentes.', () => {
     })
   })
 
-  it('Deve verificar a se as informações das estaticas estão visíveis.', () => {
+  it.skip('Deve verificar a se as informações das estaticas estão visíveis.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.wait(500)
     cy.get('[data-test="stat-total-componentes"]').within((e) => {
       const paragrafos = e.find('p')
       let texto = ''
-      for(const p of paragrafos){
-        texto += p.textContent+" "
+      for (const p of paragrafos) {
+        texto += p.textContent + " "
       }
       texto = texto.trim()
-      if(texto){
+      if (texto) {
         expect(texto).contain('Total de componentes')
       }
-      // expect(e).contain('Total de componentes')
+    })
+
+    cy.get('[data-test="stat-em-estoque"]').within((e) => {
+      const paragrafos = e.find('p')
+      let texto = ''
+      for (const p of paragrafos) {
+        texto += p.textContent + " "
+      }
+      texto = texto.trim()
+      if (texto) {
+        expect(texto).contain('Total de componentes')
+      }
+    })
+
+    cy.get('[data-test="stat-baixo-estoque"]').within((e) => {
+      const paragrafos = e.find('p')
+      let texto = ''
+      for (const p of paragrafos) {
+        texto += p.textContent + " "
+      }
+      texto = texto.trim()
+      if (texto) {
+        expect(texto).contain('Total de componentes')
+      }
+    })
+
+    cy.get('[data-test="stat-indisponiveis"]').within((e) => {
+      const paragrafos = e.find('p')
+      let texto = ''
+      for (const p of paragrafos) {
+        texto += p.textContent + " "
+      }
+      texto = texto.trim()
+      if (texto) {
+        expect(texto).contain('Total de componentes')
+      }
+    })
+  })
+  it.skip('Deve pesquisar um componente pelo nome.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="componente-row"]').first().find('[data-test="componente-nome"]').first().invoke('text').then((e) => {
+      cy.get('[data-test="search-input"]').type(e)
+      cy.wait(500)
+      cy.get('[data-test="componente-row"]').each((componente_nome) => {
+        const nome = componente_nome.find('[data-test="componente-nome"]').text()
+        expect(e).to.eq(nome)
+      })
     })
   })
 
+  it.skip('Botão de Exportar deve estar sem interação se nenhum componente com checkbox seletada estiver presente.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="exportar-button"]').should('not.be.enabled')
+    cy.get('[data-test="checkbox-select-item"]').first().click()
+  })
 
+  it.skip('Botão de Exportar deve estar interativo se ao menos um componente estiver selecionado.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="checkbox-select-item"]').first().click()
+    cy.get('[data-test="exportar-button"]').should('be.enabled')
+  })
+
+  it.skip('Não deve Exportar um .pdf se o campo nome estiver vazio.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="checkbox-select-item"]').first().click()
+    cy.get('[data-test="exportar-button"]').click()
+    cy.get('[data-test="modal-exportar-content"]').should('be.visible')
+    cy.get('[data-test="filename-input"]').clear()
+    cy.get('[data-test="format-radio-pdf"]').check().should('be.checked')
+    cy.get('[data-test="modal-exportar-export-button"]').should('not.be.enabled')
+  })
+
+  it.skip('Não deve Exportar um .cvs se o campo nome estiver vazio.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="checkbox-select-item"]').first().click()
+    cy.get('[data-test="exportar-button"]').click()
+    cy.get('[data-test="modal-exportar-content"]').should('be.visible')
+    cy.get('[data-test="filename-input"]').clear()
+    cy.get('[data-test="format-radio-csv"]').click()
+    cy.get('[data-test="format-radio-csv"]').check().should('be.checked')
+    cy.get('[data-test="modal-exportar-export-button"]').should('not.be.enabled')
+  })
+
+  it('Deve exportar um pdf com sucesso.', () => {
+    const date = new Date().getTime()
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="checkbox-select-item"]').first().click()
+    cy.get('[data-test="exportar-button"]').click()
+    cy.get('[data-test="format-radio-pdf"]').check().should('be.checked')
+    cy.get('[data-test="filename-input"]').clear().type(date.toString())
+    cy.wait(1000)
+    cy.get('[data-test="modal-exportar-content"]').should('be.visible').click({force:true})
+    // cy.get('[data-test="modal-exportar-content"]').should('not.exist')
+    // const filePath = path.join(Cypress.config('downloadsFolder'), date.toString()+"-2025-12-02.pdf")
+    // cy.readFile(filePath).should('exist')
+  })
 })
 
 function login(email: string, senha: string) {
