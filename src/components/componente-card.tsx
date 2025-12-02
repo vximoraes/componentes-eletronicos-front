@@ -9,6 +9,7 @@ interface ComponenteCardSimplesProps {
   imagem?: string;
   onClick: (id: string, nome: string) => void;
   isSelected?: boolean;
+  dataTestId?: string;
 }
 
 export default function ComponenteCardSimples({
@@ -17,7 +18,8 @@ export default function ComponenteCardSimples({
   categoria,
   imagem,
   onClick,
-  isSelected = false
+  isSelected = false,
+  dataTestId
 }: ComponenteCardSimplesProps) {
   const imagemComTimestamp = React.useMemo(() => {
     if (!imagem) return undefined;
@@ -29,8 +31,9 @@ export default function ComponenteCardSimples({
     <div
       onClick={() => onClick(id, nome)}
       className={`bg-white rounded-lg border-2 p-4 hover:shadow-md transition-all duration-200 cursor-pointer ${
-        isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'
+        isSelected ? 'border-blue-500 bg-blue-50 selected' : 'border-gray-200 hover:border-blue-300'
       }`}
+      data-test={dataTestId}
     >
       <div className="flex flex-col items-center text-center gap-3">
         {/* Imagem do componente */}

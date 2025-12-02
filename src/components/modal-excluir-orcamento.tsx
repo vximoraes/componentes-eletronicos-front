@@ -94,6 +94,7 @@ export default function ModalExcluirOrcamento({
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
+      data-test="modal-excluir"
     >
       <div
         className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
@@ -105,6 +106,7 @@ export default function ModalExcluirOrcamento({
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             title="Fechar"
+            data-test="modal-excluir-close"
           >
             <X size={20} />
           </button>
@@ -113,12 +115,12 @@ export default function ModalExcluirOrcamento({
         {/* Conteúdo */}
         <div className="px-6 pb-6 space-y-6">
           <div className="text-center pt-4 px-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2" data-test="modal-excluir-titulo">
               Excluir orçamento
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o orçamento <span className="font-semibold">{orcamentoNome}</span>?
+                Tem certeza que deseja excluir o orçamento <span className="font-semibold" data-test="modal-excluir-nome-orcamento">{orcamentoNome}</span>?
               </p>
             </div>
           </div>
@@ -143,6 +145,7 @@ export default function ModalExcluirOrcamento({
               onClick={onClose}
               disabled={excluirMutation.isPending}
               className="flex-1 cursor-pointer"
+              data-test="modal-excluir-cancelar"
             >
               Cancelar
             </Button>
@@ -151,6 +154,7 @@ export default function ModalExcluirOrcamento({
               disabled={excluirMutation.isPending}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#DC2626' }}
+              data-test="modal-excluir-confirmar"
             >
               {excluirMutation.isPending ? 'Excluindo...' : 'Excluir'}
             </Button>

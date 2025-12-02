@@ -457,6 +457,7 @@ export default function EditarOrcamentoPage() {
                     type="button"
                     onClick={handleAdicionarComponente}
                     className="flex items-center gap-2 text-white hover:bg-green-500 cursor-pointer bg-green-600 text-sm sm:text-base px-3 sm:px-4"
+                    data-test="botao-adicionar-componente"
                   >
                     <Plus className="w-4 h-4" />
                     <span className="hidden sm:inline">Adicionar componente</span>
@@ -465,7 +466,7 @@ export default function EditarOrcamentoPage() {
                 </div>
 
                 {/* Tabela */}
-                <div className="border rounded-t-lg overflow-auto bg-white flex-1 flex flex-col">
+                <div className="border rounded-t-lg overflow-auto bg-white flex-1 flex flex-col" data-test="tabela-itens-orcamento">
                   {isLoadingComponentes ? (
                     <>
                       <table className="w-full caption-bottom text-xs sm:text-sm">
@@ -556,6 +557,7 @@ export default function EditarOrcamentoPage() {
                                     }
                                   }}
                                   className="w-full h-[38px] flex items-center justify-between px-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm cursor-pointer"
+                                  data-test="select-fornecedor"
                                 >
                                   <span className={`truncate ${comp.fornecedor_nome ? 'text-gray-900' : 'text-gray-500'}`}>
                                     {comp.fornecedor_nome || 'Selecione'}
@@ -573,6 +575,7 @@ export default function EditarOrcamentoPage() {
                                   onClick={() => handleQuantidadeChange(index, -1)}
                                   className="p-1 hover:bg-gray-100 rounded cursor-pointer"
                                   disabled={comp.quantidade <= 1}
+                                  data-test="botao-decrementar"
                                 >
                                   <Minus className="w-4 h-4" />
                                 </button>
@@ -587,11 +590,13 @@ export default function EditarOrcamentoPage() {
                                   }}
                                   className="w-16 px-2 py-1 text-center border border-gray-300 rounded-md"
                                   min="1"
+                                  data-test="input-quantidade"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => handleQuantidadeChange(index, 1)}
                                   className="p-1 hover:bg-gray-100 rounded cursor-pointer"
+                                  data-test="botao-incrementar"
                                 >
                                   <Plus className="w-4 h-4" />
                                 </button>
@@ -608,11 +613,12 @@ export default function EditarOrcamentoPage() {
                                 placeholder="R$0,00"
                                 step="0.01"
                                 min="0"
+                                data-test="input-valor-unitario"
                               />
                             </td>
 
                             {/* Subtotal */}
-                            <td className="px-4 py-3 text-center text-gray-900 font-medium">
+                            <td className="px-4 py-3 text-center text-gray-900 font-medium" data-test="subtotal">
                               R${comp.subtotal.toFixed(2)}
                             </td>
 
@@ -624,6 +630,7 @@ export default function EditarOrcamentoPage() {
                                   onClick={() => handleRemoverComponente(index)}
                                   className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
                                   title="Remover componente"
+                                  data-test="botao-remover-item"
                                 >
                                   <Trash2 className="w-5 h-5" />
                                 </button>
@@ -638,7 +645,7 @@ export default function EditarOrcamentoPage() {
 
                 {/* Total */}
                 <div className="border-x border-b rounded-b-lg bg-gray-50 px-4 py-3 flex-shrink-0">
-                  <div className="text-center font-semibold text-gray-700 text-sm sm:text-base">
+                  <div className="text-center font-semibold text-gray-700 text-sm sm:text-base" data-test="total-orcamento">
                     Total: R${calcularTotal().toFixed(2)}
                   </div>
                 </div>
@@ -652,6 +659,7 @@ export default function EditarOrcamentoPage() {
                 variant="outline"
                 onClick={handleCancel}
                 className="min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                data-test="botao-cancelar"
               >
                 Cancelar
               </Button>
@@ -690,6 +698,7 @@ export default function EditarOrcamentoPage() {
       {isFornecedorDropdownOpen !== null && dropdownPosition && typeof window !== 'undefined' && createPortal(
         <div
           data-dropdown-portal
+          data-test="dropdown-fornecedores"
           style={{
             position: 'absolute',
             top: `${dropdownPosition.top}px`,
@@ -707,21 +716,23 @@ export default function EditarOrcamentoPage() {
               onChange={(e) => setFornecedorPesquisa(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               onClick={(e) => e.stopPropagation()}
+              data-test="dropdown-search-input"
             />
           </div>
-          <div className="overflow-y-auto">
+          <div className="overflow-y-auto" data-test="fornecedores-list">
             {isLoadingFornecedores ? (
               <div className="flex justify-center py-4">
                 <PulseLoader color="#306FCC" size={8} />
               </div>
             ) : fornecedoresLista.length > 0 ? (
               <>
-                {fornecedoresLista.map((fornecedor) => (
+                {fornecedoresLista.map((fornecedor, idx) => (
                   <button
                     key={fornecedor._id}
                     type="button"
                     onClick={() => handleFornecedorSelect(isFornecedorDropdownOpen, fornecedor._id, fornecedor.nome)}
                     className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm cursor-pointer"
+                    data-test={`fornecedor-option-${idx}`}
                   >
                     {fornecedor.nome}
                   </button>
