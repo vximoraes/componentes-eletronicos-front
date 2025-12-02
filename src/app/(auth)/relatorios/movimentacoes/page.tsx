@@ -56,6 +56,10 @@ function RelatorioMovimentacoesPageContent() {
       params.append("limit", "20");
       params.append("page", page.toString());
 
+      if (tipoFilter) {
+        params.append("tipo", tipoFilter);
+      }
+
       const queryString = params.toString();
       const url = `/movimentacoes${queryString ? `?${queryString}` : ""}`;
 
