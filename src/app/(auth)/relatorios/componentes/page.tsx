@@ -491,7 +491,7 @@ function RelatorioComponentesPageContent() {
                           {estoque.quantidade}
                         </TableCell>
                         <TableCell className="text-center px-8 py-3 whitespace-nowrap">
-                          <div className="flex justify-center">
+                          <div className="flex justify-center" data-test="componente-status">
                             <span
                               className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
                                 estoque.componente.status === 'Em Estoque'

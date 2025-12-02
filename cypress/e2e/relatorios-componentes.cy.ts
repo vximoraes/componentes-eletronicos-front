@@ -1,7 +1,9 @@
+import { check } from "zod";
 
 describe('Tela de relatórios de componentes.', () => {
   let email = Cypress.env('email');
-  let senha = Cypress.env('senha')
+  let senha = Cypress.env('senha');
+  let status = ["Em Estoque", "Baixo Estoque", "Indisponível"]
 
   beforeEach(() => {
     cy.visit('/')
@@ -44,13 +46,13 @@ describe('Tela de relatórios de componentes.', () => {
       cy.wrap(row).within(() => {
         // Verificar código do produto (ID)
         cy.get('[data-test="componente-codigo"]').should('be.visible')
-        
+
         // Verificar nome do produto
         cy.get('[data-test="componente-nome"]').should('be.visible')
-        
+
         // Verificar quantidade
         cy.get('[data-test="componente-quantidade"]').should('be.visible')
-        
+
         // Verificar localização
         cy.get('[data-test="componente-localizacao"]').should('be.visible')
       })
@@ -81,10 +83,10 @@ describe('Tela de relatórios de componentes.', () => {
     // Verificar se todos os checkboxes filhos foram marcados
     cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
       cy.wrap(checkbox).should('be.checked')
-      })
+    })
 
     cy.wrap(null).then(() => {
-      cy.get('[data-test="checkbox-select-all"]').click({force:true})
+      cy.get('[data-test="checkbox-select-all"]').click({ force: true })
       cy.get('[data-test="checkbox-select-all"]').should('not.be.checked')
       cy.get('[data-test="checkbox-select-item"]').each((chekbox) => {
         cy.wrap(chekbox).should('not.be.checked')
@@ -92,12 +94,36 @@ describe('Tela de relatórios de componentes.', () => {
     })
   })
 
-  it.skip('Deve realizar uma pesquisa por filtro,')
+  it('Deve realizar uma pesquisa pelo filtro baseado no status.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+
+    cy.get('[data-test="componente-status"]').first().invoke('text').then((e) => {
+      if (status.includes(e)) {
+        cy.get('[data-test="filtros-button"]').should('be.visible')
+        cy.get('[data-test="filtros-button"]').click()
+        cy.get('[data-test="filtro-status-dropdown"]').should('be.visible')
+        cy.get('[data-test="filtro-status-dropdown"]').click()
+        cy.get('[data-test="filtro-status-dropdown"]').parent().find('div').first().contains('button', `${e}`).should('be.visible')
+        cy.get('[data-test="filtro-status-dropdown"]').parent().find('div').first().contains('button', `${e}`).click()
+        cy.get('[data-test="aplicar-filtros-button"]').should('be.visible')
+        cy.get('[data-test="aplicar-filtros-button"]').click()
+        cy.wait(500)
+        cy.get('[data-test="componente-row"]').each((produto_status) => {
+          const statusAtual = produto_status.find('[data-test="componente-status"]').text()
+          expect(statusAtual).to.eq(e)
+        })
+      } else {
+        cy.log('Não há produtos cadastrados.')
+        return
+      }
+    })
+  })
 
 
 })
 
-function login(email:string, senha:string) {
+function login(email: string, senha: string) {
   cy.get('#email').type(email)
   cy.get("#senha").type(senha)
   cy.get('button').contains('Entrar').click()
