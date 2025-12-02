@@ -443,7 +443,7 @@ function RelatorioComponentesPageContent() {
               <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8" data-test="table-head-checkbox">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -455,13 +455,14 @@ function RelatorioComponentesPageContent() {
                           onChange={handleSelectAll}
                           className="w-4 h-4 cursor-pointer"
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
+                          data-test="checkbox-select-all"
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-codigo">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-componente">COMPONENTE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-quantidade">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-status">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-localizacao">LOCALIZAÇÃO</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -473,6 +474,7 @@ function RelatorioComponentesPageContent() {
                             checked={selectedItems.has(estoque._id)}
                             onChange={() => handleSelectItem(estoque._id)}
                             className="w-4 h-4 cursor-pointer"
+                            data-test="checkbox-select-item"
                           />
                         </TableCell>
                         <TableCell className="font-medium text-left px-8 py-3" data-test="componente-codigo">
