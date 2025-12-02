@@ -32,37 +32,17 @@ Para o armazenamento, consulta e alteração de dados da aplicação, o sistema 
 
 ## 3 - Categorização dos Requisitos em Funcionais x Não Funcionais
 
-   Requisito Funcional    | Requisito Não Funcional |
+Requisito Funcional    | Requisito Não Funcional |
 -----------|--------|
-RF001 – O sistema deve permitir o cadastro de usuários via convite por e-mail | NF001 – O sistema deve ser desenvolvido em Next.js 15 com React 19 |
-RF002 – O sistema deve permitir que o usuário realize login com e-mail e senha | NF002 – O sistema deve utilizar TypeScript para type safety |
-RF003 – O sistema deve permitir recuperação de senha via e-mail | NF003 – O sistema deve ser responsivo para mobile, tablet e desktop |
-RF004 – O sistema deve permitir ativação de conta via link enviado por e-mail | NF004 – O sistema deve ser acessível via navegadores modernos (Chrome, Firefox, Edge, Safari) |
-RF005 – O sistema deve permitir o cadastro de componentes eletrônicos | NF005 – O sistema deve implementar autenticação JWT via NextAuth |
-RF006 – O sistema deve permitir a edição de componentes eletrônicos | NF006 – O sistema deve validar dados com Zod antes do envio |
-RF007 – O sistema deve permitir a exclusão de componentes eletrônicos | NF007 – O sistema deve implementar paginação infinita para listas grandes |
-RF008 – O sistema deve permitir o cadastro de categorias para componentes | NF008 – O sistema deve exibir mensagens de feedback (toast notifications) |
-RF009 – O sistema deve permitir o gerenciamento de localizações de estoque | NF009 – O sistema deve ser containerizável via Docker |
-RF010 – O sistema deve permitir registro de entrada de componentes no estoque | NF010 – O sistema deve implementar cache com React Query |
-RF011 – O sistema deve permitir registro de saída de componentes do estoque | NF011 – A senha deve ter no mínimo 8 caracteres com: 1 maiúscula, 1 minúscula, 1 número e 1 caractere especial |
-RF012 – O sistema deve calcular automaticamente o status do componente (Em Estoque, Baixo Estoque, Indisponível) | NF012 – O sistema deve implementar skeleton loading para melhor UX |
-RF013 – O sistema deve permitir o cadastro de fornecedores | NF013 – Todos os formulários devem ter validação em tempo real |
-RF014 – O sistema deve permitir a edição de fornecedores | NF014 – O sistema deve implementar proteção de rotas autenticadas |
-RF015 – O sistema deve permitir a exclusão de fornecedores | NF015 – O sistema deve ter suporte a testes E2E com Cypress |
-RF016 – O sistema deve permitir o cadastro de orçamentos com múltiplos componentes e fornecedores | |
-RF017 – O sistema deve permitir a edição de orçamentos | |
-RF018 – O sistema deve permitir a exclusão de orçamentos | |
-RF019 – O sistema deve calcular automaticamente o total de orçamentos | |
-RF020 – O sistema deve permitir filtrar componentes por categoria e status | |
-RF021 – O sistema deve permitir pesquisar componentes, fornecedores, orçamentos e usuários | |
-RF022 – O sistema deve gerar relatórios de componentes em PDF e CSV | |
-RF023 – O sistema deve permitir seleção múltipla de itens para exportação | |
-RF024 – O sistema deve exibir estatísticas (total, em estoque, baixo estoque, indisponível) | |
-RF025 – O sistema deve permitir gerenciamento de usuários (admin) | |
-RF026 – O sistema deve permitir reenvio de convite para usuários não ativados | |
-RF027 – O sistema deve permitir visualização e edição de perfil do usuário | |
-RF028 – O sistema deve permitir upload de foto de perfil | |
-RF029 – O sistema deve exibir histórico de movimentações | |
+RF001 – O sistema deve permitir o cadastro de usuários pelo admin: nome, e-mail único e senha segura, que será redefinida pelo usuário através do e-mail. | NF001 – O sistema deve exibir mensagens de feedback (toast notifications)
+RF002 – O sistema deve permitir que usuários cadastrados acessem suas contas existentes para gerenciar seus componentes, utilizando autenticação segura via JWT. | NF002 – O sistema deve implementar proteção de rotas autenticadas
+RF003 – O sistema deve permitir gerenciar componentes com campos essenciais, validando categoria/localização e nome único; ajuste de quantidade só por movimentação. | NF003 – O sistema deve ser acessível via navegadores modernos
+RF004 – O sistema deve gerar alertas automáticos (estoque abaixo do mínimo, indisponibilidade, entradas/saídas), registrá-los e exibí-los aos usuários. | 
+RF005 – O sistema deve detalhar componentes e atualizar  estoque em tempo real.
+RF006 – O sistema deve possuir mecanismos de busca e filtragem por nome, status, categoria, localização e fornecedor, permitindo consultas rápidas e precisas.
+RF007 – O sistema deve permitir a criação de orçamentos, informando nome e componentes com seus devidos campos.
+RF008 – O sistema deve permitir gerenciar categorias, localizações e fornecedores.
+RF009 – O sistema deve permitir visualizar e emitir relatórios de estoque, movimentações e orçamentos.
 
 
 ### Casos de Teste

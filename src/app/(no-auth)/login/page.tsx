@@ -65,6 +65,7 @@ export default function LoginPage() {
                 placeholder="Insira seu endereço de e-mail"
                 {...register("email")}
                 disabled={isSubmitting}
+                data-test="email-input"
               />
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
@@ -82,6 +83,7 @@ export default function LoginPage() {
                   placeholder="Insira sua senha"
                   {...register("senha")}
                   disabled={isSubmitting}
+                  data-test="senha-input"
                 />
                 <button
                   type="button"
@@ -114,6 +116,7 @@ export default function LoginPage() {
                 type="submit"
                 className="p-3 md:p-5 w-full bg-[#306FCC] hover:bg-[#2557a7] transition-colors duration-500 cursor-pointer text-sm md:text-base"
                 disabled={isSubmitting}
+                data-test="botao-entrar"
               >
                 {isSubmitting ? "Entrando..." : "Entrar"}
               </Button>

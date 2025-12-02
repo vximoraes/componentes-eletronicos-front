@@ -43,4 +43,16 @@ next-env.d.ts
 
 # Cursor
 .cursorignore
+
+# Cypress
 cypress.env.json
+cypress/screenshots
+cypress/videos
+cypress/downloads
+cypress/logs
+cypress/reports
+cypress/screenshots
+cypress/videos
+cypress/downloads
+cypress/logs
+cypress/reports
