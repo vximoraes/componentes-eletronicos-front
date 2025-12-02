@@ -546,6 +546,7 @@ function RelatorioComponentesPageContent() {
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
+        data-test="modal-filtros"
       />
 
       {/* Modal de Exportar */}
