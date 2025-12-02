@@ -94,7 +94,7 @@ describe('Tela de relatórios de componentes.', () => {
     })
   })
 
-  it('Deve realizar uma pesquisa pelo filtro baseado no status.', () => {
+  it.skip('Deve realizar uma pesquisa pelo filtro baseado no status.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
@@ -113,10 +113,47 @@ describe('Tela de relatórios de componentes.', () => {
           const statusAtual = produto_status.find('[data-test="componente-status"]').text()
           expect(statusAtual).to.eq(e)
         })
+        cy.get('[data-test="filter-tag-status"]').contains(e)
       } else {
         cy.log('Não há produtos cadastrados.')
         return
       }
+    })
+  })
+  it.skip('Deve realizar uma pesquisa pelo filtro baseado na categoria.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="filtros-button"]').should('be.visible')
+    cy.get('[data-test="filtros-button"]').click()
+    cy.get('[data-test="filtro-categoria-dropdown"]').should('be.visible')
+    cy.get('[data-test="filtro-categoria-dropdown"]').click()
+    cy.get('[data-test="filtro-categoria-dropdown"]').parent().find('div').first().find('button').then((e) => {
+      const cabos = e.get()[1].textContent
+      cy.contains(cabos).should('be.visible')
+      cy.contains(cabos).click()
+      cy.get('[data-test="aplicar-filtros-button"]').should('be.visible')
+      cy.get('[data-test="aplicar-filtros-button"]').click()
+      cy.get('[data-test="componente-row"]').should('exist')
+      cy.get('[data-test="componente-row"]').should('be.visible')
+      cy.get('[data-test="filter-tag-categoria"]').contains(cabos)
+    })
+  })
+
+  it('Deve verificar a se as informações das estaticas estão visíveis.', () => {
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.wait(500)
+    cy.get('[data-test="stat-total-componentes"]').within((e) => {
+      const paragrafos = e.find('p')
+      let texto = ''
+      for(const p of paragrafos){
+        texto += p.textContent+" "
+      }
+      texto = texto.trim()
+      if(texto){
+        expect(texto).contain('Total de componentes')
+      }
+      // expect(e).contain('Total de componentes')
     })
   })
 

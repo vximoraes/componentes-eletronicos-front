@@ -385,28 +385,30 @@ function RelatorioComponentesPageContent() {
         {/* Filtros aplicados */}
         {(categoriaFilter || statusFilter) && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2" data-test="filters-container">
               {categoriaFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div data-test="filter-tag-categoria" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">Categoria:</span>
                   <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
                   <button
                     onClick={() => setCategoriaFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de categoria"
+                    data-test="remove-categoria-filter"
                   >
                     <X size={12} />
                   </button>
                 </div>
               )}
               {statusFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="filter-tag-status">
                   <span className="font-medium">Status:</span>
                   <span>{statusFilter}</span>
                   <button
                     onClick={() => setStatusFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de status"
+                    data-test="remove-status-filter"
                   >
                     <X size={12} />
                   </button>
