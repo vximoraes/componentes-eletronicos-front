@@ -8,7 +8,7 @@ import { SidebarGroup } from "@/components/ui/sidebar"
 import { SidebarMenu } from "@/components/ui/sidebar"
 import { SidebarMenuItem } from "@/components/ui/sidebar"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import SidebarButtonMenu from "./sidebarButton"
 import SidebarButtonWithSubmenu from "./sidebarButtonWithSubmenu"
 import { signOut } from "next-auth/react"
@@ -119,6 +119,29 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
   const { user } = useSession()
   const { canManageUsers } = usePermissions()
   const router = useRouter()
+  const [imageError, setImageError] = useState(false)
+  const [imageTimestamp, setImageTimestamp] = useState(() => Date.now())
+
+  useEffect(() => {
+    setImageError(false)
+    setImageTimestamp(Date.now())
+  }, [user?.fotoPerfil])
+
+  useEffect(() => {
+    const handleFotoUpdate = () => {
+      setImageError(false)
+      setImageTimestamp(Date.now())
+    }
+
+    window.addEventListener('userFotoUpdated', handleFotoUpdate)
+    return () => {
+      window.removeEventListener('userFotoUpdated', handleFotoUpdate)
+    }
+  }, [])
+
+  const handleImageError = useCallback(() => {
+    setImageError(true)
+  }, [])
 
   const handleLogout = async () => {
     localStorage.removeItem('user_permissions')
@@ -167,11 +190,12 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
                   onClick={handleProfileClick}
                   className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 cursor-pointer ${collapsed ? 'justify-center' : ''}`}
                 >
-                  {user?.fotoPerfil ? (
+                  {user?.fotoPerfil && !imageError ? (
                     <img
-                      src={`${user.fotoPerfil}?t=${new Date().getTime()}`}
+                      src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                       alt="Foto de perfil"
                       className="w-[40px] h-[40px] rounded-full object-cover"
+                      onError={handleImageError}
                     />
                   ) : (
                     <div className="w-[40px] h-[40px] rounded-full bg-gray-200 flex items-center justify-center">
@@ -300,11 +324,12 @@ export default function CustomSidebar({ path, collapsed = false }: PathRouter) {
               onClick={handleProfileClick}
               className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-[rgba(255,255,255,0.08)] transition-all duration-300 cursor-pointer"
             >
-              {user?.fotoPerfil ? (
+              {user?.fotoPerfil && !imageError ? (
                 <img
-                  src={`${user.fotoPerfil}?t=${new Date().getTime()}`}
+                  src={`${user.fotoPerfil}?t=${imageTimestamp}`}
                   alt="Foto de perfil"
                   className="w-[40px] h-[40px] rounded-full object-cover"
+                  onError={handleImageError}
                 />
               ) : (
                 <div className="w-[40px] h-[40px] rounded-full bg-gray-200 flex items-center justify-center">

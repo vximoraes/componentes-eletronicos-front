@@ -66,6 +66,7 @@ export default function HomePage() {
   const [imagemPreview, setImagemPreview] = useState<string | null>(null)
   const [novaFoto, setNovaFoto] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [isConfirmRemoveOpen, setIsConfirmRemoveOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const observerTarget = useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
@@ -116,11 +117,11 @@ export default function HomePage() {
         if (userData) {
           setUserData({ ...userData, fotoPerfil: data.data.fotoPerfil })
         }
-        // Atualiza a sessão do NextAuth para refletir a nova foto na sidebar
         await updateSession({
           ...user,
           fotoPerfil: data.data.fotoPerfil
         })
+        window.dispatchEvent(new Event('userFotoUpdated'))
       }
       queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] })
       toast.success('Foto atualizada com sucesso!', {
@@ -157,11 +158,11 @@ export default function HomePage() {
       if (userData) {
         setUserData({ ...userData, fotoPerfil: undefined })
       }
-      // Atualiza a sessão do NextAuth para remover a foto da sidebar
       await updateSession({
         ...user,
         fotoPerfil: undefined
       })
+      window.dispatchEvent(new Event('userFotoUpdated'))
       queryClient.invalidateQueries({ queryKey: ['usuario', user?.id] })
       toast.success('Foto removida com sucesso!', {
         position: 'bottom-right',
@@ -444,7 +445,12 @@ export default function HomePage() {
   }
 
   const handleRemoverFoto = () => {
+    setIsConfirmRemoveOpen(true)
+  }
+
+  const handleConfirmRemoverFoto = () => {
     deleteFotoMutation.mutate()
+    setIsConfirmRemoveOpen(false)
   }
 
   const handleCancelarEdicaoFoto = () => {
@@ -915,6 +921,84 @@ export default function HomePage() {
                     {uploadFotoMutation.isPending ? 'Salvando...' : 'Salvar'}
                   </Button>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação para Remover Foto */}
+      {isConfirmRemoveOpen && (
+        <div
+          className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
+          style={{
+            zIndex: 99999,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          }}
+          onClick={() => setIsConfirmRemoveOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+          >
+            {/* Botão de fechar */}
+            <div className="relative p-6 pb-0">
+              <button
+                onClick={() => setIsConfirmRemoveOpen(false)}
+                disabled={deleteFotoMutation.isPending}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Fechar"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Conteúdo do Modal */}
+            <div className="px-6 pb-6 space-y-6">
+              <div className="text-center pt-4 px-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Remover foto de perfil
+                </h2>
+                <div className="max-h-[120px] overflow-y-auto">
+                  <p className="text-gray-600 break-words">
+                    Tem certeza que deseja remover sua foto de perfil? Esta ação não pode ser desfeita.
+                  </p>
+                </div>
+              </div>
+
+              {/* Mensagem de erro da API */}
+              {deleteFotoMutation.error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+                  <div className="font-medium mb-1">Não foi possível remover a foto</div>
+                  <div className="text-red-500">
+                    {(deleteFotoMutation.error as any)?.response?.data?.message ||
+                      (deleteFotoMutation.error as any)?.message ||
+                      'Erro desconhecido'}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer com ações */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsConfirmRemoveOpen(false)}
+                  disabled={deleteFotoMutation.isPending}
+                  className="flex-1 cursor-pointer"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleConfirmRemoverFoto}
+                  disabled={deleteFotoMutation.isPending}
+                  className="flex-1 text-white hover:opacity-90 cursor-pointer"
+                  style={{ backgroundColor: '#DC2626' }}
+                >
+                  {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover'}
+                </Button>
               </div>
             </div>
           </div>
