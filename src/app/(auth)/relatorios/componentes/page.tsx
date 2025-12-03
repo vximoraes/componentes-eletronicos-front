@@ -65,7 +65,6 @@ function RelatorioComponentesPageContent() {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 5,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
@@ -142,7 +141,6 @@ function RelatorioComponentesPageContent() {
     queryFn: async () => {
       return await get<CategoriasApiResponse>('/categorias');
     },
-    staleTime: 1000 * 60 * 10,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;

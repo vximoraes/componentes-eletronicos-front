@@ -63,7 +63,6 @@ function RelatorioOrcamentosPageContent() {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 5,
     refetchOnMount: 'always',
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -401,54 +400,58 @@ function RelatorioOrcamentosPageContent() {
         {/* Filtros aplicados */}
         {(valorMinFilter || valorMaxFilter || dataInicioFilter || dataFimFilter) && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2" data-test="filters-container">
                               {valorMinFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div data-test="filter-tag-valor-min" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">Valor mín:</span>
                   <span>R$ {parseFloat(valorMinFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   <button
                     onClick={() => setValorMinFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de valor mínimo"
+                    data-test="remove-valor-min-filter"
                   >
                     <span className="text-xs">✕</span>
                   </button>
                 </div>
               )}
               {valorMaxFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div data-test="filter-tag-valor-max" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">Valor máx:</span>
                   <span>R$ {parseFloat(valorMaxFilter).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   <button
                     onClick={() => setValorMaxFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de valor máximo"
+                    data-test="remove-valor-max-filter"
                   >
                     <span className="text-xs">✕</span>
                   </button>
                 </div>
               )}
               {dataInicioFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div data-test="filter-tag-data-inicio" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">De:</span>
                   <span>{new Date(dataInicioFilter).toLocaleDateString('pt-BR')}</span>
                   <button
                     onClick={() => setDataInicioFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de data inicial"
+                    data-test="remove-data-inicio-filter"
                   >
                     <span className="text-xs">✕</span>
                   </button>
                 </div>
               )}
               {dataFimFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div data-test="filter-tag-data-fim" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">Até:</span>
                   <span>{new Date(dataFimFilter).toLocaleDateString('pt-BR')}</span>
                   <button
                     onClick={() => setDataFimFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de data final"
+                    data-test="remove-data-fim-filter"
                   >
                     <span className="text-xs">✕</span>
                   </button>
@@ -485,7 +488,7 @@ function RelatorioOrcamentosPageContent() {
               <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
                 <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                   <TableRow className="bg-gray-50 border-b">
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8" data-test="table-head-checkbox">
                       <input
                         type="checkbox"
                         checked={isAllSelected}
@@ -497,49 +500,51 @@ function RelatorioOrcamentosPageContent() {
                         onChange={handleSelectAll}
                         className="w-4 h-4 cursor-pointer"
                         title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
+                        data-test="checkbox-select-all"
                       />
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">DESCRIÇÃO</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">ITENS</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">VALOR TOTAL</TableHead>
-                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">DATA</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-codigo">CÓDIGO</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-nome">NOME</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-descricao">DESCRIÇÃO</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-itens">ITENS</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-valor-total">VALOR TOTAL</TableHead>
+                    <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-data">DATA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orcamentosFiltrados.map((orcamento) => (
-                      <TableRow key={orcamento._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                      <TableRow data-test="orcamento-row" key={orcamento._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
                         <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(orcamento._id)}
                             onChange={() => handleSelectItem(orcamento._id)}
                             className="w-4 h-4 cursor-pointer"
+                            data-test="checkbox-select-item"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3">
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="orcamento-codigo">
                           <span className="truncate block max-w-[200px]" title={orcamento._id}>
                             {orcamento._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3">
+                        <TableCell className="text-left px-8 py-3" data-test="orcamento-nome">
                           <span className="truncate block max-w-[200px] font-medium" title={orcamento.nome}>
                             {orcamento.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3">
+                        <TableCell className="text-left px-8 py-3" data-test="orcamento-descricao">
                           <span className="truncate block max-w-[200px]" title={orcamento.descricao || '-'}>
                             {orcamento.descricao || '-'}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium">
+                        <TableCell className="text-center px-8 py-3 font-medium" data-test="orcamento-itens">
                           {orcamento.componentes?.length || 0}
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium text-green-700 whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-3 font-medium text-green-700 whitespace-nowrap" data-test="orcamento-valor-total">
                           R$ {orcamento.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium whitespace-nowrap">
+                        <TableCell className="text-center px-8 py-3 font-medium whitespace-nowrap" data-test="orcamento-data">
                           <span className="truncate block max-w-[150px]" title={orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleString('pt-BR') : '-'}>
                             {orcamento.createdAt ? new Date(orcamento.createdAt).toLocaleDateString('pt-BR') : '-'}
                           </span>
@@ -581,6 +586,7 @@ function RelatorioOrcamentosPageContent() {
         dataInicioFilter={dataInicioFilter}
         dataFimFilter={dataFimFilter}
         onFiltersChange={handleFiltersChange}
+        data-test="modal-filtros"
       />
 
       {/* Modal de Exportar */}

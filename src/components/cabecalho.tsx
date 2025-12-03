@@ -50,7 +50,6 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
     queryKey: ['notificacoes-header', user?.id],
     queryFn: async () => await get<NotificacoesApiResponse>('/notificacoes?limite=5&page=1'),
     enabled: !!user?.id,
-    staleTime: 0,
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
   })

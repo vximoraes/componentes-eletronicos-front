@@ -81,7 +81,6 @@ export default function ModalFiltros({
     },
     initialPageParam: 1,
     enabled: isOpen,
-    staleTime: 1000 * 60 * 10
   });
 
   useEffect(() => {
@@ -210,10 +209,12 @@ export default function ModalFiltros({
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
+      data-test="modal-filtros-backdrop"
     >
       <div 
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
+        data-test="modal-filtros-content"
       >
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
@@ -221,6 +222,7 @@ export default function ModalFiltros({
             onClick={handleCloseModal}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             title="Fechar"
+            data-test="modal-filtros-close-button"
           >
             <X size={20} />
           </button>
@@ -267,6 +269,7 @@ export default function ModalFiltros({
                       }}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       onClick={(e) => e.stopPropagation()}
+                      data-test="filtro-categoria-search-input"
                     />
                   </div>
                   
@@ -285,6 +288,7 @@ export default function ModalFiltros({
                             className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
                               selectedCategoria === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
                             } cursor-pointer`}
+                            data-test={`filtro-categoria-option-${option.value || 'todas'}`}
                           >
                             {option.label}
                           </button>
@@ -299,7 +303,7 @@ export default function ModalFiltros({
                         )}
                       </>
                     ) : (
-                      <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                      <div className="px-4 py-8 text-center text-gray-500 text-sm" data-test="filtro-categoria-no-results">
                         Nenhuma categoria encontrada para "{categoriaSearch}"
                       </div>
                     )}
@@ -342,6 +346,7 @@ export default function ModalFiltros({
                       className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
                         selectedStatus === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
                       } cursor-pointer`}
+                      data-test={`filtro-status-option-${option.value.toLowerCase().replace(/\s+/g, '-') || 'todos'}`}
                     >
                       {option.label}
                     </button>

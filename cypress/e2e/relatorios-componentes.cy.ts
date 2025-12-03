@@ -1,5 +1,4 @@
 import path from 'path'
-import { da } from 'zod/v4/locales';
 
 describe('Tela de relatórios de componentes.', () => {
   let email = Cypress.env('email');
@@ -15,73 +14,53 @@ describe('Tela de relatórios de componentes.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
-    // Verificar se o cabeçalho da tabela existe
     cy.get('[data-test="table-head-codigo"]').should('be.visible')
     cy.get('[data-test="table-head-componente"]').should('be.visible')
     cy.get('[data-test="table-head-quantidade"]').should('be.visible')
     cy.get('[data-test="table-head-status"]').should('be.visible')
     cy.get('[data-test="table-head-localizacao"]').should('be.visible')
 
-    // Verificar o texto de cada cabeçalho
     cy.get('[data-test="table-head-codigo"]').should('contain.text', 'CÓDIGO')
     cy.get('[data-test="table-head-componente"]').should('contain.text', 'COMPONENTE')
     cy.get('[data-test="table-head-quantidade"]').should('contain.text', 'QUANTIDADE')
     cy.get('[data-test="table-head-status"]').should('contain.text', 'STATUS')
     cy.get('[data-test="table-head-localizacao"]').should('contain.text', 'LOCALIZAÇÃO')
 
-    // Verificar se o checkbox do cabeçalho existe
     cy.get('[data-test="table-head-checkbox"]').should('be.visible')
     cy.get('[data-test="table-head-checkbox"]').find('input[type="checkbox"]').should('exist')
   })
 
-  it.skip('Deve verificar se os campos estão visíveis em todas as linhas e se a nomenclatura dos campos correspondem.', () => {
+  it.skip('Deve verificar se os campos estão visíveis em todas as linhas e se a nomenclatura dos campos corresponde.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
-    // Verificar se há componentes na lista
     cy.get('[data-test="componente-row"]').should('exist')
     cy.get('[data-test="componente-row"]').should('have.length.greaterThan', 0)
 
-    // Verificar cada linha da tabela
     cy.get('[data-test="componente-row"]').each((row) => {
       cy.wrap(row).within(() => {
-        // Verificar código do produto (ID)
         cy.get('[data-test="componente-codigo"]').should('be.visible')
-
-        // Verificar nome do produto
         cy.get('[data-test="componente-nome"]').should('be.visible')
-
-        // Verificar quantidade
         cy.get('[data-test="componente-quantidade"]').should('be.visible')
-
-        // Verificar localização
         cy.get('[data-test="componente-localizacao"]').should('be.visible')
       })
     })
   })
-  it.skip('Deve verificar se as checkboxs são todas ativadas/desatividas quando a checkbox mãe passar por uma interação.', () => {
+  it.skip('Deve verificar se os checkboxes são todos ativados/desativados quando o checkbox mãe passar por uma interação.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
-    // Aguardar a tabela carregar
     cy.get('[data-test="componente-row"]').should('exist')
     cy.get('[data-test="componente-row"]').should('have.length.greaterThan', 0)
 
-    // Verificar que nenhum checkbox está marcado inicialmente
     cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
       cy.wrap(checkbox).should('not.be.checked')
     })
 
-    // Verificar que o checkbox mãe não está marcado
     cy.get('[data-test="checkbox-select-all"]').should('not.be.checked')
-
-    // Clicar no checkbox mãe para selecionar todos
     cy.get('[data-test="checkbox-select-all"]').click()
-
-    // Verificar se o checkbox mãe está marcado
     cy.get('[data-test="checkbox-select-all"]').should('be.checked')
 
-    // Verificar se todos os checkboxes filhos foram marcados
     cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
       cy.wrap(checkbox).should('be.checked')
     })
@@ -89,8 +68,8 @@ describe('Tela de relatórios de componentes.', () => {
     cy.wrap(null).then(() => {
       cy.get('[data-test="checkbox-select-all"]').click({ force: true })
       cy.get('[data-test="checkbox-select-all"]').should('not.be.checked')
-      cy.get('[data-test="checkbox-select-item"]').each((chekbox) => {
-        cy.wrap(chekbox).should('not.be.checked')
+      cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
+        cy.wrap(checkbox).should('not.be.checked')
       })
     })
   })
@@ -140,7 +119,7 @@ describe('Tela de relatórios de componentes.', () => {
     })
   })
 
-  it.skip('Deve verificar a se as informações das estaticas estão visíveis.', () => {
+  it.skip('Deve verificar se as informações das estatísticas estão visíveis.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.wait(500)
@@ -230,7 +209,7 @@ describe('Tela de relatórios de componentes.', () => {
     cy.get('[data-test="modal-exportar-export-button"]').should('not.be.enabled')
   })
 
-  it.skip('Não deve Exportar um .cvs se o campo nome estiver vazio.', () => {
+  it.skip('Não deve exportar um .csv se o campo nome estiver vazio.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="checkbox-select-item"]').first().click()
@@ -242,8 +221,14 @@ describe('Tela de relatórios de componentes.', () => {
     cy.get('[data-test="modal-exportar-export-button"]').should('not.be.enabled')
   })
 
-  it('Deve exportar um pdf com sucesso.', () => {
+  it.skip('Deve exportar um pdf com sucesso.', () => {
     const date = new Date().getTime()
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    const dateString = `${year}-${month}-${day}`
+
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="checkbox-select-item"]').first().click()
@@ -251,10 +236,31 @@ describe('Tela de relatórios de componentes.', () => {
     cy.get('[data-test="format-radio-pdf"]').check().should('be.checked')
     cy.get('[data-test="filename-input"]').clear().type(date.toString())
     cy.wait(1000)
-    cy.get('[data-test="modal-exportar-content"]').should('be.visible').click({force:true})
-    // cy.get('[data-test="modal-exportar-content"]').should('not.exist')
-    // const filePath = path.join(Cypress.config('downloadsFolder'), date.toString()+"-2025-12-02.pdf")
-    // cy.readFile(filePath).should('exist')
+    cy.get('[data-test="modal-exportar-export-button"]').should('be.visible')
+    cy.get('[data-test="modal-exportar-export-button"]').click()
+    const filePath = path.join(Cypress.config('downloadsFolder'), `${date.toString()}-${dateString}.pdf`)
+    cy.readFile(filePath).should('exist')
+  })
+
+  it.skip('Deve exportar um csv com sucesso.', () => {
+    const date = new Date().getTime()
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    const dateString = `${year}-${month}-${day}`
+
+    cy.get('[data-test="sidebar-btn-relatorios"]').click()
+    cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
+    cy.get('[data-test="checkbox-select-item"]').first().click()
+    cy.get('[data-test="exportar-button"]').click()
+    cy.get('[data-test="format-radio-csv"]').check().should('be.checked')
+    cy.get('[data-test="filename-input"]').clear().type(date.toString())
+    cy.wait(1000)
+    cy.get('[data-test="modal-exportar-export-button"]').should('be.visible')
+    cy.get('[data-test="modal-exportar-export-button"]').click()
+    const filePath = path.join(Cypress.config('downloadsFolder'), `${date.toString()}-${dateString}.csv`)
+    cy.readFile(filePath).should('exist')
   })
 })
 

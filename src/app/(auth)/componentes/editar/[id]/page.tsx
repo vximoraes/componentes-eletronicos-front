@@ -111,7 +111,6 @@ export default function EditarComponentePage() {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 10
   })
 
   useEffect(() => {
