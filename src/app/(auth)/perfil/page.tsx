@@ -251,7 +251,6 @@ export default function HomePage() {
     },
     initialPageParam: 1,
     enabled: !!user?.id,
-    staleTime: 0,
     refetchInterval: 10000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,

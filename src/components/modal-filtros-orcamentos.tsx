@@ -46,6 +46,25 @@ export default function ModalFiltrosOrcamentos({
     setValorMax(valorMaxFilter);
     setDataInicio(dataInicioFilter);
     setDataFim(dataFimFilter);
+    
+    // Sincronizar o período selecionado baseado nas datas
+    // Se não há datas, resetar o período selecionado
+    if (!dataInicioFilter && !dataFimFilter) {
+      setPeriodoSelecionado('');
+      setMostrarDatasPersonalizadas(false);
+    } else {
+      // Se há datas definidas, verificar se corresponde a algum período predefinido
+      const hoje = new Date();
+      const hojeStr = hoje.toISOString().split('T')[0];
+      
+      if (dataInicioFilter === hojeStr && dataFimFilter === hojeStr) {
+        setPeriodoSelecionado('hoje');
+      } else {
+        // Se as datas não correspondem a "hoje", assumir que é personalizado
+        setPeriodoSelecionado('personalizado');
+        setMostrarDatasPersonalizadas(true);
+      }
+    }
   }, [valorMinFilter, valorMaxFilter, dataInicioFilter, dataFimFilter]);
 
   useEffect(() => {
@@ -128,9 +147,17 @@ export default function ModalFiltrosOrcamentos({
         return { inicio: '', fim: '' };
     }
 
+    // Usar formato local (YYYY-MM-DD) em vez de UTC
+    const formatLocalDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     return {
-      inicio: inicio.toISOString().split('T')[0],
-      fim: hoje.toISOString().split('T')[0]
+      inicio: formatLocalDate(inicio),
+      fim: formatLocalDate(hoje)
     };
   };
 
@@ -155,7 +182,31 @@ export default function ModalFiltrosOrcamentos({
   };
 
   const handleApplyFilters = () => {
-    onFiltersChange(valorMin, valorMax, dataInicio, dataFim);
+    const hoje = getDataMaxima(); // Data atual no formato YYYY-MM-DD
+    
+    // Função para ajustar data futura para hoje
+    const ajustarDataFutura = (data: string) => {
+      if (!data) return data;
+      return data > hoje ? hoje : data;
+    };
+    
+    // Se há um período predefinido selecionado (não personalizado), recalcular as datas
+    if (periodoSelecionado && periodoSelecionado !== 'personalizado' && periodoSelecionado !== '') {
+      const datas = calcularDatasPeriodo(periodoSelecionado);
+      onFiltersChange(valorMin, valorMax, datas.inicio, datas.fim);
+    } else {
+      // Ajustar datas futuras para a data atual
+      let dataInicioAjustada = ajustarDataFutura(dataInicio);
+      let dataFimAjustada = ajustarDataFutura(dataFim);
+      
+      // Se ambas as datas estão preenchidas e a data final é menor que a inicial,
+      // ajustar a data final para ser igual à data inicial
+      if (dataInicioAjustada && dataFimAjustada && dataFimAjustada < dataInicioAjustada) {
+        dataFimAjustada = dataInicioAjustada;
+      }
+      
+      onFiltersChange(valorMin, valorMax, dataInicioAjustada, dataFimAjustada);
+    }
     handleCloseModal();
   };
 
@@ -200,6 +251,15 @@ export default function ModalFiltrosOrcamentos({
     return selected?.label || 'Todos os períodos';
   };
 
+  // Retorna data atual no formato YYYY-MM-DD (usado para ajustar datas futuras)
+  const getDataMaxima = () => {
+    const hoje = new Date();
+    const year = hoje.getFullYear();
+    const month = String(hoje.getMonth() + 1).padStart(2, '0');
+    const day = String(hoje.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const modalContent = (
     <div 
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4" 
@@ -208,10 +268,12 @@ export default function ModalFiltrosOrcamentos({
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
+      data-test="modal-filtros-orcamentos-backdrop"
     >
       <div 
         className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
+        data-test="modal-filtros-orcamentos-content"
       >
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
@@ -219,6 +281,7 @@ export default function ModalFiltrosOrcamentos({
             onClick={handleCloseModal}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             title="Fechar"
+            data-test="modal-filtros-orcamentos-close-button"
           >
             <X size={20} />
           </button>
@@ -227,7 +290,7 @@ export default function ModalFiltrosOrcamentos({
         {/* Conteúdo dos Filtros */}
         <div className="px-6 pb-6 space-y-6">
           {/* Filtro por Valor */}
-          <div className="space-y-2 pt-4">
+          <div className="space-y-2 pt-4" data-test="filtro-valor-container">
             <label className="block text-base font-medium text-gray-700">
               Faixa de valor
             </label>
@@ -245,6 +308,7 @@ export default function ModalFiltrosOrcamentos({
                     onChange={handleValorMinChange}
                     placeholder="0,00"
                     className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    data-test="filtro-valor-min-input"
                   />
                 </div>
               </div>
@@ -261,6 +325,7 @@ export default function ModalFiltrosOrcamentos({
                     onChange={handleValorMaxChange}
                     placeholder="0,00"
                     className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    data-test="filtro-valor-max-input"
                   />
                 </div>
               </div>
@@ -268,7 +333,7 @@ export default function ModalFiltrosOrcamentos({
           </div>
 
           {/* Filtro por Período */}
-          <div className="space-y-2">
+          <div className="space-y-2" data-test="filtro-periodo-container">
             <label className="block text-base font-medium text-gray-700">
               Período
             </label>
@@ -276,6 +341,7 @@ export default function ModalFiltrosOrcamentos({
               <button
                 onClick={() => setPeriodoDropdownOpen(!periodoDropdownOpen)}
                 className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer"
+                data-test="filtro-periodo-dropdown"
               >
                 <span className={periodoSelecionado ? 'text-gray-900' : 'text-gray-500'}>
                   {getPeriodoLabel()}
@@ -292,6 +358,7 @@ export default function ModalFiltrosOrcamentos({
                       className={`w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
                         periodoSelecionado === option.value ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
                       } cursor-pointer`}
+                      data-test={`filtro-periodo-option-${option.value || 'todos'}`}
                     >
                       {option.label}
                     </button>
@@ -303,7 +370,7 @@ export default function ModalFiltrosOrcamentos({
 
           {/* Datas personalizadas */}
           {(mostrarDatasPersonalizadas || periodoSelecionado === 'personalizado') && (
-            <div className="space-y-2">
+            <div className="space-y-2" data-test="filtro-datas-personalizadas-container">
               <label className="block text-base font-medium text-gray-700">
                 Selecione o período
               </label>
@@ -318,6 +385,7 @@ export default function ModalFiltrosOrcamentos({
                     value={dataInicio}
                     onChange={(e) => setDataInicio(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    data-test="filtro-data-inicio-input"
                   />
                 </div>
                 <div>
@@ -330,6 +398,7 @@ export default function ModalFiltrosOrcamentos({
                     value={dataFim}
                     onChange={(e) => setDataFim(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    data-test="filtro-data-fim-input"
                   />
                 </div>
               </div>
@@ -344,6 +413,7 @@ export default function ModalFiltrosOrcamentos({
               variant="outline"
               onClick={handleClearFilters}
               className="flex-1 cursor-pointer"
+              data-test="limpar-filtros-button"
             >
               Limpar Filtros
             </Button>
@@ -351,6 +421,7 @@ export default function ModalFiltrosOrcamentos({
               onClick={handleApplyFilters}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
+              data-test="aplicar-filtros-button"
             >
               Aplicar Filtros
             </Button>

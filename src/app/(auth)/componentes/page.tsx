@@ -83,7 +83,6 @@ function ComponentesPageContent() {
 
       return await get<ApiResponse>(url);
     },
-    staleTime: 1000 * 60 * 5,
     refetchOnMount: 'always',
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -102,7 +101,6 @@ function ComponentesPageContent() {
       );
     },
     enabled: !!selectedComponenteId,
-    staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -117,7 +115,6 @@ function ComponentesPageContent() {
     queryFn: async () => {
       return await get<CategoriasApiResponse>('/categorias?limit=9999');
     },
-    staleTime: 1000 * 60 * 10,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
