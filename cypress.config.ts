@@ -13,5 +13,6 @@ export default defineConfig({
     responseTimeout: 10000,
     video: false,
     screenshotOnRunFailure: true,
+    downloadsFolder:"cypress/downloads",
   },
 });

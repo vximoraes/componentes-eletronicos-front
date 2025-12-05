@@ -107,7 +107,8 @@ export const generateComponentesCSV = ({
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-    const timestamp = new Date().toISOString().split('T')[0];
+    const hoje = new Date();
+    const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
     
     link.setAttribute('href', url);
     link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
@@ -244,7 +245,8 @@ export const generateOrcamentosCSV = ({
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-    const timestamp = new Date().toISOString().split('T')[0];
+    const hoje = new Date();
+    const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
     
     link.setAttribute('href', url);
     link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);
@@ -325,7 +327,8 @@ export const generateMovimentacoesCSV = ({
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-    const timestamp = new Date().toISOString().split('T')[0];
+    const hoje = new Date();
+    const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
     link.setAttribute('href', url);
     link.setAttribute('download', `${sanitizedFileName}-${timestamp}.csv`);

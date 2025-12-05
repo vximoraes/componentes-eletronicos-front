@@ -57,5 +57,7 @@ cypress/downloads
 cypress/logs
 cypress/reports
 
+
 # Configmap
 *secret*
+

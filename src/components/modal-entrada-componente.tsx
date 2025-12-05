@@ -93,7 +93,6 @@ export default function ModalEntradaComponente({
     },
     initialPageParam: 1,
     enabled: isOpen,
-    staleTime: 1000 * 60 * 5
   });
 
   const { data: estoquesData } = useQuery<EstoqueApiResponse>({
@@ -102,7 +101,6 @@ export default function ModalEntradaComponente({
       return await get<EstoqueApiResponse>(`/estoques/componente/${componenteId}`);
     },
     enabled: isOpen && !!componenteId,
-    staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;

@@ -72,7 +72,6 @@ function RelatorioComponentesPageContent() {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 5,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     retry: (failureCount, error: any) => {
@@ -149,7 +148,6 @@ function RelatorioComponentesPageContent() {
     queryFn: async () => {
       return await get<CategoriasApiResponse>('/categorias?limit=9999');
     },
-    staleTime: 1000 * 60 * 10,
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
         return false;
@@ -392,28 +390,30 @@ function RelatorioComponentesPageContent() {
         {/* Filtros aplicados */}
         {(categoriaFilter || statusFilter) && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2" data-test="filters-container">
               {categoriaFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div data-test="filter-tag-categoria" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">Categoria:</span>
                   <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Carregando...'}</span>
                   <button
                     onClick={() => setCategoriaFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de categoria"
+                    data-test="remove-categoria-filter"
                   >
                     <X size={12} />
                   </button>
                 </div>
               )}
               {statusFilter && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="filter-tag-status">
                   <span className="font-medium">Status:</span>
                   <span>{statusFilter}</span>
                   <button
                     onClick={() => setStatusFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                     title="Remover filtro de status"
+                    data-test="remove-status-filter"
                   >
                     <X size={12} />
                   </button>
@@ -450,7 +450,7 @@ function RelatorioComponentesPageContent() {
               <table className="w-full min-w-[900px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8" data-test="table-head-checkbox">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -462,41 +462,43 @@ function RelatorioComponentesPageContent() {
                           onChange={handleSelectAll}
                           className="w-4 h-4 cursor-pointer"
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
+                          data-test="checkbox-select-all"
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">STATUS</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-codigo">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-componente">COMPONENTE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-quantidade">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-status">STATUS</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-localizacao">LOCALIZAÇÃO</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {estoquesFiltrados.map((estoque) => (
-                      <TableRow key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
+                      <TableRow data-test="componente-row" key={estoque._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
                         <TableCell className="text-center px-8 py-3 align-middle">
                           <input
                             type="checkbox"
                             checked={selectedItems.has(estoque._id)}
                             onChange={() => handleSelectItem(estoque._id)}
                             className="w-4 h-4 cursor-pointer"
+                            data-test="checkbox-select-item"
                           />
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3">
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="componente-codigo">
                           <span className="truncate block max-w-[200px]" title={estoque.componente._id}>
                             {estoque.componente._id.slice(-8)}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium text-left px-8 py-3">
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="componente-nome">
                           <span className="truncate block max-w-[200px]" title={estoque.componente.nome}>
                             {estoque.componente.nome}
                           </span>
                         </TableCell>
-                        <TableCell className="text-center px-8 py-3 font-medium">
+                        <TableCell className="text-center px-8 py-3 font-medium" data-test="componente-quantidade">
                           {estoque.quantidade}
                         </TableCell>
                         <TableCell className="text-center px-8 py-3 whitespace-nowrap">
-                          <div className="flex justify-center">
+                          <div className="flex justify-center" data-test="componente-status">
                             <span
                               className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${
                                 estoque.componente.status === 'Em Estoque'
@@ -511,7 +513,7 @@ function RelatorioComponentesPageContent() {
                             </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-left px-8 py-3 font-medium">
+                        <TableCell className="text-left px-8 py-3 font-medium" data-test="componente-localizacao">
                           <span className="truncate block max-w-[200px]" title={estoque.localizacao.nome}>
                             {estoque.localizacao.nome}
                           </span>
@@ -551,6 +553,7 @@ function RelatorioComponentesPageContent() {
         categoriaFilter={categoriaFilter}
         statusFilter={statusFilter}
         onFiltersChange={handleFiltersChange}
+        data-test="modal-filtros"
       />
 
       {/* Modal de Exportar */}

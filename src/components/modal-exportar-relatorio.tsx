@@ -28,25 +28,26 @@ export default function ModalExportarRelatorio({
   };
 
   return (
-    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] bg-opacity-50 flex items-center justify-center z-50" data-test="modal-exportar-overlay">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4" data-test="modal-exportar-content">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">Exportar Relatório</h2>
+        <div className="flex items-center justify-between p-6 border-b" data-test="modal-exportar-header">
+          <h2 className="text-xl font-semibold text-gray-800" data-test="modal-exportar-title">Exportar Relatório</h2>
           <button
             onClick={onClose}
             className="top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             aria-label="Fechar modal"
+            data-test="modal-exportar-close-button"
           >
             <X size={24} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4" data-test="modal-exportar-body">
           {/* Nome do arquivo */}
-          <div>
-            <label htmlFor="fileName" className="block text-sm font-medium text-gray-700 mb-2">
+          <div data-test="filename-field">
+            <label htmlFor="fileName" className="block text-sm font-medium text-gray-700 mb-2" data-test="filename-label">
               Nome do arquivo
             </label>
             <Input
@@ -56,16 +57,17 @@ export default function ModalExportarRelatorio({
               onChange={(e) => setFileName(e.target.value)}
               placeholder="Digite o nome do arquivo"
               className="w-full"
+              data-test="filename-input"
             />
           </div>
 
           {/* Formato */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div data-test="format-field">
+            <label className="block text-sm font-medium text-gray-700 mb-2" data-test="format-label">
               Formato
             </label>
-            <div className="space-y-2">
-              <label className="flex items-center space-x-3 cursor-pointer">
+            <div className="space-y-2" data-test="format-options">
+              <label className="flex items-center space-x-3 cursor-pointer" data-test="format-option-pdf">
                 <input
                   type="radio"
                   name="format"
@@ -73,10 +75,11 @@ export default function ModalExportarRelatorio({
                   checked={format === 'pdf'}
                   onChange={(e) => setFormat(e.target.value)}
                   className="w-4 h-4 text-blue-600 cursor-pointer"
+                  data-test="format-radio-pdf"
                 />
                 <span className="text-gray-700">.pdf</span>
               </label>
-              <label className="flex items-center space-x-3 cursor-pointer">
+              <label className="flex items-center space-x-3 cursor-pointer" data-test="format-option-csv">
                 <input
                   type="radio"
                   name="format"
@@ -84,6 +87,7 @@ export default function ModalExportarRelatorio({
                   checked={format === 'csv'}
                   onChange={(e) => setFormat(e.target.value)}
                   className="w-4 h-4 text-blue-600 cursor-pointer"
+                  data-test="format-radio-csv"
                 />
                 <span className="text-gray-700">.csv</span>
               </label>
@@ -92,11 +96,12 @@ export default function ModalExportarRelatorio({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 rounded-lg">
+        <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 rounded-lg" data-test="modal-exportar-footer">
           <Button
             variant="outline"
             onClick={onClose}
             className="cursor-pointer"
+            data-test="modal-exportar-cancel-button"
           >
             Cancelar
           </Button>
@@ -109,6 +114,7 @@ export default function ModalExportarRelatorio({
                 : 'opacity-50 cursor-not-allowed bg-gray-400'
             }`}
             style={fileName.trim() ? { backgroundColor: '#306FCC' } : {}}
+            data-test="modal-exportar-export-button"
           >
             Exportar
           </Button>

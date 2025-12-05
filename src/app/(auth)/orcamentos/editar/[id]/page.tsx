@@ -101,7 +101,6 @@ export default function EditarOrcamentoPage() {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined;
     },
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 5,
     enabled: isFornecedorDropdownOpen !== null,
   })
 

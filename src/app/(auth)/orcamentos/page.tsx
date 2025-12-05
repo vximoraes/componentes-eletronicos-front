@@ -62,7 +62,6 @@ function PageOrcamentosContent() {
       return lastPage.data.hasNextPage ? lastPage.data.nextPage : undefined
     },
     initialPageParam: 1,
-    staleTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     retry: (failureCount, error: any) => {
