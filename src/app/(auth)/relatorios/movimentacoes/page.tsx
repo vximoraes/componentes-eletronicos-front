@@ -56,6 +56,10 @@ function RelatorioMovimentacoesPageContent() {
       params.append("limit", "20");
       params.append("page", page.toString());
 
+      if (tipoFilter) {
+        params.append("tipo", tipoFilter);
+      }
+
       const queryString = params.toString();
       const url = `/movimentacoes${queryString ? `?${queryString}` : ""}`;
 
@@ -208,7 +212,7 @@ function RelatorioMovimentacoesPageContent() {
 
   return (
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-movimentacoes-page">
-      <Cabecalho pagina="Relatórios" descricao="Movimentações" />
+      <Cabecalho pagina="Relatórios" acao="Movimentações" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
         <div className="shrink-0 mb-6">

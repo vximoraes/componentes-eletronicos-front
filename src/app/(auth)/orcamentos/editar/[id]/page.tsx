@@ -401,7 +401,7 @@ export default function EditarOrcamentoPage() {
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col gap-3 sm:gap-4 md:gap-6 overflow-hidden">
               {/* Nome */}
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="flex justify-between items-center mb-2">
                   <Label htmlFor="nome" className="text-sm md:text-base font-medium text-gray-900">
                     Nome <span className="text-red-500">*</span>
@@ -430,13 +430,13 @@ export default function EditarOrcamentoPage() {
               </div>
 
               {/* Descrição */}
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <div className="flex justify-between items-center mb-2">
                   <Label htmlFor="descricao" className="text-sm md:text-base font-medium text-gray-900">
                     Descrição
                   </Label>
                   <span className="text-xs sm:text-sm text-gray-500">
-                    {descricao.length}/200
+                    {descricao.length}/10000
                   </span>
                 </div>
                 <textarea
@@ -445,13 +445,13 @@ export default function EditarOrcamentoPage() {
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[100px]"
-                  maxLength={200}
+                  maxLength={10000}
                 />
               </div>
 
               {/* Itens do orçamento */}
               <div className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex justify-between items-center mb-2 flex-shrink-0">
+                <div className="flex justify-between items-center mb-2 shrink-0">
                   <Label className="text-sm md:text-base font-medium text-gray-900">Itens do orçamento</Label>
                   <Button
                     type="button"

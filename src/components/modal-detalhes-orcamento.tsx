@@ -136,9 +136,11 @@ export default function ModalDetalhesOrcamento({
               </h2>
             </div>
             {(orcamentoDescricao || orcamento?.descricao) && (
-              <p className="text-sm text-gray-600 mb-3 break-words text-center max-w-full" data-test="modal-detalhes-descricao">
-                {orcamentoDescricao || orcamento?.descricao}
-              </p>
+              <div className="max-h-[120px] overflow-y-auto mb-3">
+                <p className="text-sm text-gray-600 break-words text-center max-w-full" data-test="modal-detalhes-descricao">
+                  {orcamentoDescricao || orcamento?.descricao}
+                </p>
+              </div>
             )}
             <p className="text-xl font-semibold text-blue-600" data-test="modal-detalhes-total">
               {isLoading ? 'Carregando...' : orcamento ? `R$ ${orcamento.total.toFixed(2)}` : '-'}
