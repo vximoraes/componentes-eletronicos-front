@@ -6,6 +6,7 @@ import { useSidebarContext } from "@/contexts/SidebarContext"
 import { Bell, Menu, ChevronLeft } from "lucide-react"
 import { get, patch } from "@/lib/fetchData"
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { getSession } from "next-auth/react"
 
 type NotificationItem = {
   _id: string
@@ -45,22 +46,138 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
   const [showNotifications, setShowNotifications] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const queryClient = useQueryClient()
+  const [sseConnected, setSSEConnected] = useState(false)
 
   const { data: notificacoesData } = useQuery<NotificacoesApiResponse>({
     queryKey: ['notificacoes-header', user?.id],
     queryFn: async () => await get<NotificacoesApiResponse>('/notificacoes?limite=5&page=1'),
     enabled: !!user?.id,
-    refetchInterval: 10000,
+    staleTime: 0,
     refetchOnWindowFocus: true,
+    refetchInterval: sseConnected ? false : 15000,
   })
 
   const notifications = notificacoesData?.data?.docs || []
+
+  useEffect(() => {
+    if (!user?.id) return
+
+    let abortController: AbortController | null = null
+    let reconnectTimeout: NodeJS.Timeout | null = null
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 5
+
+    const connectSSE = async () => {
+      const session = await getSession()
+      const token = session?.user?.accessToken
+      
+      if (!token) {
+        return
+      }
+
+      const API_URL = process.env.NEXT_PUBLIC_API_URL
+      if (!API_URL) {
+        return
+      }
+
+      abortController = new AbortController()
+
+      const url = `${API_URL}/notificacoes/stream`
+      
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'text/event-stream',
+          },
+          signal: abortController.signal,
+        })
+
+        if (!response.ok || !response.body) {
+          scheduleReconnect()
+          return
+        }
+
+        setSSEConnected(true)
+        reconnectAttempts = 0
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+
+        let buffer = ''
+        
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            setSSEConnected(false)
+            scheduleReconnect()
+            break
+          }
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+
+          const events = buffer.split('\n\n')
+          buffer = events.pop() || ''
+
+          for (const event of events) {
+            if (!event.trim()) continue
+            
+            const lines = event.split('\n')
+            let eventType = ''
+            let eventData = ''
+
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                eventType = line.slice(6).trim()
+              } else if (line.startsWith('data:')) {
+                eventData = line.slice(5).trim()
+              }
+            }
+
+            if (eventType && eventData) {
+              if (eventType === 'notificacao') {
+                queryClient.invalidateQueries({ queryKey: ['notificacoes-header', user?.id] })
+              }
+            }
+          }
+        }
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          setSSEConnected(false)
+          scheduleReconnect()
+        }
+      }
+    }
+
+    const scheduleReconnect = () => {
+      if (reconnectAttempts >= maxReconnectAttempts) {
+        return
+      }
+      
+      const delay = Math.min(3000 * Math.pow(2, reconnectAttempts), 30000)
+      reconnectAttempts++
+      
+      reconnectTimeout = setTimeout(connectSSE, delay)
+    }
+
+    connectSSE()
+
+    return () => {
+      if (abortController) {
+        abortController.abort()
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+      }
+      setSSEConnected(false)
+    }
+  }, [user?.id, queryClient])
 
   const handleNotificationsClick = () => setShowNotifications(prev => !prev)
   const handleProfileClick = () => router.push("/perfil")
   const handleMenuClick = () => toggleSidebar()
 
-  // Fechar menu ao clicar fora
   useEffect(() => {
     const handleDocClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -72,7 +189,6 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
   }, [])
 
 
-  // Marcar notificações como lidas
   async function markAsRead(id?: string) {
     if (id) {
       try {
@@ -165,38 +281,38 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-[320px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
-              <div className="p-3 flex items-center justify-between border-b border-gray-100">
-                <span className="font-medium">Notificações</span>
+            <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[380px] md:w-[450px] max-w-[450px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
+              <div className="p-3 flex items-center justify-between border-b border-gray-100 gap-2">
+                <span className="font-medium text-sm sm:text-base">Notificações</span>
                 <button
-                  className="text-sm text-blue-600 hover:underline cursor-pointer"
+                  className="text-xs sm:text-sm text-blue-600 hover:underline cursor-pointer whitespace-nowrap"
                   onClick={() => markAsRead(undefined)}
                 >
-                  Marcar todas
+                  Marcar todas como visualizadas
                 </button>
               </div>
 
-              <div className="max-h-64 overflow-auto">
+              <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto overflow-x-hidden">
                 {notifications.length === 0 ? (
                   <div className="p-4 text-center text-sm text-gray-500">Sem notificações</div>
                 ) : (
                   notifications.slice(0, 5).map(n => (
                     <div
                       key={n._id}
-                      className={`p-3 cursor-pointer hover:bg-gray-100 flex justify-between items-start ${
+                      className={`p-3 cursor-pointer hover:bg-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2 ${
                         n.visualizada ? "bg-white" : "bg-gray-50"
                       }`}
                       onClick={() => !n.visualizada && markAsRead(n._id)}
                     >
-                      <div className="flex items-start gap-2 flex-1">
+                      <div className="flex items-start gap-2 flex-1 min-w-0">
                         {!n.visualizada && (
                           <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"></div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className={`text-sm text-gray-800 truncate ${!n.visualizada ? 'font-medium' : ''}`}>{n.mensagem}</div>
+                          <p className={`text-sm text-gray-800 wrap-break-word ${!n.visualizada ? 'font-medium' : ''}`}>{n.mensagem}</p>
                         </div>
                       </div>
-                      <div className="text-xs text-gray-400 ml-2 shrink-0">
+                      <div className="text-xs text-gray-400 sm:ml-2 shrink-0 pl-3.5 sm:pl-0">
                         {formatTempoRelativo(n.data_hora)}
                       </div>
                     </div>

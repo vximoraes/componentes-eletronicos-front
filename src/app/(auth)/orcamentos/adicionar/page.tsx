@@ -304,7 +304,7 @@ export default function AdicionarOrcamentoPage() {
                     Descrição
                   </Label>
                   <span className="text-xs sm:text-sm text-gray-500">
-                    {descricao.length}/200
+                    {descricao.length}/10000
                   </span>
                 </div>
                 <textarea
@@ -313,7 +313,7 @@ export default function AdicionarOrcamentoPage() {
                   value={descricao}
                   onChange={(e) => setDescricao(e.target.value)}
                   className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[100px]"
-                  maxLength={200}
+                  maxLength={10000}
                 />
               </div>
 

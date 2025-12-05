@@ -113,7 +113,7 @@ function ComponentesPageContent() {
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias');
+      return await get<CategoriasApiResponse>('/categorias?limit=9999');
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -413,7 +413,7 @@ function ComponentesPageContent() {
                 {categoriaFilter && (
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm" data-test="applied-filter-categoria">
                     <span className="font-medium">Categoria:</span>
-                    <span data-test="applied-filter-categoria-nome">{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
+                    <span data-test="applied-filter-categoria-nome">{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Carregando...'}</span>
                     <button
                       onClick={() => setCategoriaFilter('')}
                       className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"

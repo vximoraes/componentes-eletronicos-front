@@ -242,14 +242,12 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
     cy.wait(500)
 
-    // Obter a data de hoje no formato esperado
     const hoje = new Date()
     const year = hoje.getFullYear()
     const month = String(hoje.getMonth() + 1).padStart(2, '0')
     const day = String(hoje.getDate()).padStart(2, '0')
     const hojeFormatado = `${day}/${month}/${year}`
     
-    // Data futura (7 dias no futuro)
     const dataFutura = new Date()
     dataFutura.setDate(dataFutura.getDate() + 7)
     const futuroYear = dataFutura.getFullYear()
@@ -261,15 +259,12 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.get('[data-test="filtro-periodo-dropdown"]').click()
     cy.get('[data-test="filtro-periodo-option-personalizado"]').click()
     
-    // Inserir data futura no campo de data inicial
     cy.get('[data-test="filtro-data-inicio-input"]').type(dataFuturaInput)
     cy.get('[data-test="aplicar-filtros-button"]').should('be.visible').click()
     cy.wait(500)
     
-    // Verificar se a tag exibe a data de hoje (ajustada) e não a data futura
     cy.get('[data-test="filter-tag-data-inicio"]').should('be.visible').contains('span', hojeFormatado)
     
-    // Limpar filtro
     cy.get('[data-test="remove-data-inicio-filter"]').click()
   })
 
@@ -278,7 +273,6 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
     cy.wait(500)
 
-    // Definir datas: data inicial = hoje, data final = 5 dias atrás
     const hoje = new Date()
     const year = hoje.getFullYear()
     const month = String(hoje.getMonth() + 1).padStart(2, '0')
@@ -286,7 +280,6 @@ describe('Tela de relatórios de orçamentos.', () => {
     const hojeInput = `${year}-${month}-${day}`
     const hojeFormatado = `${day}/${month}/${year}`
     
-    // Data 5 dias atrás
     const dataPassada = new Date()
     dataPassada.setDate(dataPassada.getDate() - 5)
     const passadoYear = dataPassada.getFullYear()
@@ -298,20 +291,15 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.get('[data-test="filtro-periodo-dropdown"]').click()
     cy.get('[data-test="filtro-periodo-option-personalizado"]').click()
     
-    // Inserir data inicial = hoje
     cy.get('[data-test="filtro-data-inicio-input"]').type(hojeInput)
-    // Inserir data final = 5 dias atrás (menor que a inicial)
     cy.get('[data-test="filtro-data-fim-input"]').type(dataPassadaInput)
     
     cy.get('[data-test="aplicar-filtros-button"]').should('be.visible').click()
     cy.wait(500)
     
-    // Verificar se ambas as tags exibem a mesma data (data inicial = hoje)
-    // A data final deve ter sido ajustada para ser igual à data inicial
     cy.get('[data-test="filter-tag-data-inicio"]').should('be.visible').contains('span', hojeFormatado)
     cy.get('[data-test="filter-tag-data-fim"]').should('be.visible').contains('span', hojeFormatado)
     
-    // Limpar filtros
     cy.get('[data-test="remove-data-inicio-filter"]').click()
     cy.get('[data-test="remove-data-fim-filter"]').click()
   })
@@ -321,14 +309,12 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
     cy.wait(500)
 
-    // Obter a data de hoje no formato esperado
     const hoje = new Date()
     const year = hoje.getFullYear()
     const month = String(hoje.getMonth() + 1).padStart(2, '0')
     const day = String(hoje.getDate()).padStart(2, '0')
     const hojeFormatado = `${day}/${month}/${year}`
     
-    // Data futura para data inicial (10 dias no futuro)
     const dataFuturaInicio = new Date()
     dataFuturaInicio.setDate(dataFuturaInicio.getDate() + 10)
     const inicioYear = dataFuturaInicio.getFullYear()
@@ -336,7 +322,6 @@ describe('Tela de relatórios de orçamentos.', () => {
     const inicioDay = String(dataFuturaInicio.getDate()).padStart(2, '0')
     const dataFuturaInicioInput = `${inicioYear}-${inicioMonth}-${inicioDay}`
     
-    // Data futura para data final (5 dias no futuro - menor que a inicial futura)
     const dataFuturaFim = new Date()
     dataFuturaFim.setDate(dataFuturaFim.getDate() + 5)
     const fimYear = dataFuturaFim.getFullYear()
@@ -348,21 +333,15 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.get('[data-test="filtro-periodo-dropdown"]').click()
     cy.get('[data-test="filtro-periodo-option-personalizado"]').click()
     
-    // Inserir data inicial futura (10 dias)
     cy.get('[data-test="filtro-data-inicio-input"]').type(dataFuturaInicioInput)
-    // Inserir data final futura (5 dias) - seria menor que a inicial, mas ambas serão ajustadas para hoje
     cy.get('[data-test="filtro-data-fim-input"]').type(dataFuturaFimInput)
     
     cy.get('[data-test="aplicar-filtros-button"]').should('be.visible').click()
     cy.wait(500)
     
-    // Ambas as datas devem ser ajustadas para hoje
-    // Primeiro ajuste: datas futuras -> hoje
-    // Segundo ajuste: como ambas ficam iguais (hoje), não precisa de mais ajuste
     cy.get('[data-test="filter-tag-data-inicio"]').should('be.visible').contains('span', hojeFormatado)
     cy.get('[data-test="filter-tag-data-fim"]').should('be.visible').contains('span', hojeFormatado)
     
-    // Limpar filtros
     cy.get('[data-test="remove-data-inicio-filter"]').click()
     cy.get('[data-test="remove-data-fim-filter"]').click()
   })

@@ -56,6 +56,13 @@ function RelatorioComponentesPageContent() {
       params.append('limit', '20');
       params.append('page', page.toString());
 
+      if (categoriaFilter) {
+        params.append('categoria', categoriaFilter);
+      }
+      if (statusFilter) {
+        params.append('status', statusFilter);
+      }
+
       const queryString = params.toString();
       const url = `/estoques${queryString ? `?${queryString}` : ''}`;
 
@@ -139,7 +146,7 @@ function RelatorioComponentesPageContent() {
   const { data: categoriasData } = useQuery<CategoriasApiResponse>({
     queryKey: ['categorias'],
     queryFn: async () => {
-      return await get<CategoriasApiResponse>('/categorias');
+      return await get<CategoriasApiResponse>('/categorias?limit=9999');
     },
     retry: (failureCount, error: any) => {
       if (error?.message?.includes('Falha na autenticação')) {
@@ -274,7 +281,7 @@ function RelatorioComponentesPageContent() {
     <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="relatorio-componentes-page">
       <Cabecalho 
         pagina="Relatórios" 
-        descricao="Componentes"
+        acao="Componentes"
       />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
@@ -387,7 +394,7 @@ function RelatorioComponentesPageContent() {
               {categoriaFilter && (
                 <div data-test="filter-tag-categoria" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">Categoria:</span>
-                  <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Selecionada'}</span>
+                  <span>{categoriasData?.data?.docs?.find((cat: any) => cat._id === categoriaFilter)?.nome || 'Carregando...'}</span>
                   <button
                     onClick={() => setCategoriaFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"

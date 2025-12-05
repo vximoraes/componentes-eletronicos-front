@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { Edit, Trash2, ArrowUpCircle, ArrowDownCircle, Package } from 'lucide-react';
+import { Edit, Trash2, PlusCircle, MinusCircle, Package } from 'lucide-react';
 
 interface ComponenteEletronicoProps {
   id?: string;
@@ -198,7 +198,7 @@ export default function ComponenteEletronico({
             data-test="entrada-icon"
             onClick={handleEntrada}
           >
-            <ArrowDownCircle size={20} className="text-green-600 hover:text-green-700" />
+            <PlusCircle size={20} className="text-green-600 hover:text-green-700" />
           </button>
           <button 
             className={`p-2 rounded-md flex-shrink-0 transition-colors duration-200 ${
@@ -211,7 +211,7 @@ export default function ComponenteEletronico({
             onClick={quantidade === 0 ? undefined : handleSaida}
             disabled={quantidade === 0}
           >
-            <ArrowUpCircle size={20} className={quantidade === 0 ? 'text-gray-400' : 'text-red-600 hover:text-red-700'} />
+            <MinusCircle size={20} className={quantidade === 0 ? 'text-gray-400' : 'text-red-600 hover:text-red-700'} />
           </button>
         </div>
       </div>
