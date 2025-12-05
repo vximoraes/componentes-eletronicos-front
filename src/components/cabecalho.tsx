@@ -46,6 +46,7 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
   const [showNotifications, setShowNotifications] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const queryClient = useQueryClient()
+  const [sseConnected, setSSEConnected] = useState(false)
 
   const { data: notificacoesData } = useQuery<NotificacoesApiResponse>({
     queryKey: ['notificacoes-header', user?.id],
@@ -53,6 +54,7 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
     enabled: !!user?.id,
     staleTime: 0,
     refetchOnWindowFocus: true,
+    refetchInterval: sseConnected ? false : 15000,
   })
 
   const notifications = notificacoesData?.data?.docs || []
@@ -61,26 +63,26 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
     if (!user?.id) return
 
     let abortController: AbortController | null = null
+    let reconnectTimeout: NodeJS.Timeout | null = null
+    let reconnectAttempts = 0
+    const maxReconnectAttempts = 5
 
     const connectSSE = async () => {
       const session = await getSession()
       const token = session?.user?.accessToken
       
       if (!token) {
-        console.log('[SSE Frontend] Sem token, não conectando')
         return
       }
 
       const API_URL = process.env.NEXT_PUBLIC_API_URL
       if (!API_URL) {
-        console.log('[SSE Frontend] API_URL não definida')
         return
       }
 
       abortController = new AbortController()
 
       const url = `${API_URL}/notificacoes/stream`
-      console.log('[SSE Frontend] Conectando a:', url)
       
       try {
         const response = await fetch(url, {
@@ -92,11 +94,12 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
         })
 
         if (!response.ok || !response.body) {
-          console.error('[SSE Frontend] Erro ao conectar SSE:', response.status)
+          scheduleReconnect()
           return
         }
 
-        console.log('[SSE Frontend] Conectado com sucesso!')
+        setSSEConnected(true)
+        reconnectAttempts = 0
 
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
@@ -106,12 +109,12 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
         while (true) {
           const { done, value } = await reader.read()
           if (done) {
-            console.log('[SSE Frontend] Stream finalizado')
+            setSSEConnected(false)
+            scheduleReconnect()
             break
           }
 
           const chunk = decoder.decode(value, { stream: true })
-          console.log('[SSE Frontend] Chunk recebido:', JSON.stringify(chunk))
           buffer += chunk
 
           const events = buffer.split('\n\n')
@@ -119,8 +122,6 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
 
           for (const event of events) {
             if (!event.trim()) continue
-            
-            console.log('[SSE Frontend] Processando evento:', JSON.stringify(event))
             
             const lines = event.split('\n')
             let eventType = ''
@@ -135,10 +136,7 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
             }
 
             if (eventType && eventData) {
-              console.log('[SSE Frontend] Evento parseado:', eventType, eventData)
-              
               if (eventType === 'notificacao') {
-                console.log('[SSE Frontend] Invalidando query de notificações')
                 queryClient.invalidateQueries({ queryKey: ['notificacoes-header', user?.id] })
               }
             }
@@ -146,9 +144,21 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
         }
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
-          console.error('[SSE Frontend] Erro:', error)
+          setSSEConnected(false)
+          scheduleReconnect()
         }
       }
+    }
+
+    const scheduleReconnect = () => {
+      if (reconnectAttempts >= maxReconnectAttempts) {
+        return
+      }
+      
+      const delay = Math.min(3000 * Math.pow(2, reconnectAttempts), 30000)
+      reconnectAttempts++
+      
+      reconnectTimeout = setTimeout(connectSSE, delay)
     }
 
     connectSSE()
@@ -157,6 +167,10 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
       if (abortController) {
         abortController.abort()
       }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+      }
+      setSSEConnected(false)
     }
   }, [user?.id, queryClient])
 
@@ -164,7 +178,6 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
   const handleProfileClick = () => router.push("/perfil")
   const handleMenuClick = () => toggleSidebar()
 
-  // Fechar menu ao clicar fora
   useEffect(() => {
     const handleDocClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -176,7 +189,6 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
   }, [])
 
 
-  // Marcar notificações como lidas
   async function markAsRead(id?: string) {
     if (id) {
       try {
