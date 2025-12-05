@@ -222,7 +222,8 @@ export const generateComponentesPDF = async ({
 
   // Salvar o PDF
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-  const timestamp = new Date().toISOString().split('T')[0];
+  const hoje = new Date();
+  const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
   doc.save(`${sanitizedFileName}-${timestamp}.pdf`);
 
   return doc;
@@ -449,7 +450,8 @@ export const generateOrcamentosPDF = async ({
 
   // Salvar o PDF
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-  const timestamp = new Date().toISOString().split('T')[0];
+  const hoje = new Date();
+  const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
   doc.save(`${sanitizedFileName}-${timestamp}.pdf`);
 
   return doc;
@@ -697,7 +699,8 @@ export const generateMovimentacoesPDF = async ({
 
   // Salvar o PDF
   const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9-_]/g, '-');
-  const timestamp = new Date().toISOString().split('T')[0];
+  const hoje = new Date();
+  const timestamp = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
   doc.save(`${sanitizedFileName}-${timestamp}.pdf`);
 
   return doc;

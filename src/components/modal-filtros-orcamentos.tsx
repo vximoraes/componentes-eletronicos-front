@@ -46,6 +46,25 @@ export default function ModalFiltrosOrcamentos({
     setValorMax(valorMaxFilter);
     setDataInicio(dataInicioFilter);
     setDataFim(dataFimFilter);
+    
+    // Sincronizar o período selecionado baseado nas datas
+    // Se não há datas, resetar o período selecionado
+    if (!dataInicioFilter && !dataFimFilter) {
+      setPeriodoSelecionado('');
+      setMostrarDatasPersonalizadas(false);
+    } else {
+      // Se há datas definidas, verificar se corresponde a algum período predefinido
+      const hoje = new Date();
+      const hojeStr = hoje.toISOString().split('T')[0];
+      
+      if (dataInicioFilter === hojeStr && dataFimFilter === hojeStr) {
+        setPeriodoSelecionado('hoje');
+      } else {
+        // Se as datas não correspondem a "hoje", assumir que é personalizado
+        setPeriodoSelecionado('personalizado');
+        setMostrarDatasPersonalizadas(true);
+      }
+    }
   }, [valorMinFilter, valorMaxFilter, dataInicioFilter, dataFimFilter]);
 
   useEffect(() => {
@@ -128,9 +147,17 @@ export default function ModalFiltrosOrcamentos({
         return { inicio: '', fim: '' };
     }
 
+    // Usar formato local (YYYY-MM-DD) em vez de UTC
+    const formatLocalDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     return {
-      inicio: inicio.toISOString().split('T')[0],
-      fim: hoje.toISOString().split('T')[0]
+      inicio: formatLocalDate(inicio),
+      fim: formatLocalDate(hoje)
     };
   };
 
@@ -155,7 +182,31 @@ export default function ModalFiltrosOrcamentos({
   };
 
   const handleApplyFilters = () => {
-    onFiltersChange(valorMin, valorMax, dataInicio, dataFim);
+    const hoje = getDataMaxima(); // Data atual no formato YYYY-MM-DD
+    
+    // Função para ajustar data futura para hoje
+    const ajustarDataFutura = (data: string) => {
+      if (!data) return data;
+      return data > hoje ? hoje : data;
+    };
+    
+    // Se há um período predefinido selecionado (não personalizado), recalcular as datas
+    if (periodoSelecionado && periodoSelecionado !== 'personalizado' && periodoSelecionado !== '') {
+      const datas = calcularDatasPeriodo(periodoSelecionado);
+      onFiltersChange(valorMin, valorMax, datas.inicio, datas.fim);
+    } else {
+      // Ajustar datas futuras para a data atual
+      let dataInicioAjustada = ajustarDataFutura(dataInicio);
+      let dataFimAjustada = ajustarDataFutura(dataFim);
+      
+      // Se ambas as datas estão preenchidas e a data final é menor que a inicial,
+      // ajustar a data final para ser igual à data inicial
+      if (dataInicioAjustada && dataFimAjustada && dataFimAjustada < dataInicioAjustada) {
+        dataFimAjustada = dataInicioAjustada;
+      }
+      
+      onFiltersChange(valorMin, valorMax, dataInicioAjustada, dataFimAjustada);
+    }
     handleCloseModal();
   };
 
@@ -198,6 +249,15 @@ export default function ModalFiltrosOrcamentos({
   const getPeriodoLabel = () => {
     const selected = periodoOptions.find(opt => opt.value === periodoSelecionado);
     return selected?.label || 'Todos os períodos';
+  };
+
+  // Retorna data atual no formato YYYY-MM-DD (usado para ajustar datas futuras)
+  const getDataMaxima = () => {
+    const hoje = new Date();
+    const year = hoje.getFullYear();
+    const month = String(hoje.getMonth() + 1).padStart(2, '0');
+    const day = String(hoje.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const modalContent = (

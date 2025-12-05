@@ -10,7 +10,7 @@ describe('Tela de relatórios de componentes.', () => {
     login(email, senha)
   })
 
-  it.skip('Deve verificar se os cabeçalhos da tabela estão corretos', () => {
+  it('Deve verificar se os cabeçalhos da tabela estão corretos', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
@@ -30,7 +30,7 @@ describe('Tela de relatórios de componentes.', () => {
     cy.get('[data-test="table-head-checkbox"]').find('input[type="checkbox"]').should('exist')
   })
 
-  it.skip('Deve verificar se os campos estão visíveis em todas as linhas e se a nomenclatura dos campos corresponde.', () => {
+  it('Deve verificar se os campos estão visíveis em todas as linhas e se a nomenclatura dos campos corresponde.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
@@ -46,7 +46,7 @@ describe('Tela de relatórios de componentes.', () => {
       })
     })
   })
-  it.skip('Deve verificar se os checkboxes são todos ativados/desativados quando o checkbox mãe passar por uma interação.', () => {
+  it('Deve verificar se os checkboxes são todos ativados/desativados quando o checkbox mãe passar por uma interação.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
@@ -74,7 +74,7 @@ describe('Tela de relatórios de componentes.', () => {
     })
   })
 
-  it.skip('Deve realizar uma pesquisa pelo filtro baseado no status.', () => {
+  it('Deve realizar uma pesquisa pelo filtro baseado no status.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
 
@@ -100,7 +100,7 @@ describe('Tela de relatórios de componentes.', () => {
       }
     })
   })
-  it.skip('Deve realizar uma pesquisa pelo filtro baseado na categoria.', () => {
+  it('Deve realizar uma pesquisa pelo filtro baseado na categoria.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="filtros-button"]').should('be.visible')
@@ -119,7 +119,7 @@ describe('Tela de relatórios de componentes.', () => {
     })
   })
 
-  it.skip('Deve verificar se as informações das estatísticas estão visíveis.', () => {
+  it('Deve verificar se as informações das estatísticas estão visíveis.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.wait(500)
@@ -143,7 +143,7 @@ describe('Tela de relatórios de componentes.', () => {
       }
       texto = texto.trim()
       if (texto) {
-        expect(texto).contain('Total de componentes')
+        expect(texto).contain('Em estoque')
       }
     })
 
@@ -155,7 +155,7 @@ describe('Tela de relatórios de componentes.', () => {
       }
       texto = texto.trim()
       if (texto) {
-        expect(texto).contain('Total de componentes')
+        expect(texto).contain('Baixo estoque')
       }
     })
 
@@ -167,11 +167,11 @@ describe('Tela de relatórios de componentes.', () => {
       }
       texto = texto.trim()
       if (texto) {
-        expect(texto).contain('Total de componentes')
+        expect(texto).contain('Indisponível')
       }
     })
   })
-  it.skip('Deve pesquisar um componente pelo nome.', () => {
+  it('Deve pesquisar um componente pelo nome.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="componente-row"]').first().find('[data-test="componente-nome"]').first().invoke('text').then((e) => {
@@ -184,21 +184,21 @@ describe('Tela de relatórios de componentes.', () => {
     })
   })
 
-  it.skip('Botão de Exportar deve estar sem interação se nenhum componente com checkbox seletada estiver presente.', () => {
+  it('Botão de Exportar deve estar sem interação se nenhum componente com checkbox seletada estiver presente.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="exportar-button"]').should('not.be.enabled')
     cy.get('[data-test="checkbox-select-item"]').first().click()
   })
 
-  it.skip('Botão de Exportar deve estar interativo se ao menos um componente estiver selecionado.', () => {
+  it('Botão de Exportar deve estar interativo se ao menos um componente estiver selecionado.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="checkbox-select-item"]').first().click()
     cy.get('[data-test="exportar-button"]').should('be.enabled')
   })
 
-  it.skip('Não deve Exportar um .pdf se o campo nome estiver vazio.', () => {
+  it('Não deve Exportar um .pdf se o campo nome estiver vazio.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="checkbox-select-item"]').first().click()
@@ -209,7 +209,7 @@ describe('Tela de relatórios de componentes.', () => {
     cy.get('[data-test="modal-exportar-export-button"]').should('not.be.enabled')
   })
 
-  it.skip('Não deve exportar um .csv se o campo nome estiver vazio.', () => {
+  it('Não deve exportar um .csv se o campo nome estiver vazio.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-componentes"]').click()
     cy.get('[data-test="checkbox-select-item"]').first().click()
@@ -221,7 +221,7 @@ describe('Tela de relatórios de componentes.', () => {
     cy.get('[data-test="modal-exportar-export-button"]').should('not.be.enabled')
   })
 
-  it.skip('Deve exportar um pdf com sucesso.', () => {
+  it('Deve exportar um pdf com sucesso.', () => {
     const date = new Date().getTime()
     const today = new Date()
     const year = today.getFullYear()
@@ -242,7 +242,7 @@ describe('Tela de relatórios de componentes.', () => {
     cy.readFile(filePath).should('exist')
   })
 
-  it.skip('Deve exportar um csv com sucesso.', () => {
+  it('Deve exportar um csv com sucesso.', () => {
     const date = new Date().getTime()
     const today = new Date()
     const year = today.getFullYear()

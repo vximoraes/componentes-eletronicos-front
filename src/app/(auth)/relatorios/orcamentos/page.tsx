@@ -115,11 +115,11 @@ function RelatorioOrcamentosPageContent() {
       // Filtro por valor máximo
       const matchValorMax = !valorMaxFilter || (orcamento.total <= parseFloat(valorMaxFilter));
       
-      // Filtro por data de início
+      // Filtro por data de início (adiciona T00:00:00 para garantir comparação no fuso local)
       const matchDataInicio = !dataInicioFilter || 
-        (orcamento.createdAt && new Date(orcamento.createdAt) >= new Date(dataInicioFilter));
+        (orcamento.createdAt && new Date(orcamento.createdAt) >= new Date(dataInicioFilter + 'T00:00:00'));
       
-      // Filtro por data de fim
+      // Filtro por data de fim (adiciona T23:59:59 para incluir todo o dia)
       const matchDataFim = !dataFimFilter || 
         (orcamento.createdAt && new Date(orcamento.createdAt) <= new Date(dataFimFilter + 'T23:59:59'));
       
@@ -432,7 +432,7 @@ function RelatorioOrcamentosPageContent() {
               {dataInicioFilter && (
                 <div data-test="filter-tag-data-inicio" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">De:</span>
-                  <span>{new Date(dataInicioFilter).toLocaleDateString('pt-BR')}</span>
+                  <span>{new Date(dataInicioFilter + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
                   <button
                     onClick={() => setDataInicioFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
@@ -446,7 +446,7 @@ function RelatorioOrcamentosPageContent() {
               {dataFimFilter && (
                 <div data-test="filter-tag-data-fim" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                   <span className="font-medium">Até:</span>
-                  <span>{new Date(dataFimFilter).toLocaleDateString('pt-BR')}</span>
+                  <span>{new Date(dataFimFilter + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
                   <button
                     onClick={() => setDataFimFilter('')}
                     className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
