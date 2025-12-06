@@ -274,7 +274,7 @@ function PageOrcamentosContent() {
   const orcamentos = data?.pages.flatMap((page) => page.data.docs) || []
 
   return (
-    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden">
+    <div className="w-full max-w-full h-screen flex flex-col overflow-hidden" data-test="orcamentos-page">
       <Cabecalho pagina="Orçamentos" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
@@ -288,12 +288,14 @@ function PageOrcamentosContent() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              data-test="search-input"
             />
           </div>
           <Button
             className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#306FCC' }}
             onClick={handleAdicionarClick}
+            data-test="adicionar-button"
           >
             <Plus className="w-4 h-4" />
             Adicionar
@@ -317,7 +319,7 @@ function PageOrcamentosContent() {
               <p className="mt-4 text-gray-600 font-medium">Carregando orçamentos...</p>
             </div>
           ) : orcamentos.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col" data-test="orcamentos-table">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
                 <table className="w-full min-w-[800px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
@@ -350,6 +352,7 @@ function PageOrcamentosContent() {
                               onClick={() => handleViewDetails(orcamento._id)}
                               className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Ver detalhes do orçamento"
+                              data-test="visualizar-button"
                             >
                               <Eye size={16} className="sm:w-5 sm:h-5" />
                             </button>
@@ -357,6 +360,7 @@ function PageOrcamentosContent() {
                               onClick={() => handleEdit(orcamento._id)}
                               className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Editar orçamento"
+                              data-test="editar-button"
                             >
                               <Edit size={16} className="sm:w-5 sm:h-5" />
                             </button>
@@ -369,6 +373,7 @@ function PageOrcamentosContent() {
                                   : 'text-gray-900 hover:text-green-600 hover:bg-green-50 cursor-pointer'
                               }`}
                               title={pdfLoadingId === orcamento._id ? "Gerando PDF..." : "Exportar PDF"}
+                              data-test="exportar-pdf-button"
                             >
                               {pdfLoadingId === orcamento._id ? (
                                 <Loader2 size={16} className="sm:w-5 sm:h-5 animate-spin" />
@@ -380,6 +385,7 @@ function PageOrcamentosContent() {
                               onClick={() => handleDelete(orcamento._id)}
                               className="p-1 sm:p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir orçamento"
+                              data-test="excluir-button"
                             >
                               <Trash2 size={16} className="sm:w-5 sm:h-5" />
                             </button>
@@ -398,7 +404,7 @@ function PageOrcamentosContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
+            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border" data-test="empty-state">
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <Search className="w-8 h-8 text-gray-400" />

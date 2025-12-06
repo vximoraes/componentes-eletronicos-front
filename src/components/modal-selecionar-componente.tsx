@@ -165,6 +165,7 @@ export default function ModalSelecionarComponente({
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
+      data-test="modal-selecionar-componentes"
     >
       <div
         className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[80vh] flex flex-col overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
@@ -188,7 +189,7 @@ export default function ModalSelecionarComponente({
               {multiSelect ? 'Selecionar Componentes' : 'Selecionar Componente'}
             </h2>
             {multiSelect && tempSelectedIds.size > 0 && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-1" data-test="contador-selecionados">
                 {tempSelectedIds.size} componente{tempSelectedIds.size > 1 ? 's' : ''} selecionado{tempSelectedIds.size > 1 ? 's' : ''}
               </p>
             )}
@@ -202,6 +203,7 @@ export default function ModalSelecionarComponente({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              data-test="modal-search-input"
             />
           </div>
 
@@ -213,8 +215,8 @@ export default function ModalSelecionarComponente({
               </div>
             ) : componentesLista.length > 0 ? (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {componentesLista.map((componente) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" data-test="componentes-grid">
+                  {componentesLista.map((componente, idx) => (
                     <ComponenteCardSimples
                       key={componente._id}
                       id={componente._id}
@@ -223,6 +225,7 @@ export default function ModalSelecionarComponente({
                       imagem={componente.imagem}
                       onClick={handleCardClick}
                       isSelected={multiSelect ? tempSelectedIds.has(componente._id) : tempSelectedId === componente._id}
+                      dataTestId={`componente-selecao-card-${idx}`}
                     />
                   ))}
                 </div>
@@ -258,6 +261,7 @@ export default function ModalSelecionarComponente({
               disabled={multiSelect ? tempSelectedIds.size === 0 : !tempSelectedId}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
               style={{ backgroundColor: '#306FCC' }}
+              data-test="botao-confirmar-selecao"
             >
               {multiSelect && tempSelectedIds.size > 0 
                 ? `Adicionar ${tempSelectedIds.size} componente${tempSelectedIds.size > 1 ? 's' : ''}`

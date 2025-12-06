@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { X, Copy, Check } from 'lucide-react'
 import { get } from '@/lib/fetchData'
 import { Orcamento } from '@/types/orcamentos'
+import { Button } from '@/components/ui/button'
 
 interface OrcamentoApiResponse {
   data: Orcamento;
@@ -111,6 +112,7 @@ export default function ModalDetalhesOrcamento({
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }}
       onClick={handleBackdropClick}
+      data-test="modal-detalhes-orcamento"
     >
       <div
         className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300"
@@ -122,23 +124,25 @@ export default function ModalDetalhesOrcamento({
             onClick={handleClose}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer z-10"
             title="Fechar"
+            aria-label="Fechar modal"
+            data-test="modal-detalhes-close"
           >
             <X size={20} />
           </button>
           <div className="text-center px-8">
             <div className="max-h-[100px] overflow-y-auto mb-2">
-              <h2 className="text-xl font-semibold text-gray-900 break-words">
+              <h2 className="text-xl font-semibold text-gray-900 break-words" data-test="modal-detalhes-header">
                 {orcamentoNome || orcamento?.nome || 'Detalhes do Orçamento'}
               </h2>
             </div>
             {(orcamentoDescricao || orcamento?.descricao) && (
               <div className="max-h-[120px] overflow-y-auto mb-3">
-                <p className="text-sm text-gray-600 break-words text-center max-w-full">
+                <p className="text-sm text-gray-600 break-words text-center max-w-full" data-test="modal-detalhes-descricao">
                   {orcamentoDescricao || orcamento?.descricao}
                 </p>
               </div>
             )}
-            <p className="text-xl font-semibold text-blue-600">
+            <p className="text-xl font-semibold text-blue-600" data-test="modal-detalhes-total">
               {isLoading ? 'Carregando...' : orcamento ? `R$ ${orcamento.total.toFixed(2)}` : '-'}
             </p>
           </div>
@@ -156,7 +160,7 @@ export default function ModalDetalhesOrcamento({
 
           {/* Loading */}
           {isLoading ? (
-            <div className="flex justify-center py-8">
+            <div className="flex justify-center py-8" data-test="loading-spinner">
               <div className="relative w-8 h-8">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -170,7 +174,7 @@ export default function ModalDetalhesOrcamento({
                   <label className="text-lg font-semibold text-gray-900 block mb-2">
                     Componentes ({orcamento.componentes.length})
                   </label>
-                  <div className="border rounded-lg overflow-x-auto">
+                  <div className="border rounded-lg overflow-x-auto" data-test="modal-detalhes-tabela">
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50 border-b">
                         <tr>
@@ -213,7 +217,7 @@ export default function ModalDetalhesOrcamento({
                       <label className="text-base font-medium text-gray-700 block mb-2">
                         Criado em
                       </label>
-                      <p className="text-base text-gray-600">
+                      <p className="text-base text-gray-600" data-test="modal-detalhes-data-criacao">
                         {new Date(orcamento.createdAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
@@ -229,7 +233,7 @@ export default function ModalDetalhesOrcamento({
                       <label className="text-base font-medium text-gray-700 block mb-2">
                         Atualizado em
                       </label>
-                      <p className="text-base text-gray-600">
+                      <p className="text-base text-gray-600" data-test="modal-detalhes-data-atualizacao">
                         {new Date(orcamento.updatedAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
