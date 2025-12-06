@@ -388,6 +388,7 @@ export default function AdicionarComponentePage() {
                     }}
                     maxLength={100}
                     className={`w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base ${errors.nome ? '!border-red-500' : ''}`}
+                    data-teste="input-nome-componente"
                   />
                   {errors.nome && (
                     <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.nome}</p>
@@ -413,6 +414,7 @@ export default function AdicionarComponentePage() {
                           className={`w-full flex items-center justify-between px-3 sm:px-4 bg-white border rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors cursor-pointer text-sm sm:text-base min-h-[38px] sm:min-h-[46px] ${errors.categoria ? 'border-red-500' : 'border-gray-300'
                             }`}
                           disabled={isLoadingCategorias}
+                          data-teste="botao-selecionar-categoria"
                         >
                           <span className={`truncate ${categoriaSelecionada ? 'text-gray-900' : 'text-gray-500'}`}>
                             {isLoadingCategorias
@@ -436,6 +438,7 @@ export default function AdicionarComponentePage() {
                                 onChange={(e) => setCategoriaPesquisa(e.target.value)}
                                 className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 onClick={(e) => e.stopPropagation()}
+                                data-teste="input-pesquisa-categoria"
                               />
                             </div>
 
@@ -468,6 +471,7 @@ export default function AdicionarComponentePage() {
                                           }}
                                           className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
                                           title="Editar categoria"
+                                          data-teste="botao-editar-categoria"
                                         >
                                           <Edit size={20} />
                                         </button>
@@ -480,6 +484,7 @@ export default function AdicionarComponentePage() {
                                           }}
                                           className="p-1.5 text-gray-900 hover:bg-gray-200 rounded transition-colors cursor-pointer"
                                           title="Excluir categoria"
+                                          data-teste="botao-excluir-categoria"
                                         >
                                           <Trash2 size={20} />
                                         </button>
@@ -509,6 +514,7 @@ export default function AdicionarComponentePage() {
                         onClick={() => setIsAddingCategoria(true)}
                         className="text-white !h-[38px] !w-[38px] sm:!h-[46px] sm:!w-[46px] !p-0 flex items-center justify-center cursor-pointer hover:opacity-90 flex-shrink-0"
                         style={{ backgroundColor: '#306FCC' }}
+                        data-teste="botao-adicionar-categoria"
                       >
                         <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>
@@ -545,6 +551,7 @@ export default function AdicionarComponentePage() {
                       }
                     }}
                     className="w-full !px-3 sm:!px-4 !h-auto !min-h-[38px] sm:!min-h-[46px] text-sm sm:text-base"
+                    data-teste="input-estoque-minimo"
                   />
                 </div>
 
@@ -569,6 +576,7 @@ export default function AdicionarComponentePage() {
                           onClick={handleRemoveImage}
                           className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg hover:bg-gray-200 transition-all duration-200 cursor-pointer"
                           aria-label="Remover imagem"
+                          data-teste="botao-remover-imagem"
                         >
                           <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" strokeWidth={2} />
                         </button>
@@ -619,6 +627,7 @@ export default function AdicionarComponentePage() {
                   onChange={(e) => setDescricao(e.target.value)}
                   maxLength={200}
                   className="w-full flex-1 px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none min-h-[120px]"
+                  data-teste="textarea-descricao-componente"
                 />
               </div>
             </div>
@@ -630,6 +639,7 @@ export default function AdicionarComponentePage() {
                 variant="outline"
                 onClick={handleCancel}
                 className="min-w-[80px] sm:min-w-[120px] cursor-pointer text-sm sm:text-base px-3 sm:px-4"
+                data-teste="botao-cancelar"
               >
                 Cancelar
               </Button>
@@ -638,6 +648,7 @@ export default function AdicionarComponentePage() {
                 className="min-w-[80px] sm:min-w-[120px] text-white cursor-pointer hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
                 style={{ backgroundColor: '#306FCC' }}
                 disabled={createComponenteMutation.isPending}
+                data-teste="botao-salvar"
               >
                 {createComponenteMutation.isPending ? 'Salvando...' : 'Salvar'}
               </Button>
@@ -676,6 +687,7 @@ export default function AdicionarComponentePage() {
                 }}
                 className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                 title="Fechar"
+                data-teste="botao-fechar-modal-categoria"
               >
                 <X size={18} className="sm:w-5 sm:h-5" />
               </button>
@@ -719,6 +731,7 @@ export default function AdicionarComponentePage() {
                       handleAddCategoria()
                     }
                   }}
+                  data-teste="input-nova-categoria"
                 />
                 {errors.novaCategoria && (
                   <p className="text-red-500 text-xs sm:text-sm">{errors.novaCategoria}</p>
@@ -739,6 +752,7 @@ export default function AdicionarComponentePage() {
                   }}
                   disabled={createCategoriaMutation.isPending}
                   className="flex-1 cursor-pointer text-sm sm:text-base"
+                  data-teste="botao-cancelar-modal-categoria"
                 >
                   Cancelar
                 </Button>
@@ -748,6 +762,7 @@ export default function AdicionarComponentePage() {
                   disabled={createCategoriaMutation.isPending}
                   className="flex-1 text-white hover:opacity-90 cursor-pointer text-sm sm:text-base"
                   style={{ backgroundColor: '#306FCC' }}
+                  data-teste="botao-criar-categoria"
                 >
                   {createCategoriaMutation.isPending ? 'Criando...' : 'Criar'}
                 </Button>

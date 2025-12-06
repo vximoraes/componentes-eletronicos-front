@@ -9,143 +9,153 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.visit('/')
     login(email, senha)
   })
-  it('Deve verificar se os cabeçalhos da tabela estão corretos.', () => {
-    cy.get('[data-test="sidebar-btn-relatorios"]').click()
-    cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
 
-    cy.get('[data-test="table-head-codigo"]').should('be.visible')
-    cy.get('[data-test="table-head-nome"]').should('be.visible')
-    cy.get('[data-test="table-head-descricao"]').should('be.visible')
-    cy.get('[data-test="table-head-itens"]').should('be.visible')
-    cy.get('[data-test="table-head-valor-total"]').should('be.visible')
-    cy.get('[data-test="table-head-data"]').should('be.visible')
+  describe('Validação da Tabela', () => {
+    it('Deve verificar se os cabeçalhos da tabela estão corretos.', () => {
+      cy.get('[data-test="sidebar-btn-relatorios"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
 
-    cy.get('[data-test="table-head-codigo"]').should('contain.text', 'CÓDIGO')
-    cy.get('[data-test="table-head-nome"]').should('contain.text', 'NOME')
-    cy.get('[data-test="table-head-descricao"]').should('contain.text', 'DESCRIÇÃO')
-    cy.get('[data-test="table-head-itens"]').should('contain.text', 'ITENS')
-    cy.get('[data-test="table-head-valor-total"]').should('contain.text', 'VALOR TOTAL')
-    cy.get('[data-test="table-head-data"]').should('contain.text', 'DATA')
+      cy.get('[data-test="table-head-codigo"]').should('be.visible')
+      cy.get('[data-test="table-head-nome"]').should('be.visible')
+      cy.get('[data-test="table-head-descricao"]').should('be.visible')
+      cy.get('[data-test="table-head-itens"]').should('be.visible')
+      cy.get('[data-test="table-head-valor-total"]').should('be.visible')
+      cy.get('[data-test="table-head-data"]').should('be.visible')
 
-    cy.get('[data-test="table-head-checkbox"]').should('be.visible')
-    cy.get('[data-test="table-head-checkbox"]').find('input[type="checkbox"]').should('exist')
-  })
+      cy.get('[data-test="table-head-codigo"]').should('contain.text', 'CÓDIGO')
+      cy.get('[data-test="table-head-nome"]').should('contain.text', 'NOME')
+      cy.get('[data-test="table-head-descricao"]').should('contain.text', 'DESCRIÇÃO')
+      cy.get('[data-test="table-head-itens"]').should('contain.text', 'ITENS')
+      cy.get('[data-test="table-head-valor-total"]').should('contain.text', 'VALOR TOTAL')
+      cy.get('[data-test="table-head-data"]').should('contain.text', 'DATA')
 
-  it('Deve verificar se os campos estão visíveis em todas as linhas e se a nomenclatura dos campos corresponde.', () => {
-    cy.get('[data-test="sidebar-btn-relatorios"]').click()
-    cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
+      cy.get('[data-test="table-head-checkbox"]').should('be.visible')
+      cy.get('[data-test="table-head-checkbox"]').find('input[type="checkbox"]').should('exist')
+    })
 
-    cy.get('[data-test="orcamento-row"]').should('exist')
-    cy.get('[data-test="orcamento-row"]').should('have.length.greaterThan', 0)
+    it('Deve verificar se os campos estão visíveis em todas as linhas e se a nomenclatura dos campos corresponde.', () => {
+      cy.get('[data-test="sidebar-btn-relatorios"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
 
-    cy.get('[data-test="orcamento-row"]').each((row) => {
-      cy.wrap(row).within(() => {
-        cy.get('[data-test="orcamento-codigo"]').should('be.visible')
-        cy.get('[data-test="orcamento-nome"]').should('be.visible')
-        cy.get('[data-test="orcamento-descricao"]').should('be.visible')
-        cy.get('[data-test="orcamento-itens"]').should('be.visible')
-        cy.get('[data-test="orcamento-valor-total"]').should('be.visible')
-        cy.get('[data-test="orcamento-data"]').should('be.visible')
+      cy.get('[data-test="orcamento-row"]').should('exist')
+      cy.get('[data-test="orcamento-row"]').should('have.length.greaterThan', 0)
+
+      cy.get('[data-test="orcamento-row"]').each((row) => {
+        cy.wrap(row).within(() => {
+          cy.get('[data-test="orcamento-codigo"]').should('be.visible')
+          cy.get('[data-test="orcamento-nome"]').should('be.visible')
+          cy.get('[data-test="orcamento-descricao"]').should('be.visible')
+          cy.get('[data-test="orcamento-itens"]').should('be.visible')
+          cy.get('[data-test="orcamento-valor-total"]').should('be.visible')
+          cy.get('[data-test="orcamento-data"]').should('be.visible')
+        })
       })
     })
   })
 
-  it('Deve verificar se os checkboxes são todos ativados/desativados quando o checkbox mãe passar por uma interação.', () => {
-    cy.get('[data-test="sidebar-btn-relatorios"]').click()
-    cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
+  describe('Funcionalidade de Checkboxes', () => {
+    it('Deve verificar se os checkboxes são todos ativados/desativados quando o checkbox mãe passar por uma interação.', () => {
+      cy.get('[data-test="sidebar-btn-relatorios"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
 
-    cy.get('[data-test="orcamento-row"]').should('exist')
-    cy.get('[data-test="orcamento-row"]').should('have.length.greaterThan', 0)
+      cy.get('[data-test="orcamento-row"]').should('exist')
+      cy.get('[data-test="orcamento-row"]').should('have.length.greaterThan', 0)
 
-    cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
-      cy.wrap(checkbox).should('not.be.checked')
-    })
-
-    cy.get('[data-test="checkbox-select-all"]').should('not.be.checked')
-    cy.get('[data-test="checkbox-select-all"]').click()
-    cy.get('[data-test="checkbox-select-all"]').should('be.checked')
-
-    cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
-      cy.wrap(checkbox).should('be.checked')
-    })
-
-    cy.wrap(null).then(() => {
-      cy.get('[data-test="checkbox-select-all"]').click({ force: true })
-      cy.get('[data-test="checkbox-select-all"]').should('not.be.checked')
       cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
         cy.wrap(checkbox).should('not.be.checked')
       })
-    })
-  })
 
-  it('Deve pesquisar um orçamento pelo nome.', () => {
-    cy.get('[data-test="sidebar-btn-relatorios"]').click()
-    cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
-    cy.get('[data-test="orcamento-row"]').first().find('[data-test="orcamento-nome"]').first().invoke('text').then((e) => {
-      const nomeOrcamento = e.trim()
-      cy.get('[data-test="search-input"]').type(nomeOrcamento)
-      cy.wait(500)
-      cy.get('[data-test="orcamento-row"]').each((orcamento_nome) => {
-        const nome = orcamento_nome.find('[data-test="orcamento-nome"]').text().trim()
-        expect(nomeOrcamento).to.eq(nome)
+      cy.get('[data-test="checkbox-select-all"]').should('not.be.checked')
+      cy.get('[data-test="checkbox-select-all"]').click()
+      cy.get('[data-test="checkbox-select-all"]').should('be.checked')
+
+      cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
+        cy.wrap(checkbox).should('be.checked')
+      })
+
+      cy.wrap(null).then(() => {
+        cy.get('[data-test="checkbox-select-all"]').click({ force: true })
+        cy.get('[data-test="checkbox-select-all"]').should('not.be.checked')
+        cy.get('[data-test="checkbox-select-item"]').each((checkbox) => {
+          cy.wrap(checkbox).should('not.be.checked')
+        })
       })
     })
   })
 
-  it('Deve verificar se as informações das estatísticas estão visíveis.', () => {
-    cy.get('[data-test="sidebar-btn-relatorios"]').click()
-    cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
-    cy.wait(500)
-    cy.get('[data-test="stat-total-orcamentos"]').within((e) => {
-      const paragrafos = e.find('p')
-      let texto = ''
-      for (const p of paragrafos) {
-        texto += p.textContent + " "
-      }
-      texto = texto.trim()
-      if (texto) {
-        expect(texto).contain('Total de orçamentos')
-      }
-    })
-
-    cy.get('[data-test="stat-valor-total"]').within((e) => {
-      const paragrafos = e.find('p')
-      let texto = ''
-      for (const p of paragrafos) {
-        texto += p.textContent + " "
-      }
-      texto = texto.trim()
-      if (texto) {
-        expect(texto).contain('Valor total')
-      }
-    })
-
-    cy.get('[data-test="stat-maior-orcamento"]').within((e) => {
-      const paragrafos = e.find('p')
-      let texto = ''
-      for (const p of paragrafos) {
-        texto += p.textContent + " "
-      }
-      texto = texto.trim()
-      if (texto) {
-        expect(texto).contain('Maior orçamento')
-      }
-    })
-
-    cy.get('[data-test="stat-menor-orcamento"]').within((e) => {
-      const paragrafos = e.find('p')
-      let texto = ''
-      for (const p of paragrafos) {
-        texto += p.textContent + " "
-      }
-      texto = texto.trim()
-      if (texto) {
-        expect(texto).contain('Menor orçamento')
-      }
+  describe('Busca de Orçamentos', () => {
+    it('Deve pesquisar um orçamento pelo nome.', () => {
+      cy.get('[data-test="sidebar-btn-relatorios"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
+      cy.get('[data-test="orcamento-row"]').first().find('[data-test="orcamento-nome"]').first().invoke('text').then((e) => {
+        const nomeOrcamento = e.trim()
+        cy.get('[data-test="search-input"]').type(nomeOrcamento)
+        cy.wait(500)
+        cy.get('[data-test="orcamento-row"]').each((orcamento_nome) => {
+          const nome = orcamento_nome.find('[data-test="orcamento-nome"]').text().trim()
+          expect(nomeOrcamento).to.eq(nome)
+        })
+      })
     })
   })
 
-  it('Deve pesquisar por um valor x e retornar valores iguais ou maiores a este.', () => {
+  describe('Estatísticas', () => {
+    it('Deve verificar se as informações das estatísticas estão visíveis.', () => {
+      cy.get('[data-test="sidebar-btn-relatorios"]').click()
+      cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
+      cy.wait(500)
+      cy.get('[data-test="stat-total-orcamentos"]').within((e) => {
+        const paragrafos = e.find('p')
+        let texto = ''
+        for (const p of paragrafos) {
+          texto += p.textContent + " "
+        }
+        texto = texto.trim()
+        if (texto) {
+          expect(texto).contain('Total de orçamentos')
+        }
+      })
+
+      cy.get('[data-test="stat-valor-total"]').within((e) => {
+        const paragrafos = e.find('p')
+        let texto = ''
+        for (const p of paragrafos) {
+          texto += p.textContent + " "
+        }
+        texto = texto.trim()
+        if (texto) {
+          expect(texto).contain('Valor total')
+        }
+      })
+
+      cy.get('[data-test="stat-maior-orcamento"]').within((e) => {
+        const paragrafos = e.find('p')
+        let texto = ''
+        for (const p of paragrafos) {
+          texto += p.textContent + " "
+        }
+        texto = texto.trim()
+        if (texto) {
+          expect(texto).contain('Maior orçamento')
+        }
+      })
+
+      cy.get('[data-test="stat-menor-orcamento"]').within((e) => {
+        const paragrafos = e.find('p')
+        let texto = ''
+        for (const p of paragrafos) {
+          texto += p.textContent + " "
+        }
+        texto = texto.trim()
+        if (texto) {
+          expect(texto).contain('Menor orçamento')
+        }
+      })
+    })
+  })
+
+  describe('Filtros de Relatório', () => {
+    it('Deve pesquisar por um valor x e retornar valores iguais ou maiores a este.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
     cy.get('[data-test="orcamento-row"]').first().find('[data-test="orcamento-valor-total"]').invoke('text').then((e) => {
@@ -345,8 +355,10 @@ describe('Tela de relatórios de orçamentos.', () => {
     cy.get('[data-test="remove-data-inicio-filter"]').click()
     cy.get('[data-test="remove-data-fim-filter"]').click()
   })
+  })
 
-  it('Botão de Exportar deve estar sem interação se nenhum orçamento com checkbox selecionada estiver presente.', () => {
+  describe('Exportação de Relatórios', () => {
+    it('Botão de Exportar deve estar sem interação se nenhum orçamento com checkbox selecionada estiver presente.', () => {
     cy.get('[data-test="sidebar-btn-relatorios"]').click()
     cy.get('[data-test="sidebar-btn-relatorios-subitem-orçamentos"]').click()
     cy.get('[data-test="exportar-button"]').should('not.be.enabled')
@@ -424,8 +436,7 @@ describe('Tela de relatórios de orçamentos.', () => {
     const filePath = path.join(Cypress.config('downloadsFolder'), `${date.toString()}-${dateString}.csv`)
     cy.readFile(filePath).should('exist')
   })
-
-
+  })
 })
 
 function login(email: string, senha: string) {
