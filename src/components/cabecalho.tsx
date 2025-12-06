@@ -291,6 +291,7 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
                 <button
                   className="text-xs sm:text-sm text-blue-600 hover:underline cursor-pointer whitespace-nowrap"
                   onClick={() => markAsRead(undefined)}
+                  data-teste="botao-marcar-todas-visualizadas"
                 >
                   Marcar todas como visualizadas
                 </button>
