@@ -196,6 +196,7 @@ function PageUsuariosContent() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
+              data-test="search-input"
               type="text"
               placeholder="Pesquisar usuários..."
               value={searchTerm}
@@ -204,6 +205,7 @@ function PageUsuariosContent() {
             />
           </div>
           <Button
+            data-test="cadastrar-usuario-button"
             className="flex items-center gap-2 text-white hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#306FCC' }}
             onClick={() => setIsCadastrarModalOpen(true)}
@@ -215,7 +217,7 @@ function PageUsuariosContent() {
 
         {/* Mensagem de Erro */}
         {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0">
+          <div data-test="error-message" className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded shrink-0">
             Erro ao carregar usuários: {error.message}
           </div>
         )}
@@ -223,7 +225,7 @@ function PageUsuariosContent() {
         {/* Área da Tabela com Scroll */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {isLoading || isRefetchingAfterDelete ? (
-            <div className="flex flex-col items-center justify-center flex-1">
+            <div data-test="loading-state" className="flex flex-col items-center justify-center flex-1">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -233,7 +235,7 @@ function PageUsuariosContent() {
           ) : usuarios.length > 0 ? (
             <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full min-w-[800px] caption-bottom text-xs sm:text-sm">
+                <table data-test="usuarios-table" className="w-full min-w-[800px] caption-bottom text-xs sm:text-sm">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
                       <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">NOME</TableHead>
@@ -271,6 +273,7 @@ function PageUsuariosContent() {
                         <TableCell className="text-center px-8 py-2 whitespace-nowrap">
                           <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
+                              data-test="visualizar-button"
                               onClick={() => handleViewDetails(usuario._id)}
                               className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Ver detalhes do usuário"
@@ -279,6 +282,7 @@ function PageUsuariosContent() {
                             </button>
                             {!usuario.ativo && (
                               <button
+                                data-test="reenviar-convite-button"
                                 onClick={() => handleReenviarConvite(usuario._id, usuario.nome)}
                                 disabled={reenviarConviteId === usuario._id}
                                 className="p-1 sm:p-2 text-gray-900 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
@@ -292,6 +296,7 @@ function PageUsuariosContent() {
                               </button>
                             )}
                             <button
+                              data-test="excluir-button"
                               onClick={() => handleExcluirUsuario(usuario._id, usuario.nome)}
                               className="p-1 sm:p-2 text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200 cursor-pointer"
                               title="Excluir usuário"
@@ -312,12 +317,12 @@ function PageUsuariosContent() {
               </div>
             </div>
           ) : (
-            <div className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
+            <div data-test="empty-state" className="text-center flex-1 flex items-center justify-center bg-white rounded-lg border">
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <Search className="w-8 h-8 text-gray-400" />
                 </div>
-                <p className="text-gray-500 text-lg">
+                <p data-test="empty-message" className="text-gray-500 text-lg">
                   {searchTerm ? 'Nenhum usuário encontrado para sua pesquisa.' : 'Não há usuários cadastrados...'}
                 </p>
               </div>

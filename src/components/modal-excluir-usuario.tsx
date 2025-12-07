@@ -88,6 +88,7 @@ export default function ModalExcluirUsuario({
 
   const modalContent = (
     <div
+      data-test="modal-excluir-usuario"
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
@@ -102,6 +103,7 @@ export default function ModalExcluirUsuario({
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
           <button
+            data-test="modal-excluir-close"
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             title="Fechar"
@@ -118,7 +120,7 @@ export default function ModalExcluirUsuario({
             </h2>
             <div className="max-h-[120px] overflow-y-auto">
               <p className="text-gray-600 break-words">
-                Tem certeza que deseja excluir o usuário <span className="font-semibold">{usuarioNome}</span>?
+                Tem certeza que deseja excluir o usuário <span data-test="modal-excluir-nome-usuario" className="font-semibold">{usuarioNome}</span>?
               </p>
             </div>
           </div>
@@ -140,6 +142,7 @@ export default function ModalExcluirUsuario({
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
           <div className="flex gap-3">
             <Button
+              data-test="modal-excluir-cancelar"
               variant="outline"
               onClick={onClose}
               disabled={excluirMutation.isPending}
@@ -148,6 +151,7 @@ export default function ModalExcluirUsuario({
               Cancelar
             </Button>
             <Button
+              data-test="modal-excluir-confirmar"
               onClick={handleExcluir}
               disabled={excluirMutation.isPending}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"

@@ -111,6 +111,7 @@ export default function ModalDetalhesUsuario({
 
   const modalContent = (
     <div
+      data-test="modal-detalhes-usuario"
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
@@ -125,6 +126,7 @@ export default function ModalDetalhesUsuario({
         {/* Header */}
         <div className="relative p-6 border-b border-gray-200 flex-shrink-0">
           <button
+            data-test="modal-detalhes-close"
             onClick={handleClose}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer z-10"
             title="Fechar"
@@ -168,11 +170,11 @@ export default function ModalDetalhesUsuario({
                 </label>
                 <div className="flex items-center gap-2">
                   {usuario.ativo ? (
-                    <span className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
+                    <span data-test="modal-detalhes-status" className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium bg-green-100 text-green-800">
                       Ativo
                     </span>
                   ) : (
-                    <span className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">
+                    <span data-test="modal-detalhes-status" className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium bg-yellow-100 text-yellow-800">
                       Aguardando ativação
                     </span>
                   )}
@@ -185,10 +187,11 @@ export default function ModalDetalhesUsuario({
                   E-mail
                 </label>
                 <div className="flex items-center gap-2">
-                  <p className="text-base text-gray-900 truncate flex-1" title={usuario.email}>
+                  <p data-test="modal-detalhes-email" className="text-base text-gray-900 truncate flex-1" title={usuario.email}>
                     {usuario.email}
                   </p>
                   <button
+                    data-test="modal-detalhes-copiar-email"
                     onClick={() => handleCopy(usuario.email, 'email')}
                     className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors flex-shrink-0 cursor-pointer"
                     title="Copiar e-mail"

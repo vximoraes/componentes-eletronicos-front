@@ -114,6 +114,7 @@ export default function ModalCadastrarUsuario({
 
   const modalContent = (
     <div
+      data-test="modal-cadastrar-usuario"
       className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4"
       style={{
         zIndex: 99999,
@@ -128,6 +129,7 @@ export default function ModalCadastrarUsuario({
         {/* Botão de fechar */}
         <div className="relative p-6 pb-0">
           <button
+            data-test="modal-cadastrar-close"
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
             title="Fechar"
@@ -158,6 +160,7 @@ export default function ModalCadastrarUsuario({
               </span>
             </div>
             <input
+              data-test="nome-input"
               id="nome"
               type="text"
               placeholder="Nome do usuário"
@@ -178,6 +181,7 @@ export default function ModalCadastrarUsuario({
               E-mail <span className="text-red-500">*</span>
             </label>
             <input
+              data-test="email-input"
               id="email"
               type="email"
               placeholder="E-mail do usuário"
@@ -208,6 +212,7 @@ export default function ModalCadastrarUsuario({
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
           <div className="flex gap-3">
             <Button
+              data-test="modal-cadastrar-cancelar"
               variant="outline"
               onClick={onClose}
               disabled={isSubmitting || cadastrarMutation.isPending}
@@ -216,6 +221,7 @@ export default function ModalCadastrarUsuario({
               Cancelar
             </Button>
             <Button
+              data-test="modal-cadastrar-confirmar"
               onClick={handleSubmit(onSubmit)}
               disabled={isSubmitting || cadastrarMutation.isPending}
               className="flex-1 text-white hover:opacity-90 cursor-pointer"
