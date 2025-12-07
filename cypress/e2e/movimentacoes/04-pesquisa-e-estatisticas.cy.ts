@@ -28,4 +28,11 @@ describe("Movimentações — Pesquisa e Estatísticas", () => {
           .should("match", /arduino/i);
       });
   });
+
+  //teste 02
+  it("Exibe estado vazio quando a pesquisa não encontra resultados", () => {
+    cy.get('[data-test="search-input"]').type("algoquenaoexiste123");
+
+    cy.get('[data-test="empty-state"]').should("be.visible");
+  });
 });
