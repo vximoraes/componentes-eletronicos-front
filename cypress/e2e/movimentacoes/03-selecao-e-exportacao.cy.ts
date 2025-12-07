@@ -46,5 +46,22 @@ describe("Movimentações — Seleção e Exportação", () => {
 
   });
 
-  //
+  it("Seleciona itens e exporta CSV (sem leitura do arquivo)", () => {
+
+    cy.get('[data-test^="checkbox-item-"]')
+      .first()
+      .click();
+
+    cy.get('[data-test="exportar-button"]').click();
+
+    cy.get('[data-test="filename-input"]')
+      .clear()
+      .type("movimentacoes-csv");
+
+    cy.get('[data-test="format-radio-csv"]').check({ force: true });
+    cy.get('[data-test="modal-exportar-export-button"]').click();
+
+    cy.get('[data-test="modal-exportar-overlay"]')
+      .should("not.exist");
+  });
 });
