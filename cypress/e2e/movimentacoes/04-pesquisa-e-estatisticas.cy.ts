@@ -53,4 +53,21 @@ describe("Movimentações — Pesquisa e Estatísticas", () => {
       .invoke("text")
       .should("match", /\d+/);
   });
+  
+    //teste 04
+  it("Estatísticas atualizam após pesquisa", () => {
+    cy.get('[data-test="stat-total-movimentacoes"]')
+      .invoke("text")
+      .then((valorAntes) => {
+        cy.get('[data-test="search-input"]').type("entrada");
+
+        cy.wait(700);
+
+        cy.get('[data-test="stat-total-movimentacoes"]')
+          .invoke("text")
+          .should((valorDepois) => {
+            expect(valorDepois).not.to.eq(valorAntes);
+          });
+      });
+  });
 });
