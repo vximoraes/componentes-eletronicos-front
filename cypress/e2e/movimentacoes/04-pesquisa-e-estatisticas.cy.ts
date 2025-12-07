@@ -53,7 +53,7 @@ describe("Movimentações — Pesquisa e Estatísticas", () => {
       .invoke("text")
       .should("match", /\d+/);
   });
-  
+
     //teste 04
   it("Estatísticas atualizam após pesquisa", () => {
     cy.get('[data-test="stat-total-movimentacoes"]')
@@ -69,5 +69,14 @@ describe("Movimentações — Pesquisa e Estatísticas", () => {
             expect(valorDepois).not.to.eq(valorAntes);
           });
       });
+  });
+
+//teste 05
+  it("Abre e fecha o bloco de estatísticas no modo mobile", () => {
+    cy.viewport(390, 844);
+    cy.get('[data-test="toggle-stats-button"]').should("be.visible").click();
+    cy.get('[data-test="stats-grid"]').should("be.visible");
+    cy.get('[data-test="toggle-stats-button"]').click();
+    cy.get('[data-test="stats-grid"]').should("not.be.visible");
   });
 });
