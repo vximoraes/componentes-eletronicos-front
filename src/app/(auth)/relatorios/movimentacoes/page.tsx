@@ -214,10 +214,12 @@ function RelatorioMovimentacoesPageContent() {
       <Cabecalho pagina="Relatórios" acao="Movimentações" />
 
       <div className="flex-1 overflow-hidden flex flex-col p-6 pt-0 max-w-full">
+        {/* Stats Section */}
         <div className="shrink-0 mb-6">
           <button
             onClick={() => setIsStatsOpen(!isStatsOpen)}
             className="xl:hidden w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors h-10 cursor-pointer"
+            data-test="toggle-stats-button"
           >
             <div className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
@@ -306,14 +308,15 @@ function RelatorioMovimentacoesPageContent() {
         {/* Filtros aplicados */}
         {tipoFilter && (
           <div className="mb-4 shrink-0" data-test="applied-filters">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2" data-test="filters-container">
+              <div data-test="filter-tag-tipo" className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm border border-gray-300 shadow-sm">
                 <span className="font-medium">Tipo:</span>
                 <span>{tipoFilter}</span>
                 <button
                   onClick={() => setTipoFilter('')}
                   className="ml-1 hover:bg-gray-200 rounded-full p-1 transition-colors flex items-center justify-center cursor-pointer"
                   title="Remover filtro de tipo"
+                  data-test="remove-tipo-filter"
                 >
                   <X size={12} />
                 </button>
@@ -336,7 +339,7 @@ function RelatorioMovimentacoesPageContent() {
         {/* Área da Tabela com Scroll */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center flex-1">
+            <div className="flex flex-col items-center justify-center flex-1" data-test="loading-spinner">
               <div className="relative w-12 h-12">
                 <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
                 <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
@@ -344,12 +347,12 @@ function RelatorioMovimentacoesPageContent() {
               <p className="mt-4 text-gray-600 font-medium">Carregando movimentações...</p>
             </div>
           ) : movimentacoesFiltradas.length > 0 ? (
-            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col">
+            <div className="border rounded-lg bg-white flex-1 overflow-hidden flex flex-col" data-test="movimentacoes-table-container">
               <div className="overflow-x-auto overflow-y-auto flex-1 relative">
-                <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm">
+                <table className="w-full min-w-[1000px] caption-bottom text-xs sm:text-sm" data-test="movimentacoes-table">
                   <TableHeader className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                     <TableRow className="bg-gray-50 border-b">
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8">
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center w-[50px] px-8" data-test="table-head-checkbox">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -359,105 +362,107 @@ function RelatorioMovimentacoesPageContent() {
                           onChange={handleSelectAll}
                           className="w-4 h-4 cursor-pointer"
                           title={isAllSelected ? "Desmarcar todos" : "Selecionar todos"}
+                          data-test="checkbox-select-all"
                         />
                       </TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">CÓDIGO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">PRODUTO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">QUANTIDADE</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">TIPO DE MOVIMENTAÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8">LOCALIZAÇÃO</TableHead>
-                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8">DATA/HORA</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-codigo">CÓDIGO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-produto">PRODUTO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-quantidade">QUANTIDADE</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-tipo">TIPO DE MOVIMENTAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-left px-8" data-test="table-head-localizacao">LOCALIZAÇÃO</TableHead>
+                      <TableHead className="font-semibold text-gray-700 bg-gray-50 text-center px-8" data-test="table-head-data">DATA/HORA</TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                          {movimentacoesFiltradas.map((mov) => (
-                            <TableRow key={mov._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }}>
-                              
-                              {/* Seleção */}
-                              <TableCell className="text-center px-8 py-3 align-middle">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedItems.has(mov._id)}
-                                  onChange={() => handleSelectItem(mov._id)}
-                                  className="w-4 h-4 cursor-pointer"
-                                />
-                              </TableCell>
+                  <TableBody data-test="movimentacoes-table-body">
+                    {movimentacoesFiltradas.map((mov) => (
+                      <TableRow key={mov._id} className="hover:bg-gray-50 border-b" style={{ height: '60px' }} data-test={`movimentacao-row-${mov._id}`}>
+                        
+                        {/* Seleção */}
+                        <TableCell className="text-center px-8 py-3 align-middle" data-test="movimentacao-checkbox-cell">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.has(mov._id)}
+                            onChange={() => handleSelectItem(mov._id)}
+                            className="w-4 h-4 cursor-pointer"
+                            data-test={`checkbox-item-${mov._id}`}
+                          />
+                        </TableCell>
 
-                              {/* CÓDIGO */}
-                              <TableCell className="font-medium text-left px-8 py-3">
-                                <span className="truncate block max-w-[200px]" title={mov.componente?._id || mov._id}>
-                                  {mov.componente?._id?.slice(-8) || mov._id?.slice(-8) || "—"}
+                        {/* CÓDIGO */}
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="movimentacao-codigo">
+                          <span className="truncate block max-w-[200px]" title={mov.componente?._id || mov._id}>
+                            {mov.componente?._id?.slice(-8) || mov._id?.slice(-8) || "—"}
+                          </span>
+                        </TableCell>
+
+                        {/* PRODUTO */}
+                        <TableCell className="font-medium text-left px-8 py-3" data-test="movimentacao-produto">
+                          <span className="truncate block max-w-[200px]" title={mov.componente?.nome || "Sem nome"}>
+                            {mov.componente?.nome || "Sem nome"}
+                          </span>
+                        </TableCell>
+
+                        {/* QUANTIDADE */}
+                        <TableCell className="text-center px-8 py-3 font-medium" data-test="movimentacao-quantidade">
+                          {mov.quantidade}
+                        </TableCell>
+
+                        {/* TIPO DE MOVIMENTAÇÃO */}
+                        <TableCell className="text-center px-8 py-3 whitespace-nowrap" data-test="movimentacao-tipo">
+                          <div className="flex justify-center">
+                            {(() => {
+                              const tipoRaw = String(mov.tipo ?? "").toLowerCase();
+                              const isEntrada = tipoRaw.includes("entrada");
+                              const isSaida = tipoRaw.includes("saída") || tipoRaw.includes("saida");
+
+                              const classes = isEntrada
+                                ? "bg-green-100 text-green-800"
+                                : isSaida
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-800";
+
+                              const textoFormatado = isEntrada
+                                ? "Entrada"
+                                : isSaida
+                                ? "Saída"
+                                : String(mov.tipo ?? "").trim() || "-";
+
+                              return (
+                                <span
+                                  className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${classes}`}
+                                  title={textoFormatado}
+                                  data-test={`badge-tipo-${isEntrada ? 'entrada' : isSaida ? 'saida' : 'outro'}`}
+                                >
+                                  {textoFormatado}
                                 </span>
-                              </TableCell>
+                              );
+                            })()}
+                          </div>
+                        </TableCell>
 
-                              {/* PRODUTO */}
-                              <TableCell className="font-medium text-left px-8 py-3">
-                                <span className="truncate block max-w-[200px]" title={mov.componente?.nome || "Sem nome"}>
-                                  {mov.componente?.nome || "Sem nome"}
-                                </span>
-                              </TableCell>
+                        {/* LOCALIZAÇÃO */}
+                        <TableCell className="text-left px-8 py-3 font-medium" data-test="movimentacao-localizacao">
+                          <span className="truncate block max-w-[200px]" title={mov.localizacao?.nome || "-"}>
+                            {mov.localizacao?.nome || "-"}
+                          </span>
+                        </TableCell>
 
-                              {/* QUANTIDADE */}
-                              <TableCell className="text-center px-8 py-3 font-medium">
-                                {mov.quantidade}
-                              </TableCell>
+                        {/* DATA/HORA */}
+                        <TableCell className="text-center px-8 py-3 font-medium whitespace-nowrap" data-test="movimentacao-data">
+                          <span className="truncate block max-w-[150px]" title={new Date(mov.data_hora).toLocaleString("pt-BR")}>
+                            {new Date(mov.data_hora).toLocaleString("pt-BR")}
+                          </span>
+                        </TableCell>
 
-                              {/* TIPO DE MOVIMENTAÇÃO */}
-                              <TableCell className="text-center px-8 py-3 whitespace-nowrap">
-                                <div className="flex justify-center">
-                                  {(() => {
-                                    const tipoRaw = String(mov.tipo ?? "").toLowerCase();
-                                    const isEntrada = tipoRaw.includes("entrada");
-                                    const isSaida = tipoRaw.includes("saída") || tipoRaw.includes("saida");
-
-                                    const classes = isEntrada
-                                      ? "bg-green-100 text-green-800"
-                                      : isSaida
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-gray-100 text-gray-800";
-
-                                    const textoFormatado = isEntrada
-                                      ? "Entrada"
-                                      : isSaida
-                                      ? "Saída"
-                                      : String(mov.tipo ?? "").trim() || "-";
-
-                                    return (
-                                      <span
-                                        className={`inline-flex items-center justify-center px-3 py-1.5 rounded-[5px] text-xs font-medium text-center whitespace-nowrap ${classes}`}
-                                        title={textoFormatado}
-                                      >
-                                        {textoFormatado}
-                                      </span>
-                                    );
-                                  })()}
-                                </div>
-                              </TableCell>
-
-                              {/* LOCALIZAÇÃO */}
-                              <TableCell className="text-left px-8 py-3 font-medium">
-                                <span className="truncate block max-w-[200px]" title={mov.localizacao?.nome || "-"}>
-                                  {mov.localizacao?.nome || "-"}
-                                </span>
-                              </TableCell>
-
-                              {/* DATA/HORA */}
-                              <TableCell className="text-center px-8 py-3 font-medium whitespace-nowrap">
-                                <span className="truncate block max-w-[150px]" title={new Date(mov.data_hora).toLocaleString("pt-BR")}>
-                                  {new Date(mov.data_hora).toLocaleString("pt-BR")}
-                                </span>
-                              </TableCell>
-
-                            </TableRow>
-                          ))}
-                   </TableBody>
-
+                      </TableRow>
+                    ))}
+                  </TableBody>
                 </table>
 
                 {/* Target do infinite scroll */}
-                <div ref={observerTarget} className="h-10 flex items-center justify-center">
+                <div ref={observerTarget} className="h-10 flex items-center justify-center" data-test="infinite-scroll-observer">
                   {isFetchingNextPage && (
-                    <PulseLoader color="#3b82f6" size={5} />
+                    <PulseLoader color="#3b82f6" size={5} data-test="loading-next-page" />
                   )}
                 </div>
               </div>
@@ -499,11 +504,10 @@ function RelatorioMovimentacoesPageContent() {
     </div>
   );
 }
-
 export default function RelatorioMovimentacoesPage() {
   return (
     <Suspense fallback={
-      <div className="w-full h-screen flex flex-col items-center justify-center">
+      <div className="w-full h-screen flex flex-col items-center justify-center" data-test="page-suspense-fallback">
         <div className="relative w-12 h-12">
           <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
           <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-r-transparent animate-spin"></div>
