@@ -29,5 +29,31 @@ describe("Movimentações — Filtros", () => {
     cy.get('[data-test="modal-filtros-content"]').should("not.exist");
   });
 
+// teste 02
+
+  it("Aplica filtro de Entrada e lista somente entradas", () => {
+    cy.get('[data-test="filtros-button"]').click();
+    cy.get('[data-test="filtro-status-dropdown"]').click();
+
+    cy.get('[data-test="filtro-status-option-entrada"]').click();
+    cy.get('[data-test="aplicar-filtros-button"]').click();
+
+    // Badge aparece
+    cy.get('[data-test="filter-tag-tipo"]')
+      .should("exist")
+      .and(($el) => {
+        const text = $el.text().toLowerCase();
+        expect(text).to.contain("entrada");
+      });
  
+        // Tabela — somente "Entrada"
+    cy.get('[data-test="movimentacoes-table-body"] tr').each(($row) => {
+      cy.wrap($row)
+        .find('[data-test^="badge-tipo-"]')
+        .invoke("text")
+        .then((t) => {
+          expect(t.trim().toLowerCase()).to.equal("entrada");
+        });
+    });
+  });
 });
