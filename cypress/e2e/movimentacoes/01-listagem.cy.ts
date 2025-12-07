@@ -18,5 +18,12 @@ describe("Movimentações — Listagem", () => {
       .should("be.visible");
   });
 
-
+  it("Carrega cabeçalhos da tabela", () => {
+    cy.get('[data-test="table-head-codigo"]').should("be.visible");
+    cy.get('[data-test="table-head-produto"]').should("be.visible");
+    cy.get('[data-test="table-head-quantidade"]').should("be.visible");
+    cy.get('[data-test="table-head-tipo"]').should("be.visible");
+    cy.get('[data-test="table-head-localizacao"]').should("be.visible");
+    cy.get('[data-test="table-head-data"]').should("be.visible");
+  }); 
 });
