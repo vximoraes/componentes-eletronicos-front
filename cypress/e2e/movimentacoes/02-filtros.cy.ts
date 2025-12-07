@@ -55,5 +55,18 @@ describe("Movimentações — Filtros", () => {
           expect(t.trim().toLowerCase()).to.equal("entrada");
         });
     });
+
+    //teste 03
+    it("Remove o filtro de tipo pelo botão X", () => {
+    cy.get('[data-test="filtros-button"]').click();
+    cy.get('[data-test="filtro-status-dropdown"]').click();
+
+    cy.get('[data-test="filtro-status-option-entrada"]').click();
+    cy.get('[data-test="aplicar-filtros-button"]').click();
+
+    cy.get('[data-test="remove-tipo-filter"]').click();
+
+    cy.get('[data-test="filter-tag-tipo"]').should("not.exist");
+  });
   });
 });
