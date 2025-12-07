@@ -35,4 +35,22 @@ describe("Movimentações — Pesquisa e Estatísticas", () => {
 
     cy.get('[data-test="empty-state"]').should("be.visible");
   });
+
+//teste 03
+  it("Exibe estatísticas com total, entradas e saídas", () => {
+    cy.get('[data-test="stat-total-movimentacoes"]')
+      .should("be.visible")
+      .invoke("text")
+      .should("match", /\d+/);
+
+    cy.get('[data-test="stat-entradas"]')
+      .should("be.visible")
+      .invoke("text")
+      .should("match", /\d+/);
+
+    cy.get('[data-test="stat-saidas"]')
+      .should("be.visible")
+      .invoke("text")
+      .should("match", /\d+/);
+  });
 });
