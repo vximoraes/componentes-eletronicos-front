@@ -30,6 +30,20 @@ describe("Perfil — Edição de Informações", () => {
         expect($input.val()).to.not.be.empty;
     });
 
+//Teste 02
+  it("Fecha o modal ao clicar no botão X", () => {
+    cy.get('[data-test="edit-perfil-button"]').click();
+
+    cy.get('[data-test="modal-edit-perfil"]')
+      .should("be.visible");
+
+    cy.get('[data-test="modal-edit-perfil-close-button"]').click();
+
+    cy.get('[data-test="modal-edit-perfil"]')
+      .should("not.exist");
+  });
+
+
   });
 
 });
