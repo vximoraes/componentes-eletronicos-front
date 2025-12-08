@@ -271,13 +271,13 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
             onClick={handleNotificationsClick}
             className="relative w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-gray-100 transition-all duration-300 cursor-pointer"
             aria-label="Notificações"
-            data-teste="botao-notificacoes"
+            data-test="botao-notificacoes"
           >
             <Bell className="w-[22px] h-[22px] text-gray-700" strokeWidth={2.3} />
             {notifications.some(n => !n.visualizada) && (
               <span 
                 className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center"
-                data-teste="contador-notificacoes"
+                data-test="contador-notificacoes"
               >
                 {notifications.filter(n => !n.visualizada).length}
               </span>
@@ -291,20 +291,20 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
                 <button
                   className="text-xs sm:text-sm text-blue-600 hover:underline cursor-pointer whitespace-nowrap"
                   onClick={() => markAsRead(undefined)}
-                  data-teste="botao-marcar-todas-visualizadas"
+                  data-test="botao-marcar-todas-visualizadas"
                 >
                   Marcar todas como visualizadas
                 </button>
               </div>
 
-              <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto overflow-x-hidden" data-teste="lista-notificacoes">
+              <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto overflow-x-hidden" data-test="lista-notificacoes">
                 {notifications.length === 0 ? (
-                  <div className="p-4 text-center text-sm text-gray-500" data-teste="notificacoes-vazio">Sem notificações</div>
+                  <div className="p-4 text-center text-sm text-gray-500" data-test="notificacoes-vazio">Sem notificações</div>
                 ) : (
                   notifications.slice(0, 5).map(n => (
                     <div
                       key={n._id}
-                      data-teste="item-notificacao"
+                      data-test="item-notificacao"
                       className={`p-3 cursor-pointer hover:bg-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2 ${
                         n.visualizada ? "bg-white" : "bg-gray-50"
                       }`}
@@ -312,13 +312,13 @@ export default function Cabecalho({ pagina, acao, descricao, showBackButton, onB
                     >
                       <div className="flex items-start gap-2 flex-1 min-w-0">
                         {!n.visualizada && (
-                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5" data-teste="indicador-nao-lida"></div>
+                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5" data-test="indicador-nao-lida"></div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm text-gray-800 wrap-break-word ${!n.visualizada ? 'font-medium' : ''}`} data-teste="mensagem-notificacao">{n.mensagem}</p>
+                          <p className={`text-sm text-gray-800 wrap-break-word ${!n.visualizada ? 'font-medium' : ''}`} data-test="mensagem-notificacao">{n.mensagem}</p>
                         </div>
                       </div>
-                      <div className="text-xs text-gray-400 sm:ml-2 shrink-0 pl-3.5 sm:pl-0" data-teste="data-notificacao">
+                      <div className="text-xs text-gray-400 sm:ml-2 shrink-0 pl-3.5 sm:pl-0" data-test="data-notificacao">
                         {formatTempoRelativo(n.data_hora)}
                       </div>
                     </div>
