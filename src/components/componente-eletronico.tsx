@@ -1,6 +1,7 @@
 "use client"
-import React from 'react';
+import React, { useState } from 'react';
 import { Edit, Trash2, PlusCircle, MinusCircle, Package } from 'lucide-react';
+import ModalVisualizarImagem from './modal-visualizar-imagem';
 
 interface ComponenteEletronicoProps {
   id?: string;
@@ -35,6 +36,8 @@ export default function ComponenteEletronico({
   isLoading = false,
   'data-test': dataTest
 }: ComponenteEletronicoProps) {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onEdit && id) {
@@ -66,6 +69,13 @@ export default function ComponenteEletronico({
   const handleClick = () => {
     if (onClick && id) {
       onClick(id);
+    }
+  };
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (imagemComTimestamp) {
+      setIsImageModalOpen(true);
     }
   };
 
@@ -101,7 +111,14 @@ export default function ComponenteEletronico({
       <div className="flex items-start justify-between mb-2 gap-2 overflow-hidden" data-test="header">
         <div className="flex items-center space-x-2 md:space-x-3 flex-1 min-w-0 overflow-hidden" data-test="component-info">
           {/* Ícone/Imagem do componente */}
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0" data-test="component-icon">
+          <div 
+            className={`w-8 h-8 md:w-10 md:h-10 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${
+              imagemComTimestamp ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+            }`}
+            data-test="component-icon"
+            onClick={handleImageClick}
+            title={imagemComTimestamp ? `Clique para ampliar a imagem de ${nome}` : ''}
+          >
             {imagemComTimestamp ? (
               <img 
                 src={imagemComTimestamp} 
@@ -215,6 +232,16 @@ export default function ComponenteEletronico({
           </button>
         </div>
       </div>
+
+      {/* Modal de visualização da imagem */}
+      {imagemComTimestamp && (
+        <ModalVisualizarImagem
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          imagemUrl={imagemComTimestamp}
+          nomeComponente={nome}
+        />
+      )}
     </div>
   );
 }

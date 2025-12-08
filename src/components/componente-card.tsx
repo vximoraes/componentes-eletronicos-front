@@ -1,6 +1,7 @@
 "use client"
-import React from 'react';
+import React, { useState } from 'react';
 import { Package } from 'lucide-react';
+import ModalVisualizarImagem from './modal-visualizar-imagem';
 
 interface ComponenteCardSimplesProps {
   id: string;
@@ -21,11 +22,20 @@ export default function ComponenteCardSimples({
   isSelected = false,
   dataTestId
 }: ComponenteCardSimplesProps) {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
   const imagemComTimestamp = React.useMemo(() => {
     if (!imagem) return undefined;
     const separator = imagem.includes('?') ? '&' : '?';
     return `${imagem}${separator}t=${Date.now()}`;
   }, [imagem]);
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (imagemComTimestamp) {
+      setIsImageModalOpen(true);
+    }
+  };
 
   return (
     <div
@@ -37,7 +47,13 @@ export default function ComponenteCardSimples({
     >
       <div className="flex flex-col items-center text-center gap-3">
         {/* Imagem do componente */}
-        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div 
+          className={`w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0 ${
+            imagemComTimestamp ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''
+          }`}
+          onClick={handleImageClick}
+          title={imagemComTimestamp ? `Clique para ampliar a imagem de ${nome}` : ''}
+        >
           {imagemComTimestamp ? (
             <img
               src={imagemComTimestamp}
@@ -68,7 +84,16 @@ export default function ComponenteCardSimples({
           {categoria}
         </p>
       </div>
+
+      {/* Modal de visualização da imagem */}
+      {imagemComTimestamp && (
+        <ModalVisualizarImagem
+          isOpen={isImageModalOpen}
+          onClose={() => setIsImageModalOpen(false)}
+          imagemUrl={imagemComTimestamp}
+          nomeComponente={nome}
+        />
+      )}
     </div>
   );
 }
-
