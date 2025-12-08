@@ -26,4 +26,21 @@ describe("Perfil — Edição de Foto", () => {
     cy.get('[data-test="modal-edit-foto"]').should("not.exist");
   });
 
+  
+    //teste03
+  it("Permite selecionar um arquivo de imagem", () => {
+    cy.get('[data-test="edit-avatar-button"]').click();
+
+    cy.get('[data-test="foto-file-input"]').selectFile(
+      {
+        contents: Cypress.Buffer.from("fake image content"),
+        fileName: "foto-teste.png",
+        mimeType: "image/png",
+      },
+      { force: true }
+    );
+
+    cy.get('[data-test="save-foto-button"]').should("be.visible");
+  });
+
 });
