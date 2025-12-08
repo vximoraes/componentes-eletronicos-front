@@ -1,0 +1,22 @@
+describe("Perfil — Edição de Foto", () => {
+
+  beforeEach(() => {
+    cy.session("login-admin", () => {
+      cy.visit("/login");
+      cy.get("#email").type("admin@admin.com");
+      cy.get("#senha").type("Senha@123");
+      cy.contains("button", "Entrar").click();
+      cy.location("pathname").should("not.include", "/login");
+    });
+
+    cy.visit("/perfil");
+    cy.get('[data-test="perfil-page"]').should("be.visible");
+  });
+
+  //teste01
+  it("Abre o modal ao clicar em editar foto", () => {
+    cy.get('[data-test="edit-avatar-button"]').click();
+    cy.get('[data-test="modal-edit-foto"]').should("be.visible");
+  });
+
+});
