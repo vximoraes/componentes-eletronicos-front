@@ -30,7 +30,7 @@ describe("Perfil — Edição de Informações", () => {
         expect($input.val()).to.not.be.empty;
     });
 
-//Teste 02
+  //Teste 02
   it("Fecha o modal ao clicar no botão X", () => {
     cy.get('[data-test="edit-perfil-button"]').click();
 
@@ -43,6 +43,27 @@ describe("Perfil — Edição de Informações", () => {
       .should("not.exist");
   });
 
+    //Teste 03
+  it("Edita o nome do usuário e salva", () => {
+    const novoNome = "Admin Teste " + Date.now();
+
+    cy.get('[data-test="edit-perfil-button"]').click();
+    cy.get('[data-test="modal-edit-perfil"]').should("be.visible");
+
+    cy.get('[data-test="input-nome"]')
+      .clear()
+      .type(novoNome);
+
+    cy.get('[data-test="save-perfil-button"]').click();
+
+    // Valida fechar modal
+    cy.get('[data-test="modal-edit-perfil"]')
+      .should("not.exist");
+
+    // Valida nome atualizado no card
+    cy.get('[data-test="perfil-nome"]', { timeout: 5000 })
+      .should("contain", novoNome);
+  });
 
   });
 
