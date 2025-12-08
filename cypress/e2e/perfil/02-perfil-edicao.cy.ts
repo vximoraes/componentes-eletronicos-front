@@ -17,7 +17,7 @@ describe("Perfil — Edição de Informações", () => {
       .should("be.visible");
   });
 
-    //Teste 01
+    //teste 01
   it("Abre o modal de edição ao clicar em Editar perfil", () => {
     cy.get('[data-test="edit-perfil-button"]').click();
 
@@ -30,7 +30,9 @@ describe("Perfil — Edição de Informações", () => {
         expect($input.val()).to.not.be.empty;
     });
 
-  //Teste 02
+  });
+
+    //teste 02
   it("Fecha o modal ao clicar no botão X", () => {
     cy.get('[data-test="edit-perfil-button"]').click();
 
@@ -43,7 +45,7 @@ describe("Perfil — Edição de Informações", () => {
       .should("not.exist");
   });
 
-    //Teste 03
+    //teste 03
   it("Edita o nome do usuário e salva", () => {
     const novoNome = "Admin Teste " + Date.now();
 
@@ -63,7 +65,7 @@ describe("Perfil — Edição de Informações", () => {
       .should("contain", novoNome);
   });
 
-    //Teste 04
+  //teste 04
   it("Desabilita o botão Salvar enquanto está salvando", () => {
     cy.get('[data-test="edit-perfil-button"]').click();
 
@@ -91,12 +93,14 @@ describe("Perfil — Edição de Informações", () => {
 
         cy.get('[data-test="cancel-edit-perfil-button"]').click();
 
+        // Modal fecha
         cy.get('[data-test="modal-edit-perfil"]')
           .should("not.exist");
 
+        // Nome não mudou
         cy.get('[data-test="perfil-nome"]')
           .should("contain", nomeOriginal);
       });
-   });
   });
+
 });
