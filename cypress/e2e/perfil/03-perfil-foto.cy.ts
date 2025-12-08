@@ -56,5 +56,18 @@ describe("Perfil — Edição de Foto", () => {
       { force: true }
     );
 
+    cy.intercept("PUT", "**/usuarios/**/foto", (req) => {
+     req.reply((res) => {
+     res.delay = 1500;
+     res.send({ data: { fotoPerfil: "/teste.png" } });
+      });
+    }).as("uploadFoto");
+
+    cy.get('[data-test="save-foto-button"]').click().should("be.disabled");
+
+    cy.wait("@uploadFoto");
+
+    cy.get('[data-test="modal-edit-foto"]').should("not.exist");
+  });
 
 });
