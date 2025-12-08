@@ -104,6 +104,39 @@ Tratamento de Erros | ● Exibir mensagem de erro se falhar ao carregar usuário
 Fechamento de Modais | ● Todos os modais devem fechar ao: Clicar no X, Clicar fora do modal, Pressionar tecla ESC, Clicar em Cancelar/Fechar. <br> ● Ao fechar, limpar dados do formulário. | ● X funcional <br> ● Clique fora fecha <br> ● ESC fecha <br> ● Botões cancelar/fechar funcionam <br> ● Formulário resetado | ● Múltiplas formas de fechar <br> ● Estado limpo após fechar
 Responsividade | ● Tabela deve ser responsiva com scroll horizontal em telas pequenas. <br> ● Botões de ação devem ser visíveis e clicáveis em todos os tamanhos. <br> ● Modais devem se adaptar ao tamanho da tela. | ● Scroll horizontal em mobile <br> ● Botões acessíveis <br> ● Modais responsivos <br> ● Texto truncado quando necessário | ● Experiência consistente em todos os dispositivos
 
+#### Relatórios
+
+##### Relatórios de Componentes
+
+---
+Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite
+-----------|--------|--------|--------
+Listagem de Relatório | ● Ao entrar na tela, exibir tabela com todos os componentes e suas localizações. <br> ● Colunas da tabela: Checkbox, Código, Componente, Quantidade, Status, Localização. <br> ● Cada linha representa um componente em uma localização específica. <br> ● Todos os cabeçalhos devem estar visíveis e com nomes corretos. | ● Tabela carregada corretamente <br> ● Todos os cabeçalhos visíveis <br> ● Dados nas colunas corretas <br> ● Checkbox no header e em cada linha | ● Relatório completo e organizado
+Seleção com Checkboxes | ● Checkbox no cabeçalho para selecionar/desselecionar todos. <br> ● Checkbox em cada linha para seleção individual. <br> ● Ao marcar checkbox mãe, todos os checkboxes filhos devem ser marcados. <br> ● Ao desmarcar checkbox mãe, todos os checkboxes filhos devem ser desmarcados. <br> ● Estado dos checkboxes deve ser visível (checked/unchecked). | ● Checkbox mãe funcional <br> ● Seleciona todos ao clicar <br> ● Desmarca todos ao clicar novamente <br> ● Checkboxes individuais sincronizados <br> ● Estado visual claro | ● Seleção múltipla funcional
+Filtros por Status | ● Botão "Filtros" para abrir modal de filtros. <br> ● Dropdown para selecionar status: Em Estoque, Baixo Estoque, Indisponível. <br> ● Ao aplicar filtro, exibir apenas componentes do status selecionado. <br> ● Tag visual do filtro ativo com botão (X) para remover. <br> ● Modal fecha após aplicar filtros. | ● Modal de filtros abre e fecha <br> ● Dropdown de status funcional <br> ● Filtro aplicado corretamente <br> ● Apenas itens do status aparecem <br> ● Tag do filtro visível <br> ● Remoção do filtro funcional | ● Filtros precisos e fáceis de usar
+Exportação de Dados | ● Botão "Exportar" habilitado apenas com itens selecionados. <br> ● Modal de exportação com campo de nome do arquivo. <br> ● Opções de formato: PDF e CSV. <br> ● Ao confirmar, gerar arquivo para download. <br> ● Modal fecha após exportação. | ● Botão desabilitado sem seleção <br> ● Modal de exportação funcional <br> ● Nome de arquivo editável <br> ● Formatos PDF e CSV disponíveis <br> ● Download gerado <br> ● Modal fecha após exportar | ● Exportação funcional nos 2 formatos
+
+##### Relatórios de Movimentações
+
+---
+Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite
+-----------|--------|--------|--------
+Listagem de Movimentações | ● Ao entrar na tela, exibir tabela com todas as movimentações. <br> ● Colunas: Checkbox, Código, Produto, Quantidade, Tipo (Entrada/Saída), Localização, Data. <br> ● Badge colorido para tipo: verde para Entrada, vermelho para Saída. <br> ● Todos os cabeçalhos visíveis e corretos. | ● Tabela carregada corretamente <br> ● Cabeçalhos visíveis <br> ● Dados nas colunas corretas <br> ● Badge de tipo com cores corretas <br> ● Checkbox funcional | ● Movimentações exibidas corretamente
+Estatísticas | ● Cards no topo com: Total de Movimentações, Total de Entradas, Total de Saídas. <br> ● Contadores atualizados em tempo real conforme filtros/pesquisas. <br> ● No modo mobile, estatísticas em bloco expansível com botão toggle. | ● Cards de estatísticas visíveis <br> ● Valores corretos exibidos <br> ● Atualização ao filtrar/pesquisar <br> ● Toggle funcional em mobile <br> ● Bloco expande/contrai | ● Estatísticas precisas e atualizadas
+Pesquisa | ● Campo de pesquisa para filtrar por nome do produto. <br> ● Busca em tempo real por correspondência parcial. <br> ● Exibir mensagem de estado vazio quando não encontrar resultados. <br> ● Estatísticas atualizam conforme pesquisa. | ● Pesquisa em tempo real funcional <br> ● Filtro por nome do produto <br> ● Mensagem de estado vazio <br> ● Estatísticas recalculadas | ● Busca eficiente e precisa
+Filtros por Tipo | ● Botão "Filtros" para abrir modal. <br> ● Dropdown para selecionar tipo: Entrada ou Saída. <br> ● Ao aplicar, listar apenas movimentações do tipo selecionado. <br> ● Tag visual do filtro ativo com botão (X) para remover. <br> ● Modal fecha após aplicar. | ● Modal de filtros funcional <br> ● Dropdown de tipo funcional <br> ● Filtro aplicado corretamente <br> ● Tag do filtro visível <br> ● Remoção pelo X funcional <br> ● Estatísticas atualizadas | ● Filtros precisos por tipo
+Seleção e Exportação | ● Checkboxes para seleção individual de movimentações. <br> ● Botão "Exportar" habilitado com itens selecionados. <br> ● Modal de exportação com campo de nome e opções PDF/CSV. <br> ● Exportação gera arquivo para download. <br> ● Suporta seleção múltipla para exportação. | ● Seleção múltipla funcional <br> ● Botão exportar habilitado corretamente <br> ● Modal de exportação funcional <br> ● PDF e CSV funcionam <br> ● Download gerado <br> ● Modal fecha após exportar | ● Exportação funcional em ambos formatos
+
+##### Relatórios de Orçamentos
+
+---
+Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite
+-----------|--------|--------|--------
+Listagem de Relatório | ● Ao entrar na tela, exibir tabela com todos os orçamentos. <br> ● Colunas: Checkbox, Código, Nome, Descrição, Itens, Valor Total, Data. <br> ● Valor total em formato monetário (R$ X,XX). <br> ● Todos os cabeçalhos visíveis e corretos. | ● Tabela carregada corretamente <br> ● Cabeçalhos visíveis <br> ● Dados nas colunas corretas <br> ● Formatação monetária aplicada <br> ● Checkbox funcional | ● Orçamentos exibidos corretamente
+Seleção com Checkboxes | ● Checkbox no cabeçalho para selecionar/desselecionar todos. <br> ● Checkbox em cada linha para seleção individual. <br> ● Ao marcar checkbox mãe, todos os filhos marcam. <br> ● Ao desmarcar checkbox mãe, todos os filhos desmarcam. | ● Checkbox mãe funcional <br> ● Seleciona/desmarca todos <br> ● Sincronização visual correta <br> ● Estado claro (checked/unchecked) | ● Seleção múltipla funcional
+Pesquisa por Nome | ● Campo de pesquisa para filtrar orçamentos por nome. <br> ● Busca em tempo real por correspondência exata. <br> ● Apenas orçamentos com o nome pesquisado são exibidos. <br> ● Limpar pesquisa restaura listagem completa. | ● Pesquisa em tempo real funcional <br> ● Filtro por nome exato <br> ● Resultados precisos <br> ● Limpar restaura lista | ● Busca eficiente e precisa
+Exportação de Dados | ● Botão "Exportar" habilitado apenas com itens selecionados. <br> ● Modal de exportação com campo de nome do arquivo. <br> ● Opções de formato: PDF e CSV. <br> ● Ao confirmar, gerar arquivo para download. <br> ● Modal fecha após exportação. | ● Botão desabilitado sem seleção <br> ● Modal de exportação funcional <br> ● Nome de arquivo editável <br> ● PDF e CSV disponíveis <br> ● Download gerado | ● Exportação funcional nos 2 formatos
+
 
 ## 4 - Estratégia de Teste
 
