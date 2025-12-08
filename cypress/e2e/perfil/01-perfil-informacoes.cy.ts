@@ -25,4 +25,22 @@ describe("Perfil — Informações e Estatísticas", () => {
     cy.get('[data-test="perfil-avatar-container"]').should("exist");
   });
 
+    //Teste 02
+  it("Mostra estatísticas do usuário", () => {
+    cy.get('[data-test="total-componentes-value"]')
+      .should("be.visible")
+      .invoke("text")
+      .should("match", /\d+/);
+
+    cy.get('[data-test="total-movimentacoes-value"]')
+      .should("be.visible")
+      .invoke("text")
+      .should("match", /\d+/);
+
+    cy.get('[data-test="total-orcamentos-value"]')
+      .should("be.visible")
+      .invoke("text")
+      .should("match", /\d+/);
+  });
+
 });
