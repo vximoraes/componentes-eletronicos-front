@@ -381,7 +381,7 @@ export default function EditarOrcamentoPage() {
                 <Skeleton className="w-full h-[100px]" />
               </div>
             </div>
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 flex-shrink-0">
+            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
               <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
               <Skeleton className="h-[38px] w-[80px] sm:w-[120px]" />
             </div>
@@ -465,21 +465,23 @@ export default function EditarOrcamentoPage() {
                 </div>
 
                 {/* Tabela */}
-                <div className="border rounded-t-lg overflow-auto bg-white flex-1 flex flex-col" data-test="tabela-itens-orcamento">
+                <div className="border rounded-t-lg bg-white flex-1 flex flex-col overflow-hidden" data-test="tabela-itens-orcamento">
                   {isLoadingComponentes ? (
                     <>
-                      <table className="w-full caption-bottom text-xs sm:text-sm">
-                        <thead className="bg-gray-50 z-10 shadow-sm">
-                          <tr className="bg-gray-50 border-b">
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">NOME</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">FORNECEDOR</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">QUANTIDADE</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">VALOR UNITÁRIO</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">SUBTOTAL</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">AÇÕES</th>
-                          </tr>
-                        </thead>
-                      </table>
+                      <div className="overflow-x-auto">
+                        <table className="w-full caption-bottom text-xs sm:text-sm min-w-[600px]">
+                          <thead className="bg-gray-50 z-10 shadow-sm">
+                            <tr className="bg-gray-50 border-b">
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">NOME</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">FORNECEDOR</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">QUANTIDADE</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">VALOR UNITÁRIO</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">SUBTOTAL</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">AÇÕES</th>
+                            </tr>
+                          </thead>
+                        </table>
+                      </div>
                       <div className="flex-1 flex items-center justify-center">
                         <div className="flex flex-col items-center py-8">
                           <div className="relative w-10 h-10">
@@ -492,32 +494,35 @@ export default function EditarOrcamentoPage() {
                     </>
                   ) : componentes.length === 0 ? (
                     <>
-                      <table className="w-full caption-bottom text-xs sm:text-sm">
-                        <thead className="bg-gray-50 z-10 shadow-sm">
-                          <tr className="bg-gray-50 border-b">
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">NOME</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">FORNECEDOR</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">QUANTIDADE</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">VALOR UNITÁRIO</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">SUBTOTAL</th>
-                            <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">AÇÕES</th>
-                          </tr>
-                        </thead>
-                      </table>
+                      <div className="overflow-x-auto">
+                        <table className="w-full caption-bottom text-xs sm:text-sm min-w-[600px]">
+                          <thead className="bg-gray-50 z-10 shadow-sm">
+                            <tr className="bg-gray-50 border-b">
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">NOME</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">FORNECEDOR</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">QUANTIDADE</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">VALOR UNITÁRIO</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">SUBTOTAL</th>
+                              <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">AÇÕES</th>
+                            </tr>
+                          </thead>
+                        </table>
+                      </div>
                       <div className="flex-1 flex items-center justify-center text-gray-500 text-xs sm:text-sm">
                         Nenhum componente adicionado.
                       </div>
                     </>
                   ) : (
-                    <table className="w-full caption-bottom text-xs sm:text-sm table-fixed">
-                      <colgroup>
-                        <col style={{ width: '20%' }} />
-                        <col style={{ width: '20%' }} />
-                        <col style={{ width: '15%' }} />
-                        <col style={{ width: '15%' }} />
-                        <col style={{ width: '15%' }} />
-                        <col style={{ width: '15%' }} />
-                      </colgroup>
+                    <div className="overflow-x-auto flex-1">
+                      <table className="w-full caption-bottom text-xs sm:text-sm min-w-[800px]">
+                        <colgroup>
+                          <col style={{ width: '20%' }} />
+                          <col style={{ width: '20%' }} />
+                          <col style={{ width: '15%' }} />
+                          <col style={{ width: '15%' }} />
+                          <col style={{ width: '15%' }} />
+                          <col style={{ width: '15%' }} />
+                        </colgroup>
                       <thead className="sticky top-0 bg-gray-50 z-10 shadow-sm">
                         <tr className="bg-gray-50 border-b">
                           <th className="font-semibold text-gray-700 bg-gray-50 text-center px-4 py-3">NOME</th>
@@ -561,7 +566,7 @@ export default function EditarOrcamentoPage() {
                                   <span className={`truncate ${comp.fornecedor_nome ? 'text-gray-900' : 'text-gray-500'}`}>
                                     {comp.fornecedor_nome || 'Selecione'}
                                   </span>
-                                  <ChevronDown className="w-4 h-4 text-gray-400 ml-2 flex-shrink-0" />
+                                  <ChevronDown className="w-4 h-4 text-gray-400 ml-2 shrink-0" />
                                 </button>
                               </div>
                             </td>
@@ -639,11 +644,12 @@ export default function EditarOrcamentoPage() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   )}
                 </div>
 
                 {/* Total */}
-                <div className="border-x border-b rounded-b-lg bg-gray-50 px-4 py-3 flex-shrink-0">
+                <div className="border-x border-b rounded-b-lg bg-gray-50 px-4 py-3 shrink-0">
                   <div className="text-center font-semibold text-gray-700 text-sm sm:text-base" data-test="total-orcamento">
                     Total: R${calcularTotal().toFixed(2)}
                   </div>
@@ -652,7 +658,7 @@ export default function EditarOrcamentoPage() {
             </div>
 
             {/* Footer com botões */}
-            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 flex-shrink-0">
+            <div className="flex justify-end gap-2 sm:gap-3 px-4 md:px-8 py-3 sm:py-4 border-t bg-gray-50 shrink-0">
               <Button
                 type="button"
                 variant="outline"

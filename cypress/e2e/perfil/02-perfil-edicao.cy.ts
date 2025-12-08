@@ -1,23 +1,28 @@
 describe("Perfil — Edição de Informações", () => {
+  const frontendUrl = Cypress.env('FRONTEND_URL');
+  const email = Cypress.env('TEST_USER_EMAIL');
+  const senha = Cypress.env('TEST_USER_PASSWORD');
 
   beforeEach(() => {
-    cy.session("login-admin", () => {
-      cy.visit("/login");
+    cy.session([email, senha], () => {
+      cy.visit(`${frontendUrl}/`);
 
-      cy.get("#email").type("admin@admin.com");
-      cy.get("#senha").type("Senha@123");
+      cy.get("#email").type(email);
+      cy.get("#senha").type(senha);
       cy.contains("button", "Entrar").click();
 
-      cy.location("pathname").should("not.include", "/login");
+      cy.url().should('include', '/componentes');
     });
 
-    cy.visit("/perfil");
+    cy.visit(`${frontendUrl}/perfil`);
+    cy.wait(1000);
+
+    cy.get('[data-test="loading-perfil-page"]', { timeout: 5000 }).should('not.exist');
 
     cy.get('[data-test="perfil-page"]', { timeout: 15000 })
       .should("be.visible");
   });
 
-    //teste 01
   it("Abre o modal de edição ao clicar em Editar perfil", () => {
     cy.get('[data-test="edit-perfil-button"]').click();
 
@@ -26,13 +31,12 @@ describe("Perfil — Edição de Informações", () => {
 
     cy.get('[data-test="input-nome"]')
       .should("be.visible")
-     .and(($input) => {
+      .and(($input) => {
         expect($input.val()).to.not.be.empty;
-    });
+      });
 
   });
 
-    //teste 02
   it("Fecha o modal ao clicar no botão X", () => {
     cy.get('[data-test="edit-perfil-button"]').click();
 
@@ -45,7 +49,6 @@ describe("Perfil — Edição de Informações", () => {
       .should("not.exist");
   });
 
-    //teste 03
   it("Edita o nome do usuário e salva", () => {
     const novoNome = "Admin Teste " + Date.now();
 
@@ -65,7 +68,6 @@ describe("Perfil — Edição de Informações", () => {
       .should("contain", novoNome);
   });
 
-  //teste 04
   it("Desabilita o botão Salvar enquanto está salvando", () => {
     cy.get('[data-test="edit-perfil-button"]').click();
 
@@ -79,7 +81,6 @@ describe("Perfil — Edição de Informações", () => {
       .should("be.disabled");
   });
 
-  //teste 05
   it("Cancela a edição e mantém o nome original", () => {
     cy.get('[data-test="perfil-nome"]')
       .invoke("text")
@@ -93,14 +94,11 @@ describe("Perfil — Edição de Informações", () => {
 
         cy.get('[data-test="cancel-edit-perfil-button"]').click();
 
-        // Modal fecha
         cy.get('[data-test="modal-edit-perfil"]')
           .should("not.exist");
 
-        // Nome não mudou
         cy.get('[data-test="perfil-nome"]')
           .should("contain", nomeOriginal);
       });
   });
-
 });
