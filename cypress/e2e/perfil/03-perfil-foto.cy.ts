@@ -70,4 +70,15 @@ describe("Perfil — Edição de Foto", () => {
     cy.get('[data-test="modal-edit-foto"]').should("not.exist");
   });
 
+    //teste05
+  it("Abre modal de confirmação e permite cancelar", () => {
+    cy.get('[data-test="edit-avatar-button"]').click();
+
+    cy.get('[data-test="remove-foto-button"]').click();
+    cy.get('[data-test="modal-confirm-remove-foto"]').should("be.visible");
+
+    cy.get('[data-test="cancel-remove-foto-button"]').click();
+    cy.get('[data-test="modal-confirm-remove-foto"]').should("not.exist");
+  });
+
 });
