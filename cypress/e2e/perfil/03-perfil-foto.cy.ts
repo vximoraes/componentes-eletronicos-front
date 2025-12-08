@@ -43,4 +43,18 @@ describe("Perfil — Edição de Foto", () => {
     cy.get('[data-test="save-foto-button"]').should("be.visible");
   });
 
+  //teste04
+  it("Desabilita botão de salvar durante upload", () => {
+    cy.get('[data-test="edit-avatar-button"]').click();
+
+    cy.get('[data-test="foto-file-input"]').selectFile(
+      {
+        contents: Cypress.Buffer.from("fake image content"),
+        fileName: "foto-teste.png",
+        mimeType: "image/png",
+      },
+      { force: true }
+    );
+
+
 });
