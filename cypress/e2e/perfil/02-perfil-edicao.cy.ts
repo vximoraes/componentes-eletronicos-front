@@ -77,7 +77,26 @@ describe("Perfil — Edição de Informações", () => {
       .should("be.disabled");
   });
 
+  //teste 05
+  it("Cancela a edição e mantém o nome original", () => {
+    cy.get('[data-test="perfil-nome"]')
+      .invoke("text")
+      .then((nomeOriginal) => {
 
+        cy.get('[data-test="edit-perfil-button"]').click();
+
+        cy.get('[data-test="input-nome"]')
+          .clear()
+          .type("Nome Temporário");
+
+        cy.get('[data-test="cancel-edit-perfil-button"]').click();
+
+        cy.get('[data-test="modal-edit-perfil"]')
+          .should("not.exist");
+
+        cy.get('[data-test="perfil-nome"]')
+          .should("contain", nomeOriginal);
+      });
+   });
   });
-
 });
