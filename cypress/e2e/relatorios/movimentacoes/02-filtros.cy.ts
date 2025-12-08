@@ -1,19 +1,22 @@
 /// <reference types="cypress" />
 
 describe("Movimentações — Filtros", () => {
+  const frontendUrl = Cypress.env('FRONTEND_URL');
+  const email = Cypress.env('TEST_USER_EMAIL');
+  const senha = Cypress.env('TEST_USER_PASSWORD');
 
   beforeEach(() => {
     cy.session("login-admin", () => {
-      cy.visit("/login");
+      cy.visit(`${frontendUrl}/login`);
 
-      cy.get("#email").should("be.visible").type("admin@admin.com");
-      cy.get("#senha").should("be.visible").type("Senha@123");
+      cy.get("#email").should("be.visible").type(email);
+      cy.get("#senha").should("be.visible").type(senha);
       cy.contains("button", "Entrar").should("be.visible").click();
 
       cy.location("pathname", { timeout: 10000 }).should("not.include", "/login");
     });
 
-    cy.visit("/relatorios/movimentacoes");
+    cy.visit(`${frontendUrl}/relatorios/movimentacoes`);
     cy.get('[data-test="relatorio-movimentacoes-page"]').should("be.visible");
   });
 

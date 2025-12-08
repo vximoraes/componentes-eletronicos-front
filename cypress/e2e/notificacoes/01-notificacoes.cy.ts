@@ -1,11 +1,12 @@
 describe('Notificações.', () => {
-    let email = Cypress.env('email');
-    let senha = Cypress.env('senha');
+    const frontendUrl = Cypress.env('FRONTEND_URL');
+    const email = Cypress.env('TEST_USER_EMAIL');
+    const senha = Cypress.env('TEST_USER_PASSWORD');
     let componente = "Componente Teste Notificações"
     let min = 5
     let status = ["Em Estoque", "Baixo Estoque", "Indisponível"]
     beforeEach(() => {
-        cy.visit('/')
+        cy.visit(`${frontendUrl}/`)
         login(email, senha)
     })
 
@@ -16,12 +17,12 @@ describe('Notificações.', () => {
             let total = parseInt(e.replace(/\D/g, ''))
             if (total == 0) {
                 cy.get('[data-test="adicionar-button"]').click()
-                cy.get('[data-teste="input-nome-componente"]').type(componente)
-                cy.get('[data-teste="botao-selecionar-categoria"]').click()
+                cy.get('[data-test="input-nome-componente"]').type(componente)
+                cy.get('[data-test="botao-selecionar-categoria"]').click()
                 cy.get('[title="Cabos"]').click()
-                cy.get('[data-teste="input-estoque-minimo"]').clear().type(min.toString())
-                cy.get('[data-teste="textarea-descricao-componente"]').type('Notificações teste...')
-                cy.get('[data-teste="botao-salvar"]').click()
+                cy.get('[data-test="input-estoque-minimo"]').clear().type(min.toString())
+                cy.get('[data-test="textarea-descricao-componente"]').type('Notificações teste...')
+                cy.get('[data-test="botao-salvar"]').click()
                 cy.wait(1500)
                 cy.get('[data-test="search-input"]').clear().type(componente)
                 cy.wait(1000)
@@ -36,8 +37,8 @@ describe('Notificações.', () => {
             cy.wait(2000)
 
             // Verificar notificações
-            cy.get('[data-teste="botao-notificacoes"]').click()
-            cy.get('[data-teste="item-notificacao"]').should('have.length.at.least', 1)
+            cy.get('[data-test="botao-notificacoes"]').click()
+            cy.get('[data-test="item-notificacao"]').should('have.length.at.least', 1)
         })
     })
 
@@ -49,19 +50,19 @@ describe('Notificações.', () => {
             let total = parseInt(e.replace(/\D/g, ''))
             if (total == 0) {
                 cy.get('[data-test="adicionar-button"]').click()
-                cy.get('[data-teste="input-nome-componente"]').type(componente)
-                cy.get('[data-teste="botao-selecionar-categoria"]').click()
+                cy.get('[data-test="input-nome-componente"]').type(componente)
+                cy.get('[data-test="botao-selecionar-categoria"]').click()
                 cy.get('[title="Cabos"]').click()
-                cy.get('[data-teste="input-estoque-minimo"]').clear().type(min.toString())
-                cy.get('[data-teste="textarea-descricao-componente"]').type('Notificações teste...')
-                cy.get('[data-teste="botao-salvar"]').click()
+                cy.get('[data-test="input-estoque-minimo"]').clear().type(min.toString())
+                cy.get('[data-test="textarea-descricao-componente"]').type('Notificações teste...')
+                cy.get('[data-test="botao-salvar"]').click()
                 cy.wait(1500)
                 cy.get('[data-test="search-input"]').clear().type(componente)
                 cy.wait(1000)
             }
 
             // Obter quantidade atual e status inicial
-            cy.get('[data-test="quantity"]').find('span').first().invoke('text').then((qtdTextoInicial) => {
+            cy.get('[data-test="componente-card-0"]').find('[data-test="quantity"]').find('span').first().invoke('text').then((qtdTextoInicial) => {
                 let qtdInicial = parseInt(qtdTextoInicial.replaceAll(/\D/g, ''))
                 cy.log(`Quantidade inicial: ${qtdInicial}`)
                 
@@ -102,9 +103,9 @@ describe('Notificações.', () => {
                     
                     cy.get('[data-test="componente-card-0"]').find('[data-test="status-badge"]').first().invoke('text').then((e) => {
                         cy.log(`Status após movimentação: ${e}`)
-                        cy.get('[data-teste="botao-notificacoes"]').click()
+                        cy.get('[data-test="botao-notificacoes"]').click()
                         cy.wait(2000)
-                        cy.get('[data-teste="mensagem-notificacao"]').first().invoke('text').then((notificacao) => {
+                        cy.get('[data-test="mensagem-notificacao"]').first().invoke('text').then((notificacao) => {
                             if (e === "Em Estoque") {
                                 expect(notificacao).to.eq(`${componente} está em estoque (${quantidade} unidades)`)
                             } else if (e === "Baixo Estoque") {
@@ -126,12 +127,12 @@ describe('Notificações.', () => {
             let total = parseInt(e.replace(/\D/g, ''))
             if (total == 0) {
                 cy.get('[data-test="adicionar-button"]').click()
-                cy.get('[data-teste="input-nome-componente"]').type(componente)
-                cy.get('[data-teste="botao-selecionar-categoria"]').click()
+                cy.get('[data-test="input-nome-componente"]').type(componente)
+                cy.get('[data-test="botao-selecionar-categoria"]').click()
                 cy.get('[title="Cabos"]').click()
-                cy.get('[data-teste="input-estoque-minimo"]').clear().type(min.toString())
-                cy.get('[data-teste="textarea-descricao-componente"]').type('Notificações teste...')
-                cy.get('[data-teste="botao-salvar"]').click()
+                cy.get('[data-test="input-estoque-minimo"]').clear().type(min.toString())
+                cy.get('[data-test="textarea-descricao-componente"]').type('Notificações teste...')
+                cy.get('[data-test="botao-salvar"]').click()
                 cy.wait(1500)
                 cy.get('[data-test="search-input"]').clear().type(componente)
                 cy.wait(1000)
@@ -141,9 +142,9 @@ describe('Notificações.', () => {
                 cy.get('[data-test="modal-entrada-localizacao-dropdown"]').parent().find('button:not([data-test="modal-entrada-localizacao-dropdown"])').first().click()
                 cy.get('[data-test="modal-entrada-confirmar"]').click()
                 cy.wait(1000)
-                cy.get('[data-teste="botao-notificacoes"]').click()
-                cy.get('[data-teste="item-notificacao"]').first().then((e) => {
-                    const visualizacao = e.find('[data-teste="indicador-nao-lida"]')
+                cy.get('[data-test="botao-notificacoes"]').click()
+                cy.get('[data-test="item-notificacao"]').first().then((e) => {
+                    const visualizacao = e.find('[data-test="indicador-nao-lida"]')
                     //   cy.log(visualizacao.text())
                 })
             } else {
@@ -160,9 +161,9 @@ describe('Notificações.', () => {
 
                 cy.wrap(null).then(() => {
                     cy.wrap(null).then(() => {
-                        cy.get('[data-teste="botao-notificacoes"]').click()
-                        cy.get('[data-teste="item-notificacao"]').first().then((e) => {
-                            const visualizacao = e.find('[data-teste="indicador-nao-lida"]').first()
+                        cy.get('[data-test="botao-notificacoes"]').click()
+                        cy.get('[data-test="item-notificacao"]').first().then((e) => {
+                            const visualizacao = e.find('[data-test="indicador-nao-lida"]').first()
                             if(visualizacao){
                                 // Caso complexo ele e click em cima de um div que tem que ser deletada
                                 // Dai realiza a busca pela primeira div, garantindo que não é a mesma
@@ -189,12 +190,12 @@ describe('Notificações.', () => {
             if (total == 0) {
                 // Criar componente
                 cy.get('[data-test="adicionar-button"]').click()
-                cy.get('[data-teste="input-nome-componente"]').type(componente)
-                cy.get('[data-teste="botao-selecionar-categoria"]').click()
+                cy.get('[data-test="input-nome-componente"]').type(componente)
+                cy.get('[data-test="botao-selecionar-categoria"]').click()
                 cy.get('[title="Cabos"]').click()
-                cy.get('[data-teste="input-estoque-minimo"]').clear().type(min.toString())
-                cy.get('[data-teste="textarea-descricao-componente"]').type('Notificações teste...')
-                cy.get('[data-teste="botao-salvar"]').click()
+                cy.get('[data-test="input-estoque-minimo"]').clear().type(min.toString())
+                cy.get('[data-test="textarea-descricao-componente"]').type('Notificações teste...')
+                cy.get('[data-test="botao-salvar"]').click()
                 cy.wait(1500)
                 cy.get('[data-test="search-input"]').clear().type(componente)
                 cy.wait(1000)
@@ -248,21 +249,21 @@ describe('Notificações.', () => {
                         cy.get('[data-test="modal-saida-localizacao-dropdown"]').click()
                         cy.get('[data-test="modal-saida-localizacao-dropdown"]').parent().find('button:not([data-test="modal-saida-localizacao-dropdown"])').first().click()
                         cy.get('[data-test="modal-saida-confirmar"]').click()
-                        cy.wait(2000)
+                        cy.wait(3000)
 
                         // Abrir notificações e verificar indicadores não lidos
-                        cy.get('[data-teste="botao-notificacoes"]').click()
+                        cy.get('[data-test="botao-notificacoes"]').click({ force: true })
                         cy.wait(1000)
                         
                         // Verificar que existem PELO MENOS 2 notificações não lidas (não necessariamente todas)
-                        cy.get('[data-teste="indicador-nao-lida"]').should('have.length.at.least', 2)
+                        cy.get('[data-test="indicador-nao-lida"]').should('have.length.at.least', 2)
 
                         // Clicar em "Marcar todas como visualizadas"
-                        cy.get('[data-teste="botao-marcar-todas-visualizadas"]').click()
+                        cy.get('[data-test="botao-marcar-todas-visualizadas"]').click()
                         cy.wait(2000)
 
                         // Verificar que nenhuma notificação tem mais o indicador de não lida
-                        cy.get('[data-teste="indicador-nao-lida"]').should('not.exist')
+                        cy.get('[data-test="indicador-nao-lida"]').should('not.exist')
                     })
                 })
             })
@@ -278,7 +279,7 @@ function login(email: string, senha: string) {
 
 function gerarNotificacao(min: number) {
     let valor = 0
-    cy.get('[data-teste="contador-notificacoes"]').invoke('text').then((e) => {
+    cy.get('[data-test="contador-notificacoes"]').invoke('text').then((e) => {
         valor = parseInt(e.replaceAll(/\D/g, ''))
     })
     cy.get('[data-test="quantity"]').find('span').first().invoke('text').then((e) => {
@@ -290,7 +291,7 @@ function gerarNotificacao(min: number) {
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').parent().find('button:not([data-test="modal-saida-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-saida-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
             compararValor(valor)
         } else if (qtd < min) {
             let valor = min - qtd
@@ -299,7 +300,7 @@ function gerarNotificacao(min: number) {
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').parent().find('button:not([data-test="modal-entrada-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-entrada-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
             compararValor(valor)
         }
         else if (qtd == 0) {
@@ -308,7 +309,7 @@ function gerarNotificacao(min: number) {
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').parent().find('button:not([data-test="modal-entrada-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-entrada-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
             compararValor(valor)
         }
         else {
@@ -318,7 +319,7 @@ function gerarNotificacao(min: number) {
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').parent().find('button:not([data-test="modal-saida-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-saida-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
             compararValor(valor)
         }
     })
@@ -326,7 +327,7 @@ function gerarNotificacao(min: number) {
 
 function gerarNotificacaoDois(min: number) {
     let valor = 0
-    cy.get('[data-teste="contador-notificacoes"]').invoke('text').then((e) => {
+    cy.get('[data-test="contador-notificacoes"]').invoke('text').then((e) => {
         valor = parseInt(e.replaceAll(/\D/g, ''))
     })
     cy.get('[data-test="quantity"]').find('span').first().invoke('text').then((e) => {
@@ -338,7 +339,7 @@ function gerarNotificacaoDois(min: number) {
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').parent().find('button:not([data-test="modal-saida-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-saida-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
       
         } else if (qtd < min) {
             let valor = min - qtd
@@ -347,7 +348,7 @@ function gerarNotificacaoDois(min: number) {
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').parent().find('button:not([data-test="modal-entrada-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-entrada-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
          
         }
         else if (qtd == 0) {
@@ -356,7 +357,7 @@ function gerarNotificacaoDois(min: number) {
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-entrada-localizacao-dropdown"]').parent().find('button:not([data-test="modal-entrada-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-entrada-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
  
         }
         else {
@@ -366,7 +367,7 @@ function gerarNotificacaoDois(min: number) {
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').click()
             cy.get('[data-test="modal-saida-localizacao-dropdown"]').parent().find('button:not([data-test="modal-saida-localizacao-dropdown"])').first().click()
             cy.get('[data-test="modal-saida-confirmar"]').click()
-            cy.get('[data-teste="botao-notificacoes"]').click()
+            cy.get('[data-test="botao-notificacoes"]').click()
 
         }
     })
@@ -374,7 +375,7 @@ function gerarNotificacaoDois(min: number) {
 
 function compararValor(valor: number) {
     let valorInterno = 0
-    cy.get('[data-teste="contador-notificacoes"]').invoke('text').then((e) => {
+    cy.get('[data-test="contador-notificacoes"]').invoke('text').then((e) => {
         valorInterno = parseInt(e.replaceAll(/\D/g, ''))
         expect(valor).to.lte(valorInterno)
         return

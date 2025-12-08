@@ -1,17 +1,20 @@
 describe("Movimentações — Seleção e Exportação", () => {
+  const frontendUrl = Cypress.env('FRONTEND_URL');
+  const email = Cypress.env('TEST_USER_EMAIL');
+  const senha = Cypress.env('TEST_USER_PASSWORD');
 
   beforeEach(() => {
     cy.session("login-admin", () => {
-      cy.visit("/login");
+      cy.visit(`${frontendUrl}/login`);
 
-      cy.get("#email").type("admin@admin.com");
-      cy.get("#senha").type("Senha@123");
+      cy.get("#email").type(email);
+      cy.get("#senha").type(senha);
       cy.contains("button", "Entrar").click();
 
       cy.location("pathname").should("not.include", "/login");
     });
 
-    cy.visit("/relatorios/movimentacoes");
+    cy.visit(`${frontendUrl}/relatorios/movimentacoes`);
 
     cy.get('[data-test="relatorio-movimentacoes-page"]', { timeout: 15000 })
       .should("be.visible");

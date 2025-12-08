@@ -1,12 +1,13 @@
 import path from 'path'
 
 describe('Tela de relatórios de componentes.', () => {
-  let email = Cypress.env('email');
-  let senha = Cypress.env('senha');
+  const frontendUrl = Cypress.env('FRONTEND_URL');
+  const email = Cypress.env('TEST_USER_EMAIL');
+  const senha = Cypress.env('TEST_USER_PASSWORD');
   let status = ["Em Estoque", "Baixo Estoque", "Indisponível"]
 
   beforeEach(() => {
-    cy.visit('/')
+    cy.visit(`${frontendUrl}/`)
     login(email, senha)
   })
 
