@@ -19,4 +19,11 @@ describe("Perfil — Edição de Foto", () => {
     cy.get('[data-test="modal-edit-foto"]').should("be.visible");
   });
 
+  //teste02
+  it("Fecha o modal ao clicar no botão X", () => {
+    cy.get('[data-test="edit-avatar-button"]').click();
+    cy.get('[data-test="modal-edit-foto-close-button"]').click();
+    cy.get('[data-test="modal-edit-foto"]').should("not.exist");
+  });
+
 });
