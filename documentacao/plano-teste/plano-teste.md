@@ -104,6 +104,27 @@ Tratamento de Erros | ● Exibir mensagem de erro se falhar ao carregar usuário
 Fechamento de Modais | ● Todos os modais devem fechar ao: Clicar no X, Clicar fora do modal, Pressionar tecla ESC, Clicar em Cancelar/Fechar. <br> ● Ao fechar, limpar dados do formulário. | ● X funcional <br> ● Clique fora fecha <br> ● ESC fecha <br> ● Botões cancelar/fechar funcionam <br> ● Formulário resetado | ● Múltiplas formas de fechar <br> ● Estado limpo após fechar
 Responsividade | ● Tabela deve ser responsiva com scroll horizontal em telas pequenas. <br> ● Botões de ação devem ser visíveis e clicáveis em todos os tamanhos. <br> ● Modais devem se adaptar ao tamanho da tela. | ● Scroll horizontal em mobile <br> ● Botões acessíveis <br> ● Modais responsivos <br> ● Texto truncado quando necessário | ● Experiência consistente em todos os dispositivos
 
+#### Perfil
+
+---
+Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite
+-----------|--------|--------|--------
+Exibição de Informações | ● Ao entrar na tela, exibir nome, e-mail e avatar do usuário. <br> ● Avatar exibido no container apropriado. <br> ● Informações carregadas do backend. | ● Nome visível <br> ● E-mail visível <br> ● Avatar container existe | ● Informações do usuário exibidas corretamente
+Estatísticas do Usuário | ● Exibir cards com estatísticas: Total de Componentes, Total de Movimentações, Total de Orçamentos. <br> ● Valores devem ser numéricos. <br> ● Valores carregados dinamicamente. | ● Total de componentes visível <br> ● Total de movimentações visível <br> ● Total de orçamentos visível <br> ● Valores numéricos corretos | ● Estatísticas precisas e atualizadas
+Área de Notificações | ● Renderizar seção de notificações. <br> ● Exibir lista de notificações se houver. <br> ● Exibir mensagem "Nenhuma notificação" se lista vazia. | ● Seção de notificações visível <br> ● Lista ou mensagem de vazio exibida corretamente | ● Notificações acessíveis na tela de perfil
+Edição de Perfil | ● Botão "Editar perfil" abre modal de edição. <br> ● Modal exibe campo de nome pré-preenchido. <br> ● Modal pode ser fechado pelo X. <br> ● Ao salvar com novo nome, perfil é atualizado. <br> ● Botão salvar desabilitado durante processamento. <br> ● Ao cancelar, mantém nome original. | ● Modal abre corretamente <br> ● Campo nome pré-preenchido <br> ● Botão X fecha modal <br> ● Nome atualizado após salvar <br> ● Botão desabilitado ao salvar <br> ● Cancelar mantém dados originais | ● Edição de nome funcional <br> ● Feedback apropriado
+Edição de Foto | ● Botão "Editar foto" abre modal de edição de avatar. <br> ● Modal permite selecionar arquivo de imagem. <br> ● Botão X fecha modal. <br> ● Botão salvar fica desabilitado durante upload. <br> ● Modal fecha após upload bem-sucedido. <br> ● Botão "Remover foto" abre modal de confirmação. <br> ● Modal de confirmação pode ser cancelado. | ● Modal de foto abre corretamente <br> ● Seleção de arquivo funcional <br> ● Botão X fecha modal <br> ● Botão salvar desabilitado durante upload <br> ● Modal fecha após upload <br> ● Modal de confirmação funcional <br> ● Cancelar remoção funciona | ● Upload de foto funcional <br> ● Confirmação de remoção obrigatória
+
+#### Notificações
+
+---
+Funcionalidades | Comportamento Esperado | Verificações | Critérios de Aceite
+-----------|--------|--------|--------
+Criação de Notificações | ● Ao cadastrar componente, criar notificação correspondente. <br> ● Ao realizar entrada de componente, gerar notificação. <br> ● Notificações aparecem na lista. | ● Notificação criada após cadastro <br> ● Notificação criada após entrada <br> ● Lista de notificações atualizada | ● Notificações geradas automaticamente
+Mensagem de Status | ● Notificação deve exibir status correto do componente. <br> ● Para "Em Estoque": mensagem com quantidade em estoque. <br> ● Para "Baixo Estoque": mensagem com quantidade baixa. <br> ● Para "Indisponível": mensagem com quantidade zero. <br> ● Mensagem deve incluir nome do componente e quantidade. | ● Mensagem de "Em Estoque" correta <br> ● Mensagem de "Baixo Estoque" correta <br> ● Mensagem de "Indisponível" correta <br> ● Nome do componente na mensagem <br> ● Quantidade na mensagem | ● Mensagens precisas e descritivas
+Marcar como Visualizada | ● Notificações não lidas exibem indicador visual. <br> ● Ao clicar no indicador, marcar notificação como visualizada. <br> ● Indicador deve desaparecer após marcar. <br> ● Notificação permanece na lista após visualização. | ● Indicador de não lida visível <br> ● Clique no indicador funciona <br> ● Indicador removido após clique <br> ● Notificação continua na lista | ● Marcação individual funcional
+Marcar Todas como Visualizadas | ● Botão "Marcar todas como visualizadas" disponível. <br> ● Ao clicar, todas as notificações não lidas são marcadas. <br> ● Todos os indicadores de não lida desaparecem. <br> ● Múltiplas notificações processadas de uma vez. | ● Botão funcional <br> ● Todas as notificações marcadas <br> ● Nenhum indicador de não lida após ação <br> ● Múltiplas notificações atualizadas | ● Marcação em lote funcional
+
 #### Relatórios
 
 ##### Relatórios de Componentes
