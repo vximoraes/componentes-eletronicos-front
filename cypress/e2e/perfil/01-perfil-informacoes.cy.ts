@@ -43,4 +43,29 @@ describe("Perfil — Informações e Estatísticas", () => {
       .should("match", /\d+/);
   });
 
+    //Teste 03
+it("Renderiza área de notificações", () => {
+  cy.get('[data-test="notificacoes-section"]')
+    .should("be.visible");
+
+  cy.get('[data-test="notificacoes-section"]').within(() => {
+
+    cy.get('[data-test="notificacoes-list"], [data-test="no-notificacoes-message"]')
+      .then(($el) => {
+        const temLista = $el.filter('[data-test="notificacoes-list"]').length > 0;
+        const temVazio = $el.filter('[data-test="no-notificacoes-message"]').length > 0;
+
+        expect(
+          temLista || temVazio,
+          "Deve existir lista ou mensagem de 'nenhuma notificação'"
+        ).to.be.true;
+
+        if (temLista) {
+          cy.get('[data-test="notificacoes-list"]').should("be.visible");
+        } else {
+          cy.get('[data-test="no-notificacoes-message"]').should("be.visible");
+        }
+      });
+    });
+  });
 });
