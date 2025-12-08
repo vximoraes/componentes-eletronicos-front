@@ -56,14 +56,27 @@ describe("Perfil — Edição de Informações", () => {
 
     cy.get('[data-test="save-perfil-button"]').click();
 
-    // Valida fechar modal
     cy.get('[data-test="modal-edit-perfil"]')
       .should("not.exist");
 
-    // Valida nome atualizado no card
     cy.get('[data-test="perfil-nome"]', { timeout: 5000 })
       .should("contain", novoNome);
   });
+
+    //Teste 04
+  it("Desabilita o botão Salvar enquanto está salvando", () => {
+    cy.get('[data-test="edit-perfil-button"]').click();
+
+    cy.get('[data-test="input-nome"]')
+      .clear()
+      .type("Novo Nome Teste");
+
+    cy.get('[data-test="save-perfil-button"]').click();
+
+    cy.get('[data-test="save-perfil-button"]')
+      .should("be.disabled");
+  });
+
 
   });
 
