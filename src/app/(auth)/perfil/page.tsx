@@ -508,7 +508,7 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-screen flex flex-col">
+      <div className="w-full h-screen flex flex-col" data-test="loading-perfil-page">
         <Cabecalho pagina="Perfil" />
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center">
@@ -535,7 +535,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full h-screen flex flex-col" data-test="perfil-page">
       {/* Cabeçalho */}
       <Cabecalho pagina="Perfil" />
 
@@ -544,36 +544,39 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch flex-1 overflow-y-auto">
           {/* Lado esquerdo - Avatar e Info */}
           <aside className="col-span-1 flex">
-            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col items-center justify-center w-full">
+            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col items-center justify-center w-full" data-test="perfil-info-section">
               <div className="relative w-32 h-32 group">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center" data-test="perfil-avatar-container">
                   {imagemPreview ? (
                     <img 
                       src={imagemPreview.startsWith('data:') ? imagemPreview : `${imagemPreview}${imagemPreview.includes('?') ? '&' : '?'}t=${Date.now()}`} 
                       alt="avatar"
                       className="w-full h-full object-cover"
+                      data-test="perfil-avatar"
                     />
                   ) : (
-                    <User className="w-16 h-16 text-gray-500" />
+                    <User className="w-16 h-16 text-gray-500" data-test="perfil-avatar-placeholder" />
                   )}
                 </div>
                 <button
                   onClick={() => setIsEditingFoto(true)}
                   className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors cursor-pointer shadow-lg"
                   title="Editar foto"
+                  data-test="edit-avatar-button"
                 >
                   <Camera className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="text-center mt-4 w-full px-2">
-                <h2 className="text-xl font-semibold truncate w-full" title={userData.nome}>{userData.nome}</h2>
-                <p className="text-sm text-gray-500 mt-1 truncate w-full" title={userData.email}>{userData.email}</p>
+                <h2 className="text-xl font-semibold truncate w-full" title={userData.nome} data-test="perfil-nome">{userData.nome}</h2>
+                <p className="text-sm text-gray-500 mt-1 truncate w-full" title={userData.email} data-test="perfil-email">{userData.email}</p>
               </div>
 
               <button
                 onClick={handleOpenEdit}
                 className="mt-4 flex items-center gap-2 justify-center text-blue-600 hover:underline transition-all cursor-pointer"
+                data-test="edit-perfil-button"
               >
                 <Pencil className="w-4 h-4" />
                 <span>Editar perfil</span>
@@ -583,12 +586,12 @@ export default function HomePage() {
 
           {/* Estatísticas de uso */}
           <section className="col-span-1 lg:col-span-2 flex">
-            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col w-full">
+            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 flex flex-col w-full" data-test="estatisticas-section">
               <h3 className="text-lg font-semibold mb-3">Estatísticas de uso</h3>
               <div className="w-full border-t border-gray-200 mb-4"></div>
 
               {isLoadingStats ? (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center" data-test="loading-estatisticas">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="py-6 px-6 bg-gray-50 rounded-lg text-center animate-pulse">
                       <div className="h-10 bg-gray-300 rounded w-20 mx-auto mb-3"></div>
@@ -598,18 +601,18 @@ export default function HomePage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-1 content-center">
-                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalComponentes.toString()}>{stats.totalComponentes}</p>
+                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center" data-test="card-total-componentes">
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalComponentes.toString()} data-test="total-componentes-value">{stats.totalComponentes}</p>
                     <p className="text-sm text-gray-500 mt-3">Componentes cadastrados</p>
                   </div>
 
-                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalMovimentacoes.toString()}>{stats.totalMovimentacoes}</p>
+                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center" data-test="card-total-movimentacoes">
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalMovimentacoes.toString()} data-test="total-movimentacoes-value">{stats.totalMovimentacoes}</p>
                     <p className="text-sm text-gray-500 mt-3">Movimentações</p>
                   </div>
 
-                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center">
-                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalOrcamentos.toString()}>{stats.totalOrcamentos}</p>
+                  <div className="py-6 px-6 bg-gray-50 rounded-lg text-center" data-test="card-total-orcamentos">
+                    <p className="text-4xl font-bold text-blue-600 truncate" title={stats.totalOrcamentos.toString()} data-test="total-orcamentos-value">{stats.totalOrcamentos}</p>
                     <p className="text-sm text-gray-500 mt-3">Orçamentos</p>
                   </div>
                 </div>
@@ -619,12 +622,12 @@ export default function HomePage() {
 
           {/* Notificações */}
           <div className="col-span-1 lg:col-span-3 flex">
-            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 w-full">
+            <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 w-full" data-test="notificacoes-section">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold">Notificações</h3>
                   {notificacoes.filter(n => !n.visualizada).length > 0 && (
-                    <span className="text-base text-blue-600 font-medium">
+                    <span className="text-base text-blue-600 font-medium" data-test="notificacoes-nao-lidas-count">
                       ({notificacoes.filter(n => !n.visualizada).length})
                     </span>
                   )}
@@ -633,6 +636,7 @@ export default function HomePage() {
                   <button
                     onClick={marcarTodasComoVisualizadas}
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer"
+                    data-test="marcar-todas-lidas-button"
                   >
                     Marcar todas como lidas
                   </button>
@@ -642,7 +646,7 @@ export default function HomePage() {
 
               <div className="max-h-60 overflow-y-auto">
                 {isLoadingNotificacoes ? (
-                  <div className="divide-y divide-gray-200 w-full">
+                  <div className="divide-y divide-gray-200 w-full" data-test="loading-notificacoes">
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="px-3 py-3 animate-pulse">
                         <div className="flex items-start gap-2">
@@ -656,7 +660,7 @@ export default function HomePage() {
                     ))}
                   </div>
                 ) : notificacoes.length > 0 ? (
-                  <div className="divide-y divide-gray-200 w-full">
+                  <div className="divide-y divide-gray-200 w-full" data-test="notificacoes-list">
                     {notificacoes.map((notificacao) => {
                       const isLoadingThis = loadingNotificacaoId === notificacao._id
                       const loadingMessage = isLoadingThis 
@@ -666,19 +670,21 @@ export default function HomePage() {
                         <div 
                           key={notificacao._id} 
                           className={`px-3 py-3 ${notificacao.visualizada ? 'bg-white' : 'bg-gray-50'} ${isLoadingThis ? 'opacity-50 cursor-wait' : ''} transition-colors hover:bg-gray-100 group`}
+                          data-test={`notificacao-item-${notificacao._id}`}
                         >
                           <div className="flex items-start gap-2">
                             {!notificacao.visualizada && (
-                              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5"></div>
+                              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full shrink-0 mt-1.5" data-test="notificacao-nao-lida-indicator"></div>
                             )}
                             <div 
                               className="flex-1 cursor-pointer"
                               onClick={() => !notificacao.visualizada && !isLoadingThis && marcarComoVisualizada(notificacao._id)}
+                              data-test="notificacao-marcar-lida-area"
                             >
-                              <p className={`text-sm text-gray-700 ${notificacao.visualizada ? '' : 'font-medium'}`}>
+                              <p className={`text-sm text-gray-700 ${notificacao.visualizada ? '' : 'font-medium'}`} data-test="notificacao-mensagem">
                                 {loadingMessage}
                                 {!isLoadingThis && (
-                                  <span className="text-sm text-gray-500 font-normal ml-2">
+                                  <span className="text-sm text-gray-500 font-normal ml-2" data-test="notificacao-tempo-relativo">
                                     - {formatTempoRelativo(notificacao.data_hora)}
                                   </span>
                                 )}
@@ -689,6 +695,7 @@ export default function HomePage() {
                                 onClick={(e) => excluirNotificacao(notificacao._id, e)}
                                 className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded-md cursor-pointer"
                                 title="Excluir notificação"
+                                data-test="notificacao-excluir-button"
                               >
                                 <X className="w-4 h-4 text-gray-500 hover:text-gray-700" />
                               </button>
@@ -699,13 +706,13 @@ export default function HomePage() {
                     })}
                     <div ref={observerTarget} className="h-2" />
                     {isFetchingNextNotificacoes && (
-                      <div className="px-3 py-3 text-center">
+                      <div className="px-3 py-3 text-center" data-test="loading-more-notificacoes">
                         <p className="text-sm text-gray-500">Carregando mais...</p>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center w-full h-60">
+                  <div className="flex items-center justify-center w-full h-60" data-test="no-notificacoes-message">
                     <p className="text-sm text-gray-500">Nenhuma notificação</p>
                   </div>
                 )}
@@ -724,6 +731,7 @@ export default function HomePage() {
             backgroundColor: 'rgba(0, 0, 0, 0.5)'
           }}
           onClick={() => setIsEditing(false)}
+          data-test="modal-edit-perfil"
         >
           <div 
             className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
@@ -735,6 +743,7 @@ export default function HomePage() {
                 onClick={handleCancelEdit}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                 title="Fechar"
+                data-test="modal-edit-perfil-close-button"
               >
                 <X size={20} />
               </button>
@@ -767,6 +776,7 @@ export default function HomePage() {
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white border border-gray-300 rounded-md hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                     required
                     disabled={isSaving}
+                    data-test="input-nome"
                   />
                 </div>
 
@@ -780,6 +790,7 @@ export default function HomePage() {
                     value={userData?.email || ''}
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 border border-gray-300 rounded-md text-sm sm:text-base text-gray-500 cursor-not-allowed"
                     disabled
+                    data-test="input-email"
                   />
                 </div>
               </form>
@@ -793,6 +804,7 @@ export default function HomePage() {
                   onClick={handleCancelEdit}
                   disabled={isSaving}
                   className="flex-1 cursor-pointer"
+                  data-test="cancel-edit-perfil-button"
                 >
                   Cancelar
                 </Button>
@@ -802,6 +814,7 @@ export default function HomePage() {
                   disabled={isSaving}
                   className="flex-1 text-white hover:opacity-90 cursor-pointer"
                   style={{ backgroundColor: '#306FCC' }}
+                  data-test="save-perfil-button"
                 >
                   {isSaving ? "Salvando..." : "Salvar"}
                 </Button>
@@ -820,6 +833,7 @@ export default function HomePage() {
             backgroundColor: 'rgba(0, 0, 0, 0.5)'
           }}
           onClick={handleCancelarEdicaoFoto}
+          data-test="modal-edit-foto"
         >
           <div 
             className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
@@ -831,6 +845,7 @@ export default function HomePage() {
                 onClick={handleCancelarEdicaoFoto}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                 title="Fechar"
+                data-test="modal-edit-foto-close-button"
               >
                 <X size={20} />
               </button>
@@ -846,15 +861,16 @@ export default function HomePage() {
 
               {/* Preview da foto */}
               <div className="flex justify-center">
-                <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                <div className="w-40 h-40 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center" data-test="foto-preview-container">
                   {imagemPreview ? (
                     <img 
                       src={imagemPreview.startsWith('data:') ? imagemPreview : `${imagemPreview}${imagemPreview.includes('?') ? '&' : '?'}t=${Date.now()}`} 
                       alt="Preview"
                       className="w-full h-full object-cover"
+                      data-test="foto-preview-image"
                     />
                   ) : (
-                    <User className="w-20 h-20 text-gray-500" />
+                    <User className="w-20 h-20 text-gray-500" data-test="foto-preview-placeholder" />
                   )}
                 </div>
               </div>
@@ -871,6 +887,7 @@ export default function HomePage() {
                       ? 'border-blue-600 bg-blue-50'
                       : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'
                   }`}
+                  data-test="foto-upload-area"
                 >
                   <Camera className="w-8 h-8 text-gray-400 mb-2" />
                   <p className="text-center text-sm">
@@ -885,6 +902,7 @@ export default function HomePage() {
                   accept="image/*"
                   onChange={handleFotoChange}
                   className="hidden"
+                  data-test="foto-file-input"
                 />
               </div>
             </div>
@@ -897,6 +915,7 @@ export default function HomePage() {
                   onClick={handleCancelarEdicaoFoto}
                   disabled={uploadFotoMutation.isPending || deleteFotoMutation.isPending}
                   className="flex-1 cursor-pointer"
+                  data-test="cancel-edit-foto-button"
                 >
                   Cancelar
                 </Button>
@@ -906,6 +925,7 @@ export default function HomePage() {
                     disabled={deleteFotoMutation.isPending}
                     className="flex-1 text-white hover:opacity-90 cursor-pointer"
                     style={{ backgroundColor: '#DC2626' }}
+                    data-test="remove-foto-button"
                   >
                     {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover foto'}
                   </Button>
@@ -916,6 +936,7 @@ export default function HomePage() {
                     disabled={uploadFotoMutation.isPending}
                     className="flex-1 text-white hover:opacity-90 cursor-pointer"
                     style={{ backgroundColor: '#306FCC' }}
+                    data-test="save-foto-button"
                   >
                     {uploadFotoMutation.isPending ? 'Salvando...' : 'Salvar'}
                   </Button>
@@ -935,6 +956,7 @@ export default function HomePage() {
             backgroundColor: 'rgba(0, 0, 0, 0.5)'
           }}
           onClick={() => setIsConfirmRemoveOpen(false)}
+          data-test="modal-confirm-remove-foto"
         >
           <div
             className="bg-white rounded-lg shadow-xl max-w-lg w-full overflow-visible animate-in fade-in-0 zoom-in-95 duration-300"
@@ -948,6 +970,7 @@ export default function HomePage() {
                 disabled={deleteFotoMutation.isPending}
                 className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Fechar"
+                data-test="modal-confirm-remove-foto-close-button"
               >
                 <X size={20} />
               </button>
@@ -968,7 +991,7 @@ export default function HomePage() {
 
               {/* Mensagem de erro da API */}
               {deleteFotoMutation.error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600" data-test="remove-foto-error-message">
                   <div className="font-medium mb-1">Não foi possível remover a foto</div>
                   <div className="text-red-500">
                     {(deleteFotoMutation.error as any)?.response?.data?.message ||
@@ -987,6 +1010,7 @@ export default function HomePage() {
                   onClick={() => setIsConfirmRemoveOpen(false)}
                   disabled={deleteFotoMutation.isPending}
                   className="flex-1 cursor-pointer"
+                  data-test="cancel-remove-foto-button"
                 >
                   Cancelar
                 </Button>
@@ -995,6 +1019,7 @@ export default function HomePage() {
                   disabled={deleteFotoMutation.isPending}
                   className="flex-1 text-white hover:opacity-90 cursor-pointer"
                   style={{ backgroundColor: '#DC2626' }}
+                  data-test="confirm-remove-foto-button"
                 >
                   {deleteFotoMutation.isPending ? 'Removendo...' : 'Remover'}
                 </Button>
